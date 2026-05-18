@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
+import { KeyRound, Mail, User, UserPlus, Users } from '@lucide/vue'
 
 const router = useRouter()
 const error = ref('')
@@ -39,7 +40,10 @@ function submitSignup() {
       <div class="ios-surface grid gap-8 rounded-[1.35rem] p-6 md:grid-cols-[0.8fr_1.2fr] sm:p-8">
         <div class="flex flex-col justify-between gap-8">
           <div>
-            <p class="mb-2 text-sm font-medium text-emerald-700">Movs App</p>
+            <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+              <UserPlus :size="17" />
+              <span>Movs App</span>
+            </p>
             <h1 class="mb-3 text-3xl font-semibold tracking-normal text-stone-950">Crear cuenta</h1>
             <p class="m-0 text-sm leading-6 text-stone-500">Guarda tus películas favoritas en una sesión local.</p>
           </div>
@@ -48,25 +52,40 @@ function submitSignup() {
 
         <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitSignup">
           <div>
-            <label class="form-label text-sm text-stone-700" for="nombres">Nombres</label>
+            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="nombres">
+              <User :size="15" />
+              <span>Nombres</span>
+            </label>
             <input id="nombres" v-model="form.nombres" class="form-control rounded-pill px-4 py-3" type="text" />
           </div>
           <div>
-            <label class="form-label text-sm text-stone-700" for="apellidos">Apellidos</label>
+            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="apellidos">
+              <Users :size="15" />
+              <span>Apellidos</span>
+            </label>
             <input id="apellidos" v-model="form.apellidos" class="form-control rounded-pill px-4 py-3" type="text" />
           </div>
           <div>
-            <label class="form-label text-sm text-stone-700" for="correo">Correo</label>
+            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="correo">
+              <Mail :size="15" />
+              <span>Correo</span>
+            </label>
             <input id="correo" v-model="form.correo" class="form-control rounded-pill px-4 py-3" type="email" />
           </div>
           <div>
-            <label class="form-label text-sm text-stone-700" for="clave">Clave</label>
+            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="clave">
+              <KeyRound :size="15" />
+              <span>Clave</span>
+            </label>
             <input id="clave" v-model="form.clave" class="form-control rounded-pill px-4 py-3" type="password" />
           </div>
 
           <p v-if="error" class="m-0 rounded-4 bg-red-50 px-4 py-3 text-sm text-red-700">{{ error }}</p>
 
-          <button class="btn btn-dark rounded-pill py-3 soft-button md:col-span-2" type="submit">Registrarme</button>
+          <button class="btn btn-dark rounded-pill py-3 soft-button icon-link justify-center md:col-span-2" type="submit">
+            <UserPlus :size="17" />
+            <span>Registrarme</span>
+          </button>
         </form>
       </div>
     </section>

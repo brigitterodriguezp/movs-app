@@ -23,6 +23,16 @@
   color: #1c1917 !important;
 }
 
+.icon-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.icon-link svg {
+  flex: 0 0 auto;
+}
+
 .main-navbar-inner {
   display: flex;
   align-items: center;
@@ -120,7 +130,6 @@
 }
 
 .site-footer {
-  margin-top: auto;
   background: rgba(255, 255, 255, 0.35);
 }
 
@@ -167,34 +176,78 @@
 
 @media (max-width: 768px) {
   .glass-nav {
+    top: auto;
+    right: 0;
+    bottom: calc(env(safe-area-inset-bottom) + 0.75rem);
+    left: 0;
+    width: calc(100% - 1.5rem) !important;
+    margin-top: 0 !important;
     border-radius: 1.5rem;
+    padding: 0.55rem !important;
   }
 
   .main-navbar-inner {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 0.65rem;
+    align-items: center;
+    flex-direction: row;
+    gap: 0;
+  }
+
+  .navbar-brand {
+    display: none;
   }
 
   .main-navbar-links {
     width: 100%;
-    flex-wrap: wrap;
-    gap: 0.45rem;
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: minmax(4.1rem, 1fr);
+    gap: 0.25rem;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .main-navbar-links::-webkit-scrollbar {
+    display: none;
   }
 
   .main-navbar-links .btn,
   .main-navbar-links .nav-link {
-    flex: 1 1 auto;
-    min-width: fit-content;
+    display: flex;
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0.45rem 0.65rem !important;
+    font-size: 0.82rem;
+    line-height: 1.1;
     text-align: center;
+    white-space: nowrap;
+  }
+
+  .page-shell {
+    padding-bottom: 6.4rem !important;
   }
 
   .home-cover {
     width: 92%;
+    border-radius: 1.45rem;
   }
 
   .home-cover img {
-    min-height: 620px;
+    min-height: 560px;
+  }
+
+  .home-cover h1 {
+    font-size: 2.35rem;
+  }
+
+  .auth-shell {
+    padding-top: 2rem !important;
+    padding-bottom: 8rem !important;
+  }
+
+  .site-footer {
+    padding-bottom: 6.6rem !important;
   }
 }
 

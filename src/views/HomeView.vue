@@ -1,5 +1,6 @@
 <script setup>
 import coverImage from '@/assets/movies/main-cover.png'
+import { Play, UserPlus } from '@lucide/vue'
 </script>
 
 <template>
@@ -23,9 +24,13 @@ import coverImage from '@/assets/movies/main-cover.png'
           "La vida también florece entre mandarinas."
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <RouterLink class="btn btn-light rounded-pill px-4 py-2 soft-button" to="/app">Explorar</RouterLink>
-          <RouterLink class="btn btn-outline-light rounded-pill px-4 py-2 soft-button" to="/signup">
-            Crear cuenta
+          <RouterLink class="btn btn-light rounded-pill px-4 py-2 soft-button icon-link" to="/app">
+            <Play :size="17" />
+            <span>Explorar</span>
+          </RouterLink>
+          <RouterLink class="btn btn-outline-light rounded-pill px-4 py-2 soft-button icon-link" to="/signup">
+            <UserPlus :size="17" />
+            <span>Crear cuenta</span>
           </RouterLink>
         </div>
       </div>

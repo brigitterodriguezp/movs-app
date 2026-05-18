@@ -8,6 +8,7 @@ import frightening from '@/assets/movies/006-the-frightening.png'
 import marilyn from '@/assets/movies/007-marilyn-monroe.png'
 import loveUntangled from '@/assets/movies/009-love-untangled.png'
 import MovieCard from '@/components/MovieCard.vue'
+import { Library } from '@lucide/vue'
 
 const movies = [
   {
@@ -74,11 +75,14 @@ const movies = [
 </script>
 
 <template>
-  <main class="page-shell min-h-screen px-4 pb-16 pt-32 sm:px-6 lg:px-10">
+  <main class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
     <section class="mx-auto max-w-7xl">
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p class="mb-2 text-sm uppercase tracking-[0.28em] text-emerald-700">Mi selección</p>
+          <p class="mb-2 inline-flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-emerald-700">
+            <Library :size="17" />
+            <span>Mi selección</span>
+          </p>
           <h1 class="text-4xl font-semibold tracking-normal text-stone-950 sm:text-5xl">Movies App</h1>
         </div>
         <span class="ios-chip w-fit rounded-pill px-4 py-2 text-sm text-stone-600">

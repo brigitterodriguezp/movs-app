@@ -36,6 +36,7 @@
 3. Vite.
 4. Bootstrap instalado en `node_modules`.
 5. Tailwind instalado en `node_modules`.
+6. Lucide instalado en `node_modules`.
 
 ## 5. Ejecución
 
