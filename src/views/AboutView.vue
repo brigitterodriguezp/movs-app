@@ -1,5 +1,5 @@
 <script setup>
-import movieImage from '@/assets/movies/image.png'
+import movieImage from '@/assets/movies/001-cover.png'
 </script>
 
 <template>

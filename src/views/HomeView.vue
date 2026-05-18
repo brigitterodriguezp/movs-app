@@ -1,5 +1,5 @@
 <script setup>
-import coverImage from '@/assets/movies/image.png'
+import coverImage from '@/assets/movies/main-cover.png'
 </script>
 
 <template>

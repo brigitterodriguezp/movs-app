@@ -12,12 +12,17 @@ defineProps({
     type: Number,
     default: 0,
   },
+  variant: {
+    type: String,
+    default: '',
+  },
 })
 </script>
 
 <template>
   <article
     class="movie-card group overflow-hidden rounded-[1.5rem]"
+    :class="variant"
     :style="{ animationDelay: `${delay}ms` }"
   >
     <div class="relative aspect-[4/5] overflow-hidden">

@@ -29,9 +29,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background:
-    radial-gradient(circle at 15% 5%, rgba(16, 185, 129, 0.16), transparent 26rem),
-    linear-gradient(135deg, #f9f6f0 0%, #eef5ec 42%, #f8fafc 100%);
+  background: #f7f4ee;
 }
 
 button,
