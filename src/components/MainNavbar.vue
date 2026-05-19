@@ -44,7 +44,7 @@ function signOut() {
         </RouterLink>
         <RouterLink v-if="!hasSession" class="btn btn-outline-dark rounded-pill px-4 soft-button icon-link" to="/signup">
           <UserPlus :size="17" />
-          <span>Registrarse</span>
+          <span>Registro</span>
         </RouterLink>
         <button v-if="hasSession" class="btn btn-outline-dark rounded-pill px-4 soft-button icon-link" type="button" @click="signOut">
           <LogOut :size="17" />
