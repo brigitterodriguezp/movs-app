@@ -1,59 +1,37 @@
 # Movs App
 
-Movs App es una aplicación web de películas desarrollada con Vue 3, Vite, Vue Router, Tailwind CSS, Bootstrap y Lucide. Yo la construí como una experiencia visual para navegar una pequeña colección de películas, registrar una cuenta local, iniciar sesión y proteger el acceso a la vista principal de la app.
+## 1. Descripción
 
-La aplicación no usa backend ni base de datos externa. Su autenticación es local y se apoya en la Web Storage API del navegador, específicamente `localStorage`.
+Aplicación web de películas desarrollada como una SPA con Vue. Permite navegar entre páginas principales, registrar un usuario, iniciar sesión, cerrar sesión y acceder a una vista protegida con tarjetas de películas.
 
-## Tabla de Contenido
+El proyecto usa autenticación local. No consume una API externa ni utiliza base de datos; los datos se guardan en el navegador mediante `localStorage`, que pertenece a la Web Storage API.
 
-1. [Descripción técnica](#descripción-técnica)
-2. [Dependencias exactas](#dependencias-exactas)
-3. [Estructura principal](#estructura-principal)
-4. [Mapa de rutas](#mapa-de-rutas)
-5. [Autenticación y localStorage](#autenticación-y-localstorage)
-6. [Comunicación entre vistas](#comunicación-entre-vistas)
-7. [Ejecución local](#ejecución-local)
-8. [Build y deploy](#build-y-deploy)
+## 2. Objetivo
 
-## Descripción Técnica
+1. Presentar una interfaz responsive para una colección visual de películas.
+2. Implementar navegación con rutas públicas y una ruta protegida.
+3. Simular registro e inicio de sesión sin backend.
+4. Persistir usuario y sesión en el navegador.
+5. Publicar la aplicación en GitHub Pages.
 
-Movs App es una Single Page Application. Vue renderiza la interfaz, Vue Router controla la navegación interna y Vite sirve el proyecto en desarrollo y genera el build de producción.
-
-La app tiene estas partes principales:
-
-- `HomeView.vue`: pantalla inicial con portada visual y enlaces hacia la app o registro.
-- `AboutView.vue`: sección informativa con carrusel de películas.
-- `SignupView.vue`: formulario de registro local.
-- `SigninView.vue`: formulario de inicio de sesión local.
-- `MovieAppView.vue`: vista protegida con el grid de películas.
-- `MainNavbar.vue`: navegación global, adaptada para desktop y móvil.
-- `AppFooter.vue`: pie de página global.
-
-## Dependencias Exactas
-
-Dependencias de producción, según `package.json`:
+## 3. Tecnologías Principales
 
 | Librería | Versión | Uso |
 | --- | --- | --- |
-| `vue` | `^3.5.32` | Framework principal para componentes reactivos. |
-| `vue-router` | `^5.0.4` | Enrutamiento SPA y guard para proteger `/app`. |
-| `vite` | `^8.0.8` | Servidor de desarrollo y empaquetador. |
-| `@vitejs/plugin-vue` | `^6.0.6` | Soporte de archivos `.vue` en Vite. |
-| `@vitejs/plugin-vue-jsx` | `^5.1.5` | Soporte opcional de JSX para Vue. |
-| `tailwindcss` | `^4.3.0` | Utilidades CSS para layout, responsive y estilos rápidos. |
+| `vue` | `^3.5.32` | Construcción de componentes y estado reactivo. |
+| `vite` | `^8.0.8` | Servidor de desarrollo y build de producción. |
+| `vue-router` | `^5.0.4` | Navegación SPA y protección de rutas. |
+| `tailwindcss` | `^4.3.0` | Utilidades CSS para diseño responsive. |
 | `@tailwindcss/vite` | `^4.3.0` | Integración de Tailwind con Vite. |
-| `bootstrap` | `^5.3.8` | Estilos base y JavaScript del carrusel. |
-| `@lucide/vue` | `^1.16.0` | Iconos usados en navbar, formularios y tarjetas. |
-| `gh-pages` | `^6.3.0` | Publicación del build en GitHub Pages. |
-| `vite-plugin-vue-devtools` | `^8.1.1` | Herramientas de desarrollo para Vue. |
+| `bootstrap` | `^5.3.8` | Componentes base y carrusel. |
 
-Versión de Node requerida:
+Versión requerida de Node:
 
 ```txt
 ^20.19.0 || >=22.12.0
 ```
 
-## Estructura Principal
+## 4. Estructura del Proyecto
 
 ```txt
 src/
@@ -77,164 +55,55 @@ src/
   main.js
 ```
 
-El archivo `src/main.js` importa Bootstrap CSS, Bootstrap JS y los estilos del proyecto. Después crea la app con `createApp(App)`, instala el router con `app.use(router)` y monta la aplicación en `#app`.
+1. `main.js` inicializa Vue, registra Vue Router e importa estilos globales.
+2. `App.vue` contiene el layout base: navbar, `RouterView` y footer.
+3. `router/index.js` define las rutas y el guard de protección.
+4. `views/` contiene las páginas principales.
+5. `components/` contiene piezas reutilizables.
+6. `assets/movies/` contiene las imágenes usadas en tarjetas y carrusel.
 
-## Mapa de Rutas
+## 5. Mapa de Rutas
 
-Las rutas están definidas en `src/router/index.js` con `createRouter` y `createWebHistory(import.meta.env.BASE_URL)`. El `base` configurado en `vite.config.js` es:
+La aplicación usa `createWebHistory(import.meta.env.BASE_URL)`. En `vite.config.js` el `base` está configurado como:
 
 ```js
 base: '/movs-app/'
 ```
 
-Por eso, en desarrollo y producción la app trabaja bajo `/movs-app/`.
+Rutas principales:
+
+| Ruta | Componente | Tipo |
+| --- | --- | --- |
+| `/` | `HomeView.vue` | Pública |
+| `/about` | `AboutView.vue` | Pública |
+| `/signin` | `SigninView.vue` | Pública |
+| `/signup` | `SignupView.vue` | Pública |
+| `/app` | `MovieAppView.vue` | Protegida |
 
 ```mermaid
 flowchart TD
-  Browser["Navegador /movs-app/"] --> App["App.vue"]
-  App --> Navbar["MainNavbar.vue"]
-  App --> RouterView["RouterView"]
-  App --> Footer["AppFooter.vue"]
-
-  RouterView --> Home["/ - HomeView.vue"]
-  RouterView --> About["/about - AboutView.vue"]
-  RouterView --> Signin["/signin - SigninView.vue"]
-  RouterView --> Signup["/signup - SignupView.vue"]
-  RouterView --> MovieApp["/app - MovieAppView.vue"]
-
-  HomeAlias["/home"] --> RedirectHome["redirect: /"]
-  RedirectHome --> Home
-
-  Guard["router.beforeEach"] --> CheckSession{"movieSession existe?"}
-  CheckSession -- "Sí" --> MovieApp
-  CheckSession -- "No" --> Signin
-
-  Navbar --> Home
-  Navbar --> About
-  Navbar --> MovieApp
-  Navbar --> Signin
-  Navbar --> Signup
+  Home["/ Home"] --> About["/about About"]
+  Home --> Signin["/signin Iniciar sesión"]
+  Home --> Signup["/signup Registro"]
+  Signin --> App["/app Películas"]
+  Signup --> App
+  About --> App
+  App --> Signin
 ```
 
-Tabla de rutas:
+## 6. Protección de Ruta
 
-| Ruta | Nombre | Componente | Acceso |
-| --- | --- | --- | --- |
-| `/` | `home` | `HomeView.vue` | Público |
-| `/home` | No aplica | Redirige a `/` | Público |
-| `/about` | `about` | `AboutView.vue` | Público |
-| `/signin` | `signin` | `SigninView.vue` | Público |
-| `/signup` | `signup` | `SignupView.vue` | Público |
-| `/app` | `movie-app` | `MovieAppView.vue` | Protegido por `movieSession` |
+La ruta `/app` depende de la existencia de `movieSession` en `localStorage`.
 
-## Autenticación y localStorage
-
-La autenticación está hecha en el frontend. No se llama a una API HTTP, no hay `fetch`, no hay `axios` y no existe una base de datos remota. La API web que se usa es la Web Storage API del navegador mediante `localStorage`.
-
-### Registro
-
-El registro ocurre en `src/views/SignupView.vue`.
-
-Campos del formulario:
-
-- `nombres`
-- `apellidos`
-- `correo`
-- `clave`
-
-Validación actual:
-
-- Todos los campos deben tener valor.
-- El correo se normaliza con `trim().toLowerCase()`.
-- La clave se guarda como texto plano porque el proyecto no usa backend ni hashing.
-
-Cuando el usuario se registra, la app crea dos entradas en `localStorage`:
-
-```js
-localStorage.setItem('movieUser', JSON.stringify(user))
-localStorage.setItem('movieSession', JSON.stringify({ correo: user.correo }))
+```mermaid
+flowchart TD
+  Request["Entrar a /app"] --> Guard["router.beforeEach"]
+  Guard --> Session{"Existe movieSession?"}
+  Session -- "Sí" --> Allow["Renderiza MovieAppView"]
+  Session -- "No" --> Redirect["Redirige a /signin"]
 ```
 
-Estructura de `movieUser`:
-
-```json
-{
-  "nombres": "Brigitte",
-  "apellidos": "Rodriguez",
-  "correo": "correo@ejemplo.com",
-  "clave": "123456"
-}
-```
-
-Estructura de `movieSession`:
-
-```json
-{
-  "correo": "correo@ejemplo.com"
-}
-```
-
-Después del registro, `SignupView.vue` ejecuta:
-
-```js
-router.push('/app')
-```
-
-Esto manda a la persona directamente a la vista protegida.
-
-### Inicio de Sesión
-
-El inicio de sesión ocurre en `src/views/SigninView.vue`.
-
-Flujo técnico:
-
-1. Se lee el usuario guardado:
-
-```js
-const user = JSON.parse(localStorage.getItem('movieUser') || 'null')
-```
-
-2. Se normaliza el correo ingresado:
-
-```js
-const correo = form.correo.trim().toLowerCase()
-```
-
-3. Si no existe `movieUser`, se muestra el error:
-
-```txt
-Primero crea una cuenta.
-```
-
-4. Si el correo o clave no coinciden, se muestra:
-
-```txt
-Correo o clave incorrectos.
-```
-
-5. Si los datos son válidos, se crea la sesión:
-
-```js
-localStorage.setItem('movieSession', JSON.stringify({ correo }))
-router.push('/app')
-```
-
-### Cierre de Sesión
-
-El cierre de sesión está en `src/components/MainNavbar.vue`.
-
-Cuando existe `movieSession`, el navbar muestra el botón `Salir`. Al presionarlo:
-
-```js
-localStorage.removeItem('movieSession')
-router.push('/signin')
-```
-
-Esto elimina solo la sesión activa. El usuario registrado (`movieUser`) se conserva en el navegador.
-
-### Protección de `/app`
-
-La ruta `/app` se protege con un guard global:
+Código principal:
 
 ```js
 router.beforeEach((to) => {
@@ -246,109 +115,182 @@ router.beforeEach((to) => {
 })
 ```
 
-Si una persona intenta entrar a `/app` sin sesión, Vue Router la redirige a `/signin`.
+## 7. Registro
 
-### Consideración de Seguridad
+El registro se maneja en `SignupView.vue`.
 
-Este sistema sirve para una práctica frontend y para simular autenticación local. No debe usarse como autenticación real en producción porque:
+1. El formulario recibe `nombres`, `apellidos`, `correo` y `clave`.
+2. Se valida que ningún campo esté vacío.
+3. El correo se normaliza con `trim().toLowerCase()`.
+4. Se crea el objeto `user`.
+5. Se guarda `movieUser` en `localStorage`.
+6. Se crea `movieSession` para iniciar sesión automáticamente.
+7. Se redirige a `/app`.
 
-- La clave queda guardada en texto plano.
-- Cualquier persona con acceso al navegador puede ver o modificar `localStorage`.
-- No hay tokens firmados, expiración de sesión ni validación en servidor.
-- No hay protección real contra manipulación del estado del cliente.
+Objeto guardado como `movieUser`:
 
-## Comunicación Entre Vistas
+```json
+{
+  "nombres": "Brigitte",
+  "apellidos": "Rodriguez",
+  "correo": "correo@ejemplo.com",
+  "clave": "123456"
+}
+```
 
-Las vistas no se comunican por props directas. La comunicación se hace por dos mecanismos:
+Código usado para persistir el registro:
 
-- `vue-router`: cambia la vista activa dentro de `RouterView`.
-- `localStorage`: conserva `movieUser` y `movieSession` entre vistas y recargas.
+```js
+localStorage.setItem('movieUser', JSON.stringify(user))
+localStorage.setItem('movieSession', JSON.stringify({ correo: user.correo }))
+router.push('/app')
+```
+
+## 8. Inicio de Sesión
+
+El inicio de sesión se maneja en `SigninView.vue`.
+
+1. Se lee `movieUser` desde `localStorage`.
+2. Se normaliza el correo ingresado.
+3. Se compara el correo y la clave contra el usuario guardado.
+4. Si no existe usuario, se muestra `Primero crea una cuenta.`
+5. Si las credenciales no coinciden, se muestra `Correo o clave incorrectos.`
+6. Si las credenciales coinciden, se crea `movieSession`.
+7. Se redirige a `/app`.
+
+Lectura del usuario:
+
+```js
+const user = JSON.parse(localStorage.getItem('movieUser') || 'null')
+```
+
+Creación de sesión:
+
+```js
+localStorage.setItem('movieSession', JSON.stringify({ correo }))
+router.push('/app')
+```
+
+Objeto guardado como `movieSession`:
+
+```json
+{
+  "correo": "correo@ejemplo.com"
+}
+```
+
+## 9. Cierre de Sesión
+
+El cierre de sesión se ejecuta desde `MainNavbar.vue`.
+
+1. Si existe `movieSession`, el navbar muestra la opción `Salir`.
+2. Al salir, se elimina solo `movieSession`.
+3. `movieUser` permanece guardado para futuros inicios de sesión.
+4. Se redirige a `/signin`.
+
+Código:
+
+```js
+localStorage.removeItem('movieSession')
+router.push('/signin')
+```
+
+## 10. Web API Utilizada
+
+La API web usada para autenticación local es `localStorage`.
+
+1. `localStorage.setItem()` guarda datos como texto.
+2. `JSON.stringify()` convierte objetos JavaScript en texto JSON.
+3. `localStorage.getItem()` lee los datos guardados.
+4. `JSON.parse()` convierte el texto JSON nuevamente en objeto.
+5. `localStorage.removeItem()` elimina una clave específica.
+
+Claves usadas:
+
+| Clave | Contenido | Cuándo se crea | Cuándo se elimina |
+| --- | --- | --- | --- |
+| `movieUser` | Datos del usuario registrado | Registro | No se elimina desde la interfaz |
+| `movieSession` | Correo de la sesión activa | Registro o inicio de sesión | Cierre de sesión |
+
+## 11. Flujo de Autenticación
 
 ```mermaid
 sequenceDiagram
-  participant U as Usuario
+  participant User as Usuario
   participant Signup as SignupView
+  participant Signin as SigninView
   participant Storage as localStorage
   participant Router as Vue Router
-  participant Guard as beforeEach
   participant App as MovieAppView
-  participant Signin as SigninView
   participant Navbar as MainNavbar
 
-  U->>Signup: Completa registro
-  Signup->>Storage: setItem("movieUser", JSON.stringify(user))
-  Signup->>Storage: setItem("movieSession", JSON.stringify({ correo }))
-  Signup->>Router: push("/app")
-  Router->>Guard: valida navegación
-  Guard->>Storage: getItem("movieSession")
-  Storage-->>Guard: sesión existente
-  Guard-->>Router: permite acceso
-  Router->>App: renderiza MovieAppView
+  User->>Signup: Envía registro
+  Signup->>Storage: Guarda movieUser
+  Signup->>Storage: Guarda movieSession
+  Signup->>Router: Navega a /app
+  Router->>App: Muestra vista protegida
 
-  U->>Navbar: Presiona Salir
-  Navbar->>Storage: removeItem("movieSession")
-  Navbar->>Router: push("/signin")
-  Router->>Signin: renderiza SigninView
+  User->>Navbar: Cierra sesión
+  Navbar->>Storage: Elimina movieSession
+  Navbar->>Router: Navega a /signin
+
+  User->>Signin: Envía correo y clave
+  Signin->>Storage: Lee movieUser
+  Signin->>Storage: Guarda movieSession
+  Signin->>Router: Navega a /app
 ```
 
-## Ejecución Local
+## 12. Ejecución
 
-Instalar dependencias:
+1. Instalar dependencias:
 
 ```sh
 npm install
 ```
 
-Levantar el servidor de desarrollo:
+2. Levantar servidor local:
 
 ```sh
 npm run dev
 ```
 
-En este proyecto, Vite muestra una URL parecida a:
+3. Abrir la ruta local:
 
 ```txt
 http://localhost:5173/movs-app/
 ```
 
-Si se desea exponer en red local:
-
-```sh
-npm run dev -- --host 0.0.0.0
-```
-
-Compilar producción:
+4. Compilar producción:
 
 ```sh
 npm run build
 ```
 
-Previsualizar el build:
+5. Previsualizar build:
 
 ```sh
 npm run preview
 ```
 
-## Build y Deploy
+## 13. Deploy
 
-El deploy está definido en `package.json`:
-
-```json
-{
-  "deploy": "npm run build && gh-pages -d dist"
-}
-```
-
-Ejecutar deploy:
+El deploy se ejecuta con:
 
 ```sh
 npm run deploy
 ```
 
-Ese comando:
+Ese script realiza:
 
-1. Ejecuta `vite build`.
-2. Genera la carpeta `dist`.
-3. Publica `dist` en GitHub Pages usando `gh-pages`.
+1. `npm run build`
+2. Generación de `dist`
+3. Publicación con `gh-pages -d dist`
 
-Como `vite.config.js` define `base: '/movs-app/'`, los assets se construyen con rutas correctas para GitHub Pages.
+El `base: '/movs-app/'` permite que los assets funcionen correctamente en GitHub Pages.
+
+## 14. Nota de Seguridad
+
+1. La autenticación es local y solo simula un flujo de usuario.
+2. La clave queda guardada en texto plano.
+3. `localStorage` puede inspeccionarse desde DevTools.
+4. No debe usarse como autenticación real en producción.

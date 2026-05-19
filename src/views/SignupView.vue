@@ -1,10 +1,9 @@
 <script setup>
-import { reactive, ref } from 'vue'
+import { reactive } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { KeyRound, Mail, User, UserPlus, Users } from '@lucide/vue'
 
 const router = useRouter()
-const error = ref('')
 
 const form = reactive({
   nombres: '',
@@ -13,18 +12,51 @@ const form = reactive({
   clave: '',
 })
 
-function submitSignup() {
-  error.value = ''
+const errors = reactive({
+  nombres: '',
+  apellidos: '',
+  correo: '',
+  clave: '',
+})
 
-  if (!form.nombres || !form.apellidos || !form.correo || !form.clave) {
-    error.value = 'Completa todos los campos.'
+function submitSignup() {
+  errors.nombres = ''
+  errors.apellidos = ''
+  errors.correo = ''
+  errors.clave = ''
+
+  if (!form.nombres.trim()) {
+    errors.nombres = 'Ingresa tus nombres.'
+  }
+
+  if (!form.apellidos.trim()) {
+    errors.apellidos = 'Ingresa tus apellidos.'
+  }
+
+  if (!form.correo.trim()) {
+    errors.correo = 'Ingresa tu correo.'
+  }
+
+  if (!form.clave) {
+    errors.clave = 'Ingresa una clave.'
+  }
+
+  if (errors.nombres || errors.apellidos || errors.correo || errors.clave) {
+    return
+  }
+
+  const correo = form.correo.trim().toLowerCase()
+  const savedUser = JSON.parse(localStorage.getItem('movieUser') || 'null')
+
+  if (savedUser?.correo === correo) {
+    errors.correo = 'Ya existe una cuenta con ese correo.'
     return
   }
 
   const user = {
     nombres: form.nombres.trim(),
     apellidos: form.apellidos.trim(),
-    correo: form.correo.trim().toLowerCase(),
+    correo,
     clave: form.clave,
   }
 
@@ -45,42 +77,44 @@ function submitSignup() {
               <span>Movs App</span>
             </p>
             <h1 class="mb-3 text-3xl font-semibold tracking-normal text-stone-950">Crear cuenta</h1>
-            <p class="m-0 text-sm leading-6 text-stone-500">Guarda tus películas favoritas en una sesión local.</p>
+            <p class="m-0 text-sm leading-6 text-stone-500">Crea tu cuenta y empieza a organizar tus películas favoritas.</p>
           </div>
           <RouterLink class="w-fit font-medium text-stone-950" to="/signin">Ya tengo cuenta</RouterLink>
         </div>
 
         <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitSignup">
           <div>
-            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="nombres">
+            <label class="form-label auth-field-label text-sm text-stone-700" for="nombres">
               <User :size="15" />
               <span>Nombres</span>
             </label>
             <input id="nombres" v-model="form.nombres" class="form-control rounded-pill px-4 py-3" type="text" />
+            <p v-if="errors.nombres" class="auth-field-error">{{ errors.nombres }}</p>
           </div>
           <div>
-            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="apellidos">
+            <label class="form-label auth-field-label text-sm text-stone-700" for="apellidos">
               <Users :size="15" />
               <span>Apellidos</span>
             </label>
             <input id="apellidos" v-model="form.apellidos" class="form-control rounded-pill px-4 py-3" type="text" />
+            <p v-if="errors.apellidos" class="auth-field-error">{{ errors.apellidos }}</p>
           </div>
           <div>
-            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="correo">
+            <label class="form-label auth-field-label text-sm text-stone-700" for="correo">
               <Mail :size="15" />
               <span>Correo</span>
             </label>
             <input id="correo" v-model="form.correo" class="form-control rounded-pill px-4 py-3" type="email" />
+            <p v-if="errors.correo" class="auth-field-error">{{ errors.correo }}</p>
           </div>
           <div>
-            <label class="form-label inline-flex items-center gap-2 text-sm text-stone-700" for="clave">
+            <label class="form-label auth-field-label text-sm text-stone-700" for="clave">
               <KeyRound :size="15" />
               <span>Clave</span>
             </label>
             <input id="clave" v-model="form.clave" class="form-control rounded-pill px-4 py-3" type="password" />
+            <p v-if="errors.clave" class="auth-field-error">{{ errors.clave }}</p>
           </div>
-
-          <p v-if="error" class="m-0 rounded-4 bg-red-50 px-4 py-3 text-sm text-red-700">{{ error }}</p>
 
           <button class="btn btn-dark rounded-pill py-3 soft-button icon-link justify-center md:col-span-2" type="submit">
             <UserPlus :size="17" />

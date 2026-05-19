@@ -34,7 +34,7 @@ defineProps({
         :alt="movie.title"
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent"></div>
-      <span class="absolute left-4 top-4 inline-flex items-center gap-1 rounded-pill bg-white/85 px-3 py-1 text-xs font-medium text-stone-800">
+      <span class="movie-mood-chip absolute left-4 top-4 inline-flex items-center gap-1 rounded-pill px-3 py-1 text-xs font-medium">
         <Tag :size="13" />
         {{ movie.mood }}
       </span>

@@ -1,6 +1,7 @@
 :root {
   color: #1c1917;
   background: #f7f4ee;
+  color-scheme: light;
   font-family:
     Inter,
     ui-sans-serif,
@@ -13,6 +14,12 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+:root.dark {
+  color: #f8fafc;
+  background: #10100f;
+  color-scheme: dark;
 }
 
 *,
@@ -30,6 +37,12 @@ body {
   min-height: 100vh;
   margin: 0;
   background: #f7f4ee;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at 20% 0%, rgba(16, 185, 129, 0.12), transparent 28rem),
+    linear-gradient(135deg, #10100f 0%, #171512 48%, #0f1512 100%);
 }
 
 button,
