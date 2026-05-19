@@ -228,19 +228,22 @@
 @media (max-width: 768px) {
   .glass-nav {
     top: auto;
-    right: 0;
+    right: auto;
     bottom: calc(env(safe-area-inset-bottom) + 0.55rem);
-    left: 0;
-    width: calc(100% - 1rem) !important;
+    left: 50%;
+    width: fit-content !important;
+    max-width: calc(100% - 1rem);
     margin-top: 0 !important;
     border-radius: 1.15rem;
     padding: 0.35rem !important;
+    transform: translateX(-50%);
   }
 
   .main-navbar-inner {
     align-items: center;
     flex-direction: row;
     gap: 0;
+    justify-content: center;
   }
 
   .navbar-brand {
@@ -248,15 +251,17 @@
   }
 
   .main-navbar-links {
-    width: 100%;
-    display: grid;
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: fit-content;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
     gap: 0.18rem;
   }
 
   .main-navbar-links .btn,
   .main-navbar-links .nav-link {
     display: flex;
+    width: 3.45rem;
     min-width: 0;
     min-height: 2.72rem;
     flex-direction: column;
