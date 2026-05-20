@@ -8,6 +8,15 @@ import frightening from '@/assets/movies/006-the-frightening.png'
 import marilyn from '@/assets/movies/007-marilyn-monroe.png'
 import loveUntangled from '@/assets/movies/009-love-untangled.png'
 import { Clapperboard, Film, Layers } from '@lucide/vue'
+import { onMounted, ref } from 'vue'
+
+const isLoading = ref(true)
+
+onMounted(() => {
+  window.setTimeout(() => {
+    isLoading.value = false
+  }, 650)
+})
 
 const carouselMovies = [
   {
@@ -63,7 +72,25 @@ const carouselMovies = [
 
 <template>
   <main class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
-    <section class="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
+    <section v-if="isLoading" class="about-skeleton-grid page-skeleton mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cargando acerca de Movs App">
+      <div class="about-carousel overflow-hidden rounded-[2rem] ios-media">
+        <div class="page-skeleton-media about-skeleton-media"></div>
+      </div>
+
+      <div class="ios-surface rounded-[1.75rem] p-6 sm:p-8 lg:p-10">
+        <span class="page-skeleton-line page-skeleton-kicker"></span>
+        <span class="page-skeleton-line page-skeleton-heading"></span>
+        <span class="page-skeleton-line page-skeleton-text"></span>
+        <span class="page-skeleton-line page-skeleton-text short"></span>
+        <div class="about-skeleton-stats">
+          <span class="page-skeleton-card"></span>
+          <span class="page-skeleton-card"></span>
+          <span class="page-skeleton-card"></span>
+        </div>
+      </div>
+    </section>
+
+    <section v-else class="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <div
         id="aboutMoviesCarousel"
         class="carousel slide overflow-hidden rounded-[2rem] ios-media about-carousel"
