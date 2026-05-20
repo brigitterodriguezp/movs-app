@@ -1,4 +1,5 @@
 <script setup>
+import AboutSkeleton from '@/components/skeletons/AboutSkeleton.vue'
 import coverStory from '@/assets/movies/001-cover.png'
 import ninera from '@/assets/movies/002-ninera.png'
 import scaryMovie from '@/assets/movies/003-scary-movie.png'
@@ -72,24 +73,7 @@ const carouselMovies = [
 
 <template>
   <main class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
-    <section v-if="isLoading" class="about-skeleton-grid page-skeleton mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]" aria-label="Cargando acerca de Movs App">
-      <div class="about-carousel overflow-hidden rounded-[2rem] ios-media">
-        <div class="page-skeleton-media about-skeleton-media"></div>
-      </div>
-
-      <div class="ios-surface rounded-[1.75rem] p-6 sm:p-8 lg:p-10">
-        <span class="page-skeleton-line page-skeleton-kicker"></span>
-        <span class="page-skeleton-line page-skeleton-heading"></span>
-        <span class="page-skeleton-line page-skeleton-text"></span>
-        <span class="page-skeleton-line page-skeleton-text short"></span>
-        <div class="about-skeleton-stats">
-          <span class="page-skeleton-card"></span>
-          <span class="page-skeleton-card"></span>
-          <span class="page-skeleton-card"></span>
-        </div>
-      </div>
-    </section>
-
+    <AboutSkeleton v-if="isLoading" />
     <section v-else class="mx-auto grid max-w-6xl items-center gap-8 lg:grid-cols-[0.9fr_1.1fr]">
       <div
         id="aboutMoviesCarousel"

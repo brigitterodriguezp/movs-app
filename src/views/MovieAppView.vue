@@ -1,5 +1,6 @@
 <script setup>
 import MovieCard from '@/components/MovieCard.vue'
+import MovieGridSkeleton from '@/components/skeletons/MovieGridSkeleton.vue'
 import moviesApi from '@/data/movies.json'
 import { Library } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
@@ -43,23 +44,7 @@ onMounted(() => {
         </span>
       </div>
 
-      <div v-if="isLoading" class="movie-bento-grid" aria-label="Cargando películas">
-        <article
-          v-for="skeleton in skeletonMovies"
-          :key="`skeleton-${skeleton.id}`"
-          class="movie-card movie-card-skeleton rounded-[1.5rem]"
-          :class="skeleton.variant"
-        >
-          <div class="movie-skeleton-poster"></div>
-          <div class="movie-skeleton-body">
-            <span class="movie-skeleton-line movie-skeleton-title"></span>
-            <span class="movie-skeleton-line movie-skeleton-meta"></span>
-            <span class="movie-skeleton-line"></span>
-            <span class="movie-skeleton-line movie-skeleton-short"></span>
-          </div>
-        </article>
-      </div>
-
+      <MovieGridSkeleton v-if="isLoading" :movies="skeletonMovies" />
       <div v-else class="movie-bento-grid">
         <MovieCard
           v-for="(movie, index) in movies"

@@ -1,4 +1,5 @@
 <script setup>
+import HomeSkeleton from '@/components/skeletons/HomeSkeleton.vue'
 import coverImage from '@/assets/movies/main-cover.png'
 import { Play, UserPlus } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
@@ -14,20 +15,7 @@ onMounted(() => {
 
 <template>
   <main class="page-shell flex min-h-screen items-center justify-center px-4 py-28">
-    <section v-if="isLoading" class="home-cover page-skeleton home-skeleton relative w-[80%] max-w-6xl overflow-hidden rounded-[2rem]" aria-label="Cargando inicio">
-      <div class="page-skeleton-media"></div>
-      <div class="home-skeleton-content">
-        <span class="page-skeleton-line page-skeleton-kicker"></span>
-        <span class="page-skeleton-line page-skeleton-heading"></span>
-        <span class="page-skeleton-line page-skeleton-text"></span>
-        <span class="page-skeleton-line page-skeleton-text short"></span>
-        <div class="page-skeleton-actions">
-          <span class="page-skeleton-pill"></span>
-          <span class="page-skeleton-pill outline"></span>
-        </div>
-      </div>
-    </section>
-
+    <HomeSkeleton v-if="isLoading" />
     <section v-else class="home-cover group relative w-[80%] max-w-6xl overflow-hidden rounded-[2rem]">
       <img
         class="h-[76vh] min-h-[540px] w-full object-cover transition duration-700 ease-out group-hover:scale-[1.025]"

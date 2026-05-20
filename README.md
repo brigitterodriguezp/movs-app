@@ -88,6 +88,12 @@ P1ExamenRodriguezBrigitte/
         009-love-untangled.png
         main-cover.png
     components/
+      skeletons/
+        AboutSkeleton.vue
+        HomeSkeleton.vue
+        MovieGridSkeleton.vue
+        SigninSkeleton.vue
+        SignupSkeleton.vue
       AppFooter.vue
       MainNavbar.vue
       MovieCard.vue
@@ -116,7 +122,7 @@ P1ExamenRodriguezBrigitte/
 5. `src/views/SignupView.vue`: formulario de registro con plan y datos de pago.
 6. `src/views/SigninView.vue`: formulario de inicio de sesión.
 7. `src/views/MovieAppView.vue`: catálogo visual de películas que mapea los datos desde `movies.json`.
-8. `src/components/`: componentes reutilizables como navbar, footer y tarjetas.
+8. `src/components/`: componentes reutilizables como navbar, footer, tarjetas y loaders skeleton.
 9. `src/assets/movies/`: imágenes utilizadas por el sistema.
 10. `src/data/movies.json`: archivo JSON que simula una API de películas.
 
