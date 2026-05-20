@@ -37,7 +37,7 @@ function toggleTheme() {
           <Home :size="17" />
           <span>Inicio</span>
         </RouterLink>
-        <RouterLink class="nav-link rounded-pill px-3 icon-link" to="/about">
+        <RouterLink class="nav-link rounded-pill px-3 icon-link about-nav-link" to="/about">
           <Info :size="17" />
           <span>Acerca</span>
         </RouterLink>

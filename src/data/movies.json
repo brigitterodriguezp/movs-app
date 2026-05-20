@@ -1,0 +1,70 @@
+[
+  {
+    "id": 1,
+    "title": "Cover Story",
+    "year": "2026",
+    "mood": "Drama",
+    "description": "Una historia íntima para volver cuando la noche pide calma.",
+    "image": "001-cover.png",
+    "variant": "movie-card-featured"
+  },
+  {
+    "id": 2,
+    "title": "La Niñera",
+    "year": "2025",
+    "mood": "Suspenso",
+    "description": "Una casa tranquila empieza a guardar demasiados secretos.",
+    "image": "002-ninera.png",
+    "variant": "movie-card-tall"
+  },
+  {
+    "id": 3,
+    "title": "Scary Movie",
+    "year": "2024",
+    "mood": "Terror",
+    "description": "Risas oscuras, sustos rápidos y una noche imposible de pausar.",
+    "image": "003-scary-movie.png"
+  },
+  {
+    "id": 4,
+    "title": "Little Women",
+    "year": "2023",
+    "mood": "Drama",
+    "description": "Decisiones grandes en habitaciones pequeñas.",
+    "image": "004-little-women.png"
+  },
+  {
+    "id": 5,
+    "title": "Joker",
+    "year": "2022",
+    "mood": "Crimen",
+    "description": "Una mirada intensa a una ciudad que ya no sabe escuchar.",
+    "image": "005-joker.png",
+    "variant": "movie-card-wide"
+  },
+  {
+    "id": 6,
+    "title": "The Frightening",
+    "year": "2021",
+    "mood": "Misterio",
+    "description": "Algo se mueve entre pasillos donde nadie debería estar.",
+    "image": "006-the-frightening.png"
+  },
+  {
+    "id": 7,
+    "title": "Marilyn Monroe",
+    "year": "2020",
+    "mood": "Biografía",
+    "description": "Luz, cámara y una silueta que nunca dejó de aparecer.",
+    "image": "007-marilyn-monroe.png"
+  },
+  {
+    "id": 8,
+    "title": "Love Untangled",
+    "year": "2025",
+    "mood": "Romance",
+    "description": "Primer amor, nervios y una confesión esperando su momento.",
+    "image": "009-love-untangled.png",
+    "variant": "movie-card-wide"
+  }
+]

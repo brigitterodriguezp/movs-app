@@ -1,77 +1,30 @@
 <script setup>
-import cover001 from '@/assets/movies/001-cover.png'
-import ninera from '@/assets/movies/002-ninera.png'
-import scaryMovie from '@/assets/movies/003-scary-movie.png'
-import littleWomen from '@/assets/movies/004-little-women.png'
-import joker from '@/assets/movies/005-joker.png'
-import frightening from '@/assets/movies/006-the-frightening.png'
-import marilyn from '@/assets/movies/007-marilyn-monroe.png'
-import loveUntangled from '@/assets/movies/009-love-untangled.png'
 import MovieCard from '@/components/MovieCard.vue'
+import moviesApi from '@/data/movies.json'
 import { Library } from '@lucide/vue'
+import { onMounted, ref } from 'vue'
 
-const movies = [
-  {
-    title: 'Cover Story',
-    year: '2026',
-    mood: 'Drama',
-    description: 'Una historia íntima para volver cuando la noche pide calma.',
-    image: cover001,
-    variant: 'movie-card-featured',
-  },
-  {
-    title: 'La Niñera',
-    year: '2025',
-    mood: 'Suspenso',
-    description: 'Una casa tranquila empieza a guardar demasiados secretos.',
-    image: ninera,
-    variant: 'movie-card-tall',
-  },
-  {
-    title: 'Scary Movie',
-    year: '2024',
-    mood: 'Terror',
-    description: 'Risas oscuras, sustos rápidos y una noche imposible de pausar.',
-    image: scaryMovie,
-  },
-  {
-    title: 'Little Women',
-    year: '2023',
-    mood: 'Drama',
-    description: 'Decisiones grandes en habitaciones pequeñas.',
-    image: littleWomen,
-  },
-  {
-    title: 'Joker',
-    year: '2022',
-    mood: 'Crimen',
-    description: 'Una mirada intensa a una ciudad que ya no sabe escuchar.',
-    image: joker,
-    variant: 'movie-card-wide',
-  },
-  {
-    title: 'The Frightening',
-    year: '2021',
-    mood: 'Misterio',
-    description: 'Algo se mueve entre pasillos donde nadie debería estar.',
-    image: frightening,
-  },
-  {
-    title: 'Marilyn Monroe',
-    year: '2020',
-    mood: 'Biografía',
-    description: 'Luz, cámara y una silueta que nunca dejó de aparecer.',
-    image: marilyn,
-  },
-  {
-    title: 'Love Untangled',
-    year: '2025',
-    mood: 'Romance',
-    description: 'Primer amor, nervios y una confesión esperando su momento.',
-    image: loveUntangled,
-    variant: 'movie-card-wide',
-  },
-]
+const movieImages = import.meta.glob('../assets/movies/*.png', {
+  eager: true,
+  import: 'default',
+})
+
+const movies = moviesApi.map((movie) => ({
+  ...movie,
+  image: movieImages[`../assets/movies/${movie.image}`],
+}))
+
+const isLoading = ref(true)
+const skeletonMovies = moviesApi.map((movie) => ({
+  id: movie.id,
+  variant: movie.variant || '',
+}))
+
+onMounted(() => {
+  window.setTimeout(() => {
+    isLoading.value = false
+  }, 750)
+})
 </script>
 
 <template>
@@ -90,10 +43,27 @@ const movies = [
         </span>
       </div>
 
-      <div class="movie-bento-grid">
+      <div v-if="isLoading" class="movie-bento-grid" aria-label="Cargando películas">
+        <article
+          v-for="skeleton in skeletonMovies"
+          :key="`skeleton-${skeleton.id}`"
+          class="movie-card movie-card-skeleton rounded-[1.5rem]"
+          :class="skeleton.variant"
+        >
+          <div class="movie-skeleton-poster"></div>
+          <div class="movie-skeleton-body">
+            <span class="movie-skeleton-line movie-skeleton-title"></span>
+            <span class="movie-skeleton-line movie-skeleton-meta"></span>
+            <span class="movie-skeleton-line"></span>
+            <span class="movie-skeleton-line movie-skeleton-short"></span>
+          </div>
+        </article>
+      </div>
+
+      <div v-else class="movie-bento-grid">
         <MovieCard
           v-for="(movie, index) in movies"
-          :key="movie.title"
+          :key="movie.id"
           :movie="movie"
           :image="movie.image"
           :variant="movie.variant"

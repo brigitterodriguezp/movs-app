@@ -2,10 +2,16 @@
 @import './base.css';
 
 #app {
+  width: 100%;
+  max-width: 100%;
   min-height: 100vh;
+  overflow-x: hidden;
 }
 
 .page-shell {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
   animation: pageIn 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -49,6 +55,7 @@
 
 .main-navbar-inner {
   display: flex;
+  min-width: 0;
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
@@ -56,6 +63,7 @@
 
 .main-navbar-links {
   display: flex;
+  min-width: 0;
   align-items: center;
   gap: 0.5rem;
 }
@@ -608,6 +616,7 @@
   display: grid;
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1.25rem;
+  min-width: 0;
 }
 
 .site-footer {
@@ -653,6 +662,68 @@
     0 13px 28px rgba(28, 25, 23, 0.075);
 }
 
+.movie-card-skeleton {
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.movie-skeleton-poster,
+.movie-skeleton-line {
+  position: relative;
+  overflow: hidden;
+  background: rgba(214, 211, 209, 0.58);
+}
+
+.movie-skeleton-poster::after,
+.movie-skeleton-line::after {
+  position: absolute;
+  inset: 0;
+  content: '';
+  animation: skeletonShimmer 1.15s ease-in-out infinite;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.62), transparent);
+  transform: translateX(-100%);
+}
+
+.movie-skeleton-poster {
+  aspect-ratio: 4 / 5;
+}
+
+.movie-skeleton-body {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1.25rem;
+}
+
+.movie-skeleton-line {
+  display: block;
+  width: 100%;
+  height: 0.78rem;
+  border-radius: 999px;
+}
+
+.movie-skeleton-title {
+  width: 70%;
+  height: 1.15rem;
+}
+
+.movie-skeleton-meta {
+  width: 42%;
+}
+
+.movie-skeleton-short {
+  width: 58%;
+}
+
+.dark .movie-skeleton-poster,
+.dark .movie-skeleton-line {
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.dark .movie-skeleton-poster::after,
+.dark .movie-skeleton-line::after {
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.14), transparent);
+}
+
 @keyframes pageIn {
   from {
     opacity: 0;
@@ -687,14 +758,20 @@
   }
 }
 
+@keyframes skeletonShimmer {
+  to {
+    transform: translateX(100%);
+  }
+}
+
 @media (max-width: 768px) {
   .glass-nav {
     top: auto;
     right: auto;
     bottom: calc(env(safe-area-inset-bottom) + 0.55rem);
     left: 50%;
-    width: fit-content !important;
-    max-width: calc(100% - 1rem);
+    width: min(calc(100vw - 1rem), 19rem) !important;
+    max-width: calc(100vw - 1rem);
     margin-top: 0 !important;
     border-radius: 1.15rem;
     padding: 0.35rem !important;
@@ -712,8 +789,12 @@
     display: none;
   }
 
+  .about-nav-link {
+    display: none !important;
+  }
+
   .main-navbar-links {
-    width: fit-content;
+    width: 100%;
     max-width: 100%;
     display: flex;
     justify-content: center;
@@ -723,7 +804,8 @@
   .main-navbar-links .btn,
   .main-navbar-links .nav-link {
     display: flex;
-    width: 3rem;
+    width: auto;
+    flex: 1 1 0;
     min-width: 0;
     min-height: 2.72rem;
     flex-direction: column;
@@ -736,6 +818,12 @@
     line-height: 1.1;
     text-align: center;
     white-space: normal;
+  }
+
+  .main-navbar-links .btn span,
+  .main-navbar-links .nav-link span {
+    display: block;
+    min-width: 0;
   }
 
   .main-navbar-links .btn svg,
@@ -789,6 +877,9 @@
   }
 
   .auth-shell {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
     min-height: auto !important;
     align-items: flex-start !important;
     padding-top: 1.25rem !important;
@@ -796,15 +887,29 @@
   }
 
   .auth-panel {
+    width: 100%;
+    min-width: 0;
     max-width: 23.5rem;
     border-radius: 1.15rem !important;
     padding: 0.35rem !important;
   }
 
   .auth-shell .ios-surface {
+    min-width: 0;
     gap: 1rem !important;
     border-radius: 0.95rem !important;
     padding: 1rem !important;
+  }
+
+  .auth-shell form,
+  .auth-shell form > *,
+  .payment-section,
+  .payment-box,
+  .plan-grid,
+  .plan-option,
+  .card-number-wrap {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .auth-shell h1 {
@@ -847,7 +952,13 @@
   }
 
   .card-number-wrap .form-control {
-    padding-right: 7rem !important;
+    padding-right: 5.8rem !important;
+  }
+
+  .card-number-wrap span {
+    right: 0.85rem;
+    max-width: 4.7rem;
+    font-size: 0.72rem;
   }
 
   .auth-shell .btn {
@@ -900,13 +1011,16 @@
   }
 
   .movie-card-featured .relative,
-  .movie-card-tall .relative {
+  .movie-card-tall .relative,
+  .movie-card-featured .movie-skeleton-poster,
+  .movie-card-tall .movie-skeleton-poster {
     aspect-ratio: auto;
     height: 100%;
     min-height: 30rem;
   }
 
-  .movie-card-wide .relative {
+  .movie-card-wide .relative,
+  .movie-card-wide .movie-skeleton-poster {
     aspect-ratio: 16 / 10;
   }
 }

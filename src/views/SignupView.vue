@@ -56,24 +56,7 @@ function detectCardBrand(number = cardDigits()) {
 }
 
 function isValidCardNumber(number) {
-  if (number.length < 13 || number.length > 19) return false
-
-  let sum = 0
-  let shouldDouble = false
-
-  for (let index = number.length - 1; index >= 0; index -= 1) {
-    let digit = Number(number[index])
-
-    if (shouldDouble) {
-      digit *= 2
-      if (digit > 9) digit -= 9
-    }
-
-    sum += digit
-    shouldDouble = !shouldDouble
-  }
-
-  return sum % 10 === 0
+  return /^\d{13,19}$/.test(number)
 }
 
 function isValidExpiry(value) {
@@ -167,6 +150,8 @@ function submitSignup() {
     return
   }
 
+  const selectedPlan = plans.find((plan) => plan.id === form.plan)
+
   const user = {
     nombres: form.nombres.trim(),
     apellidos: form.apellidos.trim(),
@@ -174,11 +159,17 @@ function submitSignup() {
     clave: form.clave,
     subscription: {
       plan: form.plan,
+      name: selectedPlan?.name || form.plan,
+      price: selectedPlan?.price || '',
+      benefits: selectedPlan?.benefits || [],
       status: 'active',
     },
     payment: {
+      method: 'card',
+      holder: form.cardName.trim(),
       brand: detectCardBrand(cardNumber),
       last4: cardNumber.slice(-4),
+      expiry: form.cardExpiry,
     },
   }
 
