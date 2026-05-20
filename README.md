@@ -128,21 +128,7 @@ P1ExamenRodriguezBrigitte/
 
 ## 9. Capturas de pantalla del sistema
 
-1. Pantalla principal:
-
-![Pantalla principal](./src/assets/movies/main-cover.png)
-
-2. Catálogo de películas:
-
-![Película Cover Story](./src/assets/movies/001-cover.png)
-
-3. Tarjetas de películas:
-
-![Película La Niñera](./src/assets/movies/002-ninera.png)
-
-4. Ejemplo de película destacada:
-
-![Película Joker](./src/assets/movies/005-joker.png)
+Disponibles en el informe del proyecto.
 
 ## 10. Integrantes y asignatura
 
