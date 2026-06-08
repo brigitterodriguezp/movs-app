@@ -1,5 +1,5 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ChevronDown, Clapperboard, Home, Info, LogIn, LogOut, Moon, ShieldCheck, Sun, User, UserPlus, Users } from '@lucide/vue'
 
@@ -7,6 +7,21 @@ const route = useRoute()
 const router = useRouter()
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const showMenu = ref(false)
+const scrolled = ref(false)
+
+let scrollCleanup = null
+
+onMounted(() => {
+  const onScroll = () => {
+    scrolled.value = window.scrollY > 60
+  }
+  window.addEventListener('scroll', onScroll, { passive: true })
+  scrollCleanup = () => window.removeEventListener('scroll', onScroll)
+})
+
+onUnmounted(() => {
+  if (scrollCleanup) scrollCleanup()
+})
 
 const hasSession = computed(() => {
   route.fullPath
@@ -69,7 +84,7 @@ function handleBlur(e) {
 </script>
 
 <template>
-  <nav class="fixed-top glass-nav mx-auto mt-3 w-fit max-w-[95vw] rounded-pill px-3 py-2">
+  <nav class="fixed-top glass-nav mx-auto mt-3 w-fit max-w-[95vw] rounded-pill px-3 py-2" :class="{ 'nav-compact': scrolled }">
     <div class="main-navbar-inner">
       <RouterLink class="navbar-brand fw-semibold tracking-tight me-3 text-decoration-none d-inline-flex align-items-center gap-1 d-none d-md-flex" to="/" style="color: var(--color-accent);">
         <Clapperboard :size="18" />

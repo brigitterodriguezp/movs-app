@@ -18,6 +18,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  transition: gap 0.4s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .main-navbar-links {
@@ -110,6 +111,55 @@
   background: var(--color-surface-hover);
   color: var(--color-text);
   border-color: var(--color-border);
+}
+
+.glass-nav {
+  transition: padding 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+              border-radius 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@media (min-width: 769px) {
+  .glass-nav.nav-compact {
+    padding: 0.35rem 1.2rem;
+    transform: translateY(-0.25rem);
+  }
+
+  .glass-nav.nav-compact .main-navbar-links > * {
+    flex: 0 0 auto;
+  }
+
+  .glass-nav.nav-compact .main-navbar-links .d-md-inline {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .glass-nav.nav-compact .user-dropdown-wrap .d-md-inline {
+    opacity: 0;
+    width: 0;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+    border: none;
+  }
+
+  .glass-nav.nav-compact .main-navbar-inner {
+    justify-content: center;
+    gap: 0.25rem;
+  }
+
+  .main-navbar-links > * {
+    transition: flex 0.35s ease;
+  }
+
+  .main-navbar-links .d-md-inline,
+  .user-dropdown-wrap .d-md-inline {
+    transition: opacity 0.35s ease, width 0.35s ease;
+  }
 }
 
 @media (max-width: 768px) {
