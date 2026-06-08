@@ -89,19 +89,29 @@ El sistema permite registrar múltiples usuarios con planes de suscripción (Bas
 
 ---
 
-## 5. Diagrama de login
+## 5. Diagrama de login y registro
 
 ```mermaid
 flowchart TD
     A["Landing (/)"] --> B["Registrarse<br/>/signup"]
     A --> C["Iniciar sesión<br/>/signin"]
-    C --> D["Validar credenciales<br/>(busca en movieUsers)"]
-    D -->|"rol=admin"| E["/admin<br/>Panel de gestión"]
-    D -->|"rol=user"| F["/app<br/>Mi cuenta / suscripción"]
-    F --> G["/movies<br/>Catálogo"]
 
-    H["Guardia de rutas"] -.->|"Sin sesión"| C
-    E -.->|"Sin rol=admin"| I["/unauthorized<br/>(403)"]
+    B --> D["Formulario de registro"]
+    D --> E{"¿Campos válidos?<br/>(nombres, correo,<br/>tarjeta, CVV, etc.)"}
+    E -->|"No"| D
+    E -->|"Sí"| F["Guardar en localStorage<br/>(movieUsers)"]
+    F --> G["Redirigir a /signin"]
+
+    C --> H["Formulario de inicio de sesión"]
+    H --> I{"Buscar en movieUsers<br/>¿correo y clave coinciden?"}
+    I -->|"No"| J["Mostrar error<br/>'Correo o clave incorrectos'"]
+    J --> H
+    I -->|"Sí"| K["Guardar sesión<br/>(movieSession)"]
+    K --> L{"¿Rol?"}
+    L -->|"admin"| M["/admin<br/>Panel de gestión"]
+    L -->|"user"| N["/app<br/>Mi cuenta / suscripción"]
+    N --> O["/movies<br/>Catálogo"]
+
+    P["Guardia de rutas"] -.->|"Sin sesión"| C
+    M -.->|"Sin rol=admin"| Q["/unauthorized (403)"]
 ```
-
----
