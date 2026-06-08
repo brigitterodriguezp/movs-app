@@ -135,6 +135,11 @@ function submitSignin() {
           </button>
         </form>
 
+        <p class="mt-4 mb-0 text-center text-sm" style="color: var(--color-text-muted);">
+          ¿No tienes cuenta?
+          <RouterLink to="/signup" class="fw-semibold text-decoration-none" style="color: var(--color-accent-text);">Regístrate</RouterLink>
+        </p>
+
       </div>
     </section>
   </main>
