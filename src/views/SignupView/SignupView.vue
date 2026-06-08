@@ -189,7 +189,7 @@ function submitSignup() {
 </script>
 
 <template>
-  <main class="auth-shell flex min-h-screen items-start justify-center px-4 pb-14 pt-36 sm:pt-40">
+  <main class="auth-shell flex min-h-screen items-start justify-center px-4 pb-14 pt-20 sm:pt-24">
     <SignupSkeleton v-if="isLoading" />
     <section v-else class="auth-panel w-full max-w-5xl rounded-[1.75rem] p-4 sm:p-6">
       <div class="ios-surface grid gap-8 rounded-[1.35rem] p-6 md:grid-cols-[0.8fr_1.2fr] sm:p-8">

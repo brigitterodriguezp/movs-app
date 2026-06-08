@@ -55,19 +55,16 @@
 }
 
 .form-control {
-  border-color: var(--color-border);
+  color: var(--color-text);
+  border: 1px solid rgba(0, 0, 0, 0.07);
   background: var(--color-surface-strong);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 .dark .form-control {
-  color: var(--color-text);
-  border-color: var(--color-border);
-  background: rgba(12, 12, 11, 0.62);
-}
-
-.dark .form-control:focus {
-  color: var(--color-text);
-  background: rgba(16, 16, 15, 0.78);
+  border-color: rgba(255, 255, 255, 0.09);
+  background: rgba(30, 30, 36, 0.55);
 }
 
 .form-control:focus {

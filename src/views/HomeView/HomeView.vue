@@ -143,8 +143,8 @@ function onVideoEnded() {
           class="max-w-3xl transition-all duration-500 ease-out"
           :class="isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'"
         >
-          <p class="mt-6 max-w-lg text-sm italic text-white/75 sm:text-base">
-            "Tú y yo, siempre"
+          <p class="mt-6 max-w-lg text-sm font-bold text-white/75 sm:text-base">
+            Si la vida te da mandarinas
           </p>
           <p class="mt-4 text-[10px] uppercase tracking-[0.25em] opacity-60">
             Esperanza, Resiliencia, Vida
