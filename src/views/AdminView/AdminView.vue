@@ -211,7 +211,7 @@ onMounted(() => {
             <Search :size="15" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--color-text-muted);" />
             <input
               v-model="searchQuery"
-              class="form-control rounded-pill py-2 pl-9 pr-4 text-sm"
+              class="form-control rounded-pill py-2 pl-10 pr-4 text-sm"
               placeholder="Buscar..."
               type="text"
             />

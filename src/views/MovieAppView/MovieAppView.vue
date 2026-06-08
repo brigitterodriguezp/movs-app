@@ -54,15 +54,15 @@ onMounted(() => {
         </div>
         <div class="flex items-center gap-3">
           <div class="relative">
-            <Search :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-stone-400" />
+            <Search :size="16" class="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--color-text-muted);" />
             <input
               v-model="searchQuery"
-              class="form-control rounded-pill py-2 pl-9 pr-4 text-sm"
+              class="form-control rounded-pill py-2 pl-10 pr-4 text-sm"
               placeholder="Buscar películas..."
               type="text"
             />
           </div>
-          <span class="ios-chip w-fit rounded-pill px-4 py-2 text-sm text-stone-600">
+          <span class="ios-chip w-fit rounded-pill px-4 py-2 text-sm" style="color: var(--color-text-secondary);">
             {{ movies.length }} de {{ allMovies.length }} títulos
           </span>
         </div>
@@ -70,9 +70,9 @@ onMounted(() => {
 
       <MovieGridSkeleton v-if="isLoading" :movies="skeletonMovies" />
       <div v-else-if="!movies.length" class="ios-surface rounded-[1.35rem] p-8 text-center">
-        <Search :size="40" class="mx-auto mb-4 text-stone-400" />
-        <h2 class="mb-2 text-xl font-semibold text-stone-700">Sin resultados</h2>
-        <p class="text-stone-500">No encontramos películas con ese criterio.</p>
+        <Search :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
+        <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">Sin resultados</h2>
+        <p style="color: var(--color-text-muted);">No encontramos películas con ese criterio.</p>
       </div>
       <div v-else class="movie-bento-grid">
         <MovieCard

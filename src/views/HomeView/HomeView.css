@@ -1,10 +1,14 @@
 .home-cover {
   animation: coverIn 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
+  transition: width 700ms ease-out, max-width 700ms ease-out;
+}
+
+.home-cover img {
+  transition: opacity 700ms ease-out, transform 700ms ease-out;
 }
 
 @media (max-width: 768px) {
   .home-cover {
-    width: 92%;
     border-radius: 1.45rem;
   }
 

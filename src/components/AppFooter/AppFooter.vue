@@ -4,7 +4,7 @@ import { Clapperboard } from '@lucide/vue'
 
 <template>
   <footer class="site-footer px-4 py-3">
-    <div class="mx-auto max-w-7xl border-t border-stone-200 pt-3 text-center text-sm text-stone-500">
+    <div class="mx-auto max-w-7xl border-t pt-3 text-center text-sm" style="border-color: var(--color-border-subtle); color: var(--color-text-muted);">
       <p class="m-0 inline-flex flex-wrap items-center justify-center gap-2">
         <Clapperboard :size="16" />
         <span>Movs App 2026</span>
