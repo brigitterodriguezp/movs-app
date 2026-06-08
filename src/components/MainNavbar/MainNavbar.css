@@ -1,0 +1,301 @@
+.glass-nav {
+  z-index: 20;
+  background: var(--nav-bg);
+  border: 1px solid var(--nav-border);
+  box-shadow:
+    var(--shadow-sm),
+    0 8px 20px color-mix(in srgb, var(--color-text) 5.5%, transparent);
+}
+
+.dark .glass-nav {
+  box-shadow:
+    var(--shadow-sm),
+    0 16px 38px var(--shadow-lg);
+  backdrop-filter: blur(18px);
+}
+
+.navbar-brand,
+.nav-link {
+  color: var(--nav-text) !important;
+}
+
+.main-navbar-inner {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.main-navbar-links {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.glass-nav .btn-outline-dark {
+  color: var(--nav-text);
+  border-color: var(--nav-text);
+}
+
+.dark .glass-nav .btn-outline-dark {
+  border-color: rgba(245, 245, 244, 0.32);
+}
+
+.glass-nav .nav-action,
+.glass-nav .theme-toggle {
+  --bs-btn-color: var(--color-text);
+  --bs-btn-border-color: var(--color-border);
+  --bs-btn-bg: var(--nav-action-bg);
+  --bs-btn-hover-color: var(--nav-action-hover-text);
+  --bs-btn-hover-bg: var(--nav-action-hover-bg);
+  --bs-btn-hover-border-color: var(--nav-action-hover-bg);
+  --bs-btn-active-color: var(--nav-action-hover-text);
+  --bs-btn-active-bg: var(--nav-action-hover-bg);
+  --bs-btn-active-border-color: var(--nav-action-hover-bg);
+  --bs-btn-focus-shadow-rgb: 16, 185, 129;
+}
+
+.glass-nav .nav-action {
+  --bs-btn-color: var(--nav-action-hover-text) !important;
+  --bs-btn-border-color: var(--nav-action-hover-bg);
+  --bs-btn-bg: var(--nav-action-hover-bg);
+  --bs-btn-hover-color: var(--nav-action-hover-text);
+  --bs-btn-hover-bg: var(--color-surface-dark);
+  --bs-btn-hover-border-color: var(--color-surface-dark);
+  --bs-btn-active-color: var(--nav-action-hover-text);
+  --bs-btn-active-bg: #44403c;
+  --bs-btn-active-border-color: #44403c;
+  color: var(--bs-btn-color) !important;
+  background: var(--bs-btn-bg) !important;
+  border-color: var(--bs-btn-border-color) !important;
+}
+
+.glass-nav .nav-action:hover,
+.glass-nav .nav-action:focus-visible,
+.glass-nav .nav-action:active {
+  color: var(--bs-btn-hover-color) !important;
+  background: var(--bs-btn-hover-bg) !important;
+  border-color: var(--bs-btn-hover-border-color) !important;
+}
+
+.glass-nav .nav-action span,
+.glass-nav .nav-action svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.glass-nav .theme-toggle {
+  --bs-btn-color: var(--color-text);
+  --bs-btn-border-color: var(--color-border);
+  --bs-btn-bg: rgba(255, 255, 255, 0.64);
+  --bs-btn-hover-color: var(--color-text);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--color-emerald) 14%, transparent);
+  --bs-btn-hover-border-color: color-mix(in srgb, var(--color-emerald) 34%, transparent);
+  --bs-btn-active-color: var(--color-text);
+  --bs-btn-active-bg: color-mix(in srgb, var(--color-emerald) 18%, transparent);
+  --bs-btn-active-border-color: color-mix(in srgb, var(--color-emerald) 44%, transparent);
+  width: 2.45rem;
+  justify-content: center;
+  padding-right: 0 !important;
+  padding-left: 0 !important;
+  color: var(--bs-btn-color) !important;
+  background: var(--bs-btn-bg) !important;
+  border-color: var(--bs-btn-border-color) !important;
+}
+
+.glass-nav .theme-toggle:hover,
+.glass-nav .theme-toggle:focus-visible,
+.glass-nav .theme-toggle:active {
+  color: var(--bs-btn-hover-color) !important;
+  background: var(--bs-btn-hover-bg) !important;
+  border-color: var(--bs-btn-hover-border-color) !important;
+}
+
+.glass-nav .theme-toggle svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.dark .glass-nav .nav-action,
+.dark .glass-nav .theme-toggle {
+  --bs-btn-color: #f8fafc;
+  --bs-btn-border-color: rgba(255, 255, 255, 0.18);
+  --bs-btn-bg: var(--nav-action-bg);
+  --bs-btn-hover-color: #ecfdf5;
+  --bs-btn-hover-bg: rgba(16, 185, 129, 0.18);
+  --bs-btn-hover-border-color: rgba(110, 231, 183, 0.46);
+  --bs-btn-active-color: #ffffff;
+  --bs-btn-active-bg: rgba(16, 185, 129, 0.24);
+  --bs-btn-active-border-color: rgba(110, 231, 183, 0.58);
+  color: var(--bs-btn-color) !important;
+  background: var(--bs-btn-bg) !important;
+  border-color: var(--bs-btn-border-color) !important;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+}
+
+.dark .glass-nav .theme-toggle {
+  --bs-btn-color: #ede9fe;
+  --bs-btn-border-color: rgba(196, 181, 253, 0.28);
+  --bs-btn-bg: rgba(167, 139, 250, 0.14);
+  --bs-btn-hover-color: #ffffff;
+  --bs-btn-hover-bg: rgba(167, 139, 250, 0.24);
+  --bs-btn-hover-border-color: rgba(196, 181, 253, 0.44);
+}
+
+.dark .glass-nav .nav-action:hover,
+.dark .glass-nav .nav-action:focus-visible,
+.dark .glass-nav .nav-action:active,
+.dark .glass-nav .nav-action.show,
+.dark .glass-nav .theme-toggle:hover,
+.dark .glass-nav .theme-toggle:focus-visible,
+.dark .glass-nav .theme-toggle:active,
+.dark .glass-nav .theme-toggle.show {
+  color: var(--bs-btn-hover-color) !important;
+  background: var(--bs-btn-hover-bg) !important;
+  border-color: var(--bs-btn-hover-border-color) !important;
+}
+
+.dark .glass-nav .nav-action span,
+.dark .glass-nav .nav-action svg,
+.dark .glass-nav .theme-toggle span,
+.dark .glass-nav .theme-toggle svg {
+  color: inherit !important;
+  stroke: currentColor !important;
+}
+
+.nav-link.router-link-active {
+  background: color-mix(in srgb, var(--color-emerald) 12%, transparent);
+  color: var(--color-emerald-text);
+}
+
+.dark .nav-link.router-link-active {
+  background: color-mix(in srgb, var(--color-emerald) 20%, transparent);
+  color: var(--color-emerald-text);
+}
+
+.glass-nav .user-dropdown-menu a,
+.glass-nav .user-dropdown-menu button {
+  text-decoration: none;
+}
+
+.glass-nav .user-dropdown-menu a:hover,
+.glass-nav .user-dropdown-menu button:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  text-decoration: none;
+}
+
+.glass-nav .user-dropdown-wrap .btn {
+  background: transparent;
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.glass-nav .user-dropdown-wrap .btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+@media (max-width: 768px) {
+  .glass-nav {
+    top: auto;
+    right: auto;
+    bottom: calc(env(safe-area-inset-bottom) + 0.55rem);
+    left: 50%;
+    width: min(calc(100vw - 1rem), 19rem) !important;
+    max-width: calc(100vw - 1rem);
+    margin-top: 0 !important;
+    border-radius: 1.15rem;
+    padding: 0.35rem !important;
+    transform: translateX(-50%);
+  }
+
+  .main-navbar-inner {
+    align-items: center;
+    flex-direction: row;
+    gap: 0;
+    justify-content: center;
+  }
+
+  .navbar-brand {
+    display: none;
+  }
+
+  .about-nav-link {
+    display: none !important;
+  }
+
+  .main-navbar-links {
+    width: 100%;
+    max-width: 100%;
+    display: flex;
+    justify-content: center;
+    gap: 0.18rem;
+  }
+
+  .main-navbar-links .btn,
+  .main-navbar-links .nav-link,
+  .main-navbar-links .user-dropdown-wrap {
+    display: flex;
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.72rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+    border-width: 0;
+    padding: 0.32rem 0.2rem !important;
+    font-size: 0.67rem;
+    line-height: 1.1;
+    text-align: center;
+    white-space: normal;
+  }
+
+  .main-navbar-links .user-dropdown-wrap .btn {
+    all: unset;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.12rem;
+    width: 100%;
+    font-size: 0.67rem;
+    line-height: 1.1;
+    color: var(--color-text);
+    cursor: pointer;
+  }
+
+  .main-navbar-links .btn span,
+  .main-navbar-links .nav-link span,
+  .main-navbar-links .user-dropdown-wrap span {
+    display: block;
+    min-width: 0;
+  }
+
+  .main-navbar-links .btn svg,
+  .main-navbar-links .nav-link svg,
+  .main-navbar-links .user-dropdown-wrap svg {
+    width: 1rem;
+    height: 1rem;
+  }
+
+  .main-navbar-links .btn span,
+  .main-navbar-links .nav-link span,
+  .main-navbar-links .user-dropdown-wrap span {
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-dropdown-wrap .user-dropdown-menu {
+    bottom: 100%;
+    top: auto;
+    margin-bottom: 0.5rem;
+    margin-top: 0;
+  }
+}

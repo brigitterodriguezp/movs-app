@@ -1,5 +1,5 @@
 <script setup>
-import HomeSkeleton from '@/components/skeletons/HomeSkeleton.vue'
+import HomeSkeleton from '@/components/skeletons/HomeSkeleton/HomeSkeleton.vue'
 import coverImage from '@/assets/movies/main-cover.png'
 import { Play, UserPlus } from '@lucide/vue'
 import { onMounted, ref } from 'vue'
@@ -35,7 +35,7 @@ onMounted(() => {
           "La vida también florece entre mandarinas."
         </p>
         <div class="mt-8 flex flex-wrap gap-3">
-          <RouterLink class="btn btn-light rounded-pill px-4 py-2 soft-button icon-link" to="/app">
+          <RouterLink class="btn btn-light rounded-pill px-4 py-2 soft-button icon-link" to="/movies">
             <Play :size="17" />
             <span>Explorar</span>
           </RouterLink>
@@ -48,3 +48,5 @@ onMounted(() => {
     </section>
   </main>
 </template>
+
+<style scoped src="./HomeView.css"></style>

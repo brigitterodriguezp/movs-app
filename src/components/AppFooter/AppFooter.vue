@@ -13,3 +13,5 @@ import { Clapperboard } from '@lucide/vue'
     </div>
   </footer>
 </template>
+
+<style scoped src="./AppFooter.css"></style>

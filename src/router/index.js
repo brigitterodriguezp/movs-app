@@ -1,9 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import HomeView from '../views/HomeView.vue'
-import SigninView from '../views/SigninView.vue'
-import SignupView from '../views/SignupView.vue'
-import MovieAppView from '../views/MovieAppView.vue'
-import AboutView from '../views/AboutView.vue'
+import HomeView from '../views/HomeView/HomeView.vue'
+import SigninView from '../views/SigninView/SigninView.vue'
+import SignupView from '../views/SignupView/SignupView.vue'
+import MovieAppView from '../views/MovieAppView/MovieAppView.vue'
+import AboutView from '../views/AboutView/AboutView.vue'
+import AccountsView from '../views/AccountsView/AccountsView.vue'
+import AdminView from '../views/AdminView/AdminView.vue'
+import UnauthorizedView from '../views/UnauthorizedView/UnauthorizedView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -34,17 +37,37 @@ const router = createRouter({
     },
     {
       path: '/app',
+      name: 'accounts',
+      component: AccountsView,
+    },
+    {
+      path: '/movies',
       name: 'movie-app',
       component: MovieAppView,
+    },
+    {
+      path: '/admin',
+      name: 'admin',
+      component: AdminView,
+    },
+    {
+      path: '/unauthorized',
+      name: 'unauthorized',
+      component: UnauthorizedView,
     },
   ],
 })
 
 router.beforeEach((to) => {
   const session = localStorage.getItem('movieSession')
+  const sessionData = session ? JSON.parse(session) : null
 
-  if (to.path === '/app' && !session) {
+  if ((to.path === '/app' || to.path === '/movies' || to.path === '/admin') && !sessionData) {
     return '/signin'
+  }
+
+  if (to.path === '/admin' && sessionData && sessionData.rol !== 'admin') {
+    return '/unauthorized'
   }
 })
 

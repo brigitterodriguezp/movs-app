@@ -1,0 +1,25 @@
+[
+  {
+    "id": 1,
+    "nombre": "Brigitte Rodriguez",
+    "correo": "barodriguez7@espe.edu.ec",
+    "password": "admin123",
+    "rol": "admin",
+    "suscripcion": {
+      "plan": "plus",
+      "nombre": "Plus",
+      "precio": "$8.99",
+      "beneficios": ["3 pantallas", "Estrenos destacados", "Full HD y favoritos"],
+      "estado": "active",
+      "fecha_inicio": "2026-06-08",
+      "fecha_expiracion": "2026-07-08"
+    },
+    "pago": {
+      "metodo": "card",
+      "titular": "Brigitte Rodriguez",
+      "marca": "Visa",
+      "ultimos4": "4242",
+      "vencimiento": "12/28"
+    }
+  }
+]

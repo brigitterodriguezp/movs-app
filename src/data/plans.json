@@ -1,0 +1,14 @@
+[
+  {
+    "id": "basic",
+    "name": "Basic",
+    "price": "$4.99",
+    "benefits": ["1 pantalla", "Catálogo esencial", "Calidad HD"]
+  },
+  {
+    "id": "plus",
+    "name": "Plus",
+    "price": "$8.99",
+    "benefits": ["3 pantallas", "Estrenos destacados", "Full HD y favoritos"]
+  }
+]

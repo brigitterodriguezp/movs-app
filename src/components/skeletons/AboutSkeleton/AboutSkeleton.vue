@@ -20,3 +20,5 @@
     </div>
   </section>
 </template>
+
+<style scoped src="./AboutSkeleton.css"></style>

@@ -1,32 +1,20 @@
 <script setup>
-import SignupSkeleton from '@/components/skeletons/SignupSkeleton.vue'
+import SignupSkeleton from '@/components/skeletons/SignupSkeleton/SignupSkeleton.vue'
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { BadgeCheck, CreditCard, KeyRound, Mail, ShieldCheck, User, UserPlus, Users } from '@lucide/vue'
+import plansData from '@/data/plans.json'
 
 const router = useRouter()
 const isLoading = ref(true)
-
-const plans = [
-  {
-    id: 'basic',
-    name: 'Basic',
-    price: '$4.99',
-    benefits: ['1 pantalla', 'Catálogo esencial', 'Calidad HD'],
-  },
-  {
-    id: 'plus',
-    name: 'Plus',
-    price: '$8.99',
-    benefits: ['3 pantallas', 'Estrenos destacados', 'Full HD y favoritos'],
-  },
-]
+const plans = plansData
 
 const form = reactive({
   nombres: '',
   apellidos: '',
   correo: '',
   clave: '',
+  rol: 'usuario',
   plan: 'basic',
   cardName: '',
   cardNumber: '',
@@ -151,37 +139,47 @@ function submitSignup() {
   }
 
   const correo = form.correo.trim().toLowerCase()
-  const savedUser = JSON.parse(localStorage.getItem('movieUser') || 'null')
+  const savedUsers = JSON.parse(localStorage.getItem('movieUsers') || '[]')
 
-  if (savedUser?.correo === correo) {
+  if (savedUsers.some((u) => u.correo === correo)) {
     errors.correo = 'Ya existe una cuenta con ese correo.'
     return
   }
 
   const selectedPlan = plans.find((plan) => plan.id === form.plan)
+  const now = new Date()
+  const fechaInicio = now.toISOString().slice(0, 10)
+  const expiryDate = new Date(now)
+  expiryDate.setDate(expiryDate.getDate() + 30)
+  const fechaExpiracion = expiryDate.toISOString().slice(0, 10)
+  const nextId = savedUsers.reduce((max, u) => Math.max(max, u.id || 0), 0) + 1
 
   const user = {
-    nombres: form.nombres.trim(),
-    apellidos: form.apellidos.trim(),
+    id: nextId,
+    nombre: `${form.nombres.trim()} ${form.apellidos.trim()}`,
     correo,
-    clave: form.clave,
-    subscription: {
+    password: form.clave,
+    rol: form.rol,
+    suscripcion: {
       plan: form.plan,
-      name: selectedPlan?.name || form.plan,
-      price: selectedPlan?.price || '',
-      benefits: selectedPlan?.benefits || [],
-      status: 'active',
+      nombre: selectedPlan?.name || form.plan,
+      precio: selectedPlan?.price || '',
+      beneficios: selectedPlan?.benefits || [],
+      estado: 'active',
+      fecha_inicio: fechaInicio,
+      fecha_expiracion: fechaExpiracion,
     },
-    payment: {
-      method: 'card',
-      holder: form.cardName.trim(),
-      brand: detectCardBrand(cardNumber),
-      last4: cardNumber.slice(-4),
-      expiry: form.cardExpiry,
+    pago: {
+      metodo: 'card',
+      titular: form.cardName.trim(),
+      marca: detectCardBrand(cardNumber),
+      ultimos4: cardNumber.slice(-4),
+      vencimiento: form.cardExpiry,
     },
   }
 
-  localStorage.setItem('movieUser', JSON.stringify(user))
+  savedUsers.push(user)
+  localStorage.setItem('movieUsers', JSON.stringify(savedUsers))
   router.push('/signin')
 }
 </script>
@@ -235,6 +233,17 @@ function submitSignup() {
             </label>
             <input id="clave" v-model="form.clave" class="form-control rounded-pill px-4 py-3" type="password" />
             <p v-if="errors.clave" class="auth-field-error">{{ errors.clave }}</p>
+          </div>
+
+          <div class="md:col-span-2">
+            <label class="form-label auth-field-label text-sm text-stone-700" for="rol">
+              <ShieldCheck :size="15" />
+              <span>Tipo de cuenta</span>
+            </label>
+            <select id="rol" v-model="form.rol" class="form-control rounded-pill px-4 py-3">
+              <option value="usuario">Usuario</option>
+              <option value="admin">Administrador</option>
+            </select>
           </div>
 
           <div class="md:col-span-2">
@@ -316,7 +325,7 @@ function submitSignup() {
                   v-model="form.cardCvv"
                   class="form-control rounded-pill px-4 py-3"
                   inputmode="numeric"
-                  maxlength="4"
+                  maxlength="3"
                   placeholder="123"
                   type="password"
                 />
@@ -334,3 +343,5 @@ function submitSignup() {
     </section>
   </main>
 </template>
+
+<style scoped src="./SignupView.css"></style>

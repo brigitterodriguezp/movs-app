@@ -1,5 +1,5 @@
 <script setup>
-import AboutSkeleton from '@/components/skeletons/AboutSkeleton.vue'
+import AboutSkeleton from '@/components/skeletons/AboutSkeleton/AboutSkeleton.vue'
 import coverStory from '@/assets/movies/001-cover.png'
 import ninera from '@/assets/movies/002-ninera.png'
 import scaryMovie from '@/assets/movies/003-scary-movie.png'
@@ -156,3 +156,5 @@ const carouselMovies = [
     </section>
   </main>
 </template>
+
+<style scoped src="./AboutView.css"></style>
