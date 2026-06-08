@@ -122,7 +122,8 @@ onMounted(() => {
           </p>
           <p
             class="inline-flex items-center gap-1.5 font-medium"
-            :class="user.suscripcion?.fecha_expiracion ? expiracionColor(daysUntilExpiry(user.suscripcion.fecha_expiracion)) : 'text-stone-500'"
+            :class="user.suscripcion?.fecha_expiracion ? expiracionColor(daysUntilExpiry(user.suscripcion.fecha_expiracion)) : ''"
+            style="color: var(--color-text-muted);"
           >
             <Clock :size="12" />
             <template v-if="user.suscripcion?.fecha_expiracion">

@@ -7,6 +7,7 @@ import AboutView from '../views/AboutView/AboutView.vue'
 import AccountsView from '../views/AccountsView/AccountsView.vue'
 import AdminView from '../views/AdminView/AdminView.vue'
 import UnauthorizedView from '../views/UnauthorizedView/UnauthorizedView.vue'
+import NotFoundView from '../views/NotFoundView/NotFoundView.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -55,6 +56,11 @@ const router = createRouter({
       name: 'unauthorized',
       component: UnauthorizedView,
     },
+    {
+      path: '/:pathMatch(.*)*',
+      name: 'not-found',
+      component: NotFoundView,
+    },
   ],
 })
 
@@ -62,12 +68,8 @@ router.beforeEach((to) => {
   const session = localStorage.getItem('movieSession')
   const sessionData = session ? JSON.parse(session) : null
 
-  if ((to.path === '/app' || to.path === '/movies' || to.path === '/admin') && !sessionData) {
+  if ((to.path === '/app' || to.path === '/movies') && !sessionData) {
     return '/signin'
-  }
-
-  if (to.path === '/admin' && sessionData && sessionData.rol !== 'admin') {
-    return '/unauthorized'
   }
 })
 

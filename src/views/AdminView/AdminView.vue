@@ -1,9 +1,12 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue'
 import {
-  BadgeCheck, Edit3, Plus, Search, ShieldCheck, Trash2, UserPlus, Users, X
+  BadgeCheck, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
 } from '@lucide/vue'
 import plansData from '@/data/plans.json'
+
+const session = JSON.parse(localStorage.getItem('movieSession') || '{}')
+const isAdmin = session.rol === 'admin'
 
 const allUsers = ref([])
 const isLoading = ref(true)
@@ -86,7 +89,20 @@ function saveUser() {
     saved[idx].correo = form.value.correo.trim().toLowerCase()
     saved[idx].rol = form.value.rol
     if (form.value.password) saved[idx].password = form.value.password
-    if (saved[idx].suscripcion) saved[idx].suscripcion.plan = form.value.plan
+    if (saved[idx].suscripcion) {
+      saved[idx].suscripcion.plan = form.value.plan
+      const now = new Date()
+      const expiry = new Date(now)
+      expiry.setDate(expiry.getDate() + 30)
+      saved[idx].suscripcion.fecha_inicio = now.toISOString().slice(0, 10)
+      saved[idx].suscripcion.fecha_expiracion = expiry.toISOString().slice(0, 10)
+      const selectedPlan = plans.find((p) => p.id === form.value.plan)
+      if (selectedPlan) {
+        saved[idx].suscripcion.nombre = selectedPlan.name
+        saved[idx].suscripcion.precio = selectedPlan.price
+        saved[idx].suscripcion.beneficios = selectedPlan.benefits
+      }
+    }
   } else {
     const existing = saved.find((u) => u.correo === form.value.correo.trim().toLowerCase())
     if (existing) return
@@ -163,7 +179,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <main class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
+  <main v-if="isAdmin" class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
     <section class="mx-auto max-w-7xl">
       <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
@@ -442,6 +458,18 @@ onMounted(() => {
         </div>
       </div>
     </Teleport>
+  </main>
+
+  <main v-else class="page-shell flex min-h-screen items-center justify-center px-4 pb-14 pt-36">
+    <div class="ios-surface w-full max-w-lg rounded-[1.75rem] p-8 text-center">
+      <ShieldX :size="56" class="mx-auto mb-4" style="color: var(--color-error);" />
+      <h1 class="mb-2 text-3xl font-semibold" style="color: var(--color-text);">403</h1>
+      <h2 class="mb-3 text-xl font-semibold" style="color: var(--color-text-secondary);">Acceso no autorizado</h2>
+      <p class="mb-6" style="color: var(--color-text-muted);">No tienes permisos para acceder a esta sección.</p>
+      <RouterLink class="btn rounded-pill px-5 py-2 soft-button" to="/" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
+        Volver al inicio
+      </RouterLink>
+    </div>
   </main>
 </template>
 
