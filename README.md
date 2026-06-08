@@ -89,29 +89,35 @@ El sistema permite registrar múltiples usuarios con planes de suscripción (Bas
 
 ---
 
-## 5. Diagrama de login y registro
+## 5. Diagramas
+
+### 5.1 Registro
 
 ```mermaid
 flowchart TD
-    A["Landing (/)"] --> B["Registrarse<br/>/signup"]
-    A --> C["Iniciar sesión<br/>/signin"]
+    A["Landing (/)"] --> B["/signup"]
+    B --> C["Formulario de registro"]
+    C --> D{"¿Campos válidos?<br/>(nombres, correo,<br/>tarjeta, CVV, etc.)"}
+    D -->|"No"| C
+    D -->|"Sí"| E["Guardar en localStorage<br/>(movieUsers)"]
+    E --> F["Redirigir a /signin"]
+```
 
-    B --> D["Formulario de registro"]
-    D --> E{"¿Campos válidos?<br/>(nombres, correo,<br/>tarjeta, CVV, etc.)"}
-    E -->|"No"| D
-    E -->|"Sí"| F["Guardar en localStorage<br/>(movieUsers)"]
-    F --> G["Redirigir a /signin"]
+### 5.2 Inicio de sesión
 
-    C --> H["Formulario de inicio de sesión"]
-    H --> I{"Buscar en movieUsers<br/>¿correo y clave coinciden?"}
-    I -->|"No"| J["Mostrar error<br/>'Correo o clave incorrectos'"]
-    J --> H
-    I -->|"Sí"| K["Guardar sesión<br/>(movieSession)"]
-    K --> L{"¿Rol?"}
-    L -->|"admin"| M["/admin<br/>Panel de gestión"]
-    L -->|"user"| N["/app<br/>Mi cuenta / suscripción"]
-    N --> O["/movies<br/>Catálogo"]
+```mermaid
+flowchart TD
+    A["Landing (/)"] --> B["/signin"]
+    B --> C["Formulario de inicio de sesión"]
+    C --> D{"Buscar en movieUsers<br/>¿correo y clave coinciden?"}
+    D -->|"No"| E["Mostrar error<br/>'Correo o clave incorrectos'"]
+    E --> C
+    D -->|"Sí"| F["Guardar sesión<br/>(movieSession)"]
+    F --> G{"¿Rol?"}
+    G -->|"admin"| H["/admin<br/>Panel de gestión"]
+    G -->|"user"| I["/app<br/>Mi cuenta / suscripción"]
+    I --> J["/movies<br/>Catálogo"]
 
-    P["Guardia de rutas"] -.->|"Sin sesión"| C
-    M -.->|"Sin rol=admin"| Q["/unauthorized (403)"]
+    K["Guardia de rutas"] -.->|"Sin sesión"| B
+    H -.->|"Sin rol=admin"| L["/unauthorized (403)"]
 ```
