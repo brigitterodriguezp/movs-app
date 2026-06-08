@@ -93,7 +93,7 @@ function handleBlur(e) {
           <ShieldCheck :size="17" />
           <span class="d-none d-md-inline">Admin</span>
         </RouterLink>
-        <RouterLink v-if="!hasSession" class="nav-link rounded-pill px-3 icon-link d-none d-md-flex" to="/signin">
+        <RouterLink v-if="!hasSession" class="nav-link rounded-pill px-3 icon-link" to="/signin">
           <LogIn :size="17" />
           <span class="d-none d-md-inline">Entrar</span>
         </RouterLink>
@@ -101,19 +101,19 @@ function handleBlur(e) {
           <UserPlus :size="17" />
           <span class="d-none d-md-inline">Registro</span>
         </RouterLink>
+        <RouterLink
+          class="nav-link rounded-pill px-3 icon-link d-md-none"
+          to="/app"
+          @click="closeMenu"
+        >
+          <User :size="17" />
+        </RouterLink>
         <div
           v-if="hasSession"
           class="position-relative user-dropdown-wrap"
           tabindex="-1"
           @blur="handleBlur"
         >
-          <RouterLink
-            class="nav-link rounded-pill px-3 icon-link d-md-none"
-            to="/app"
-            @click="closeMenu"
-          >
-            <User :size="17" />
-          </RouterLink>
           <button
             class="btn rounded-pill px-3 py-2 soft-button icon-link d-none d-md-flex"
             type="button"
