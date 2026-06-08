@@ -24,7 +24,12 @@ const form = ref({
 })
 
 const deleteTarget = ref(null)
-const selfDeleteError = ref(false)
+const selfDeleteUser = ref(null)
+const adminDeleteBlocked = ref(null)
+
+function clearSelfDelete() {
+  selfDeleteUser.value = null
+}
 
 const filteredUsers = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
@@ -86,8 +91,6 @@ function saveUser() {
     const idx = saved.findIndex((u) => u.id === editingUser.value.id)
     if (idx === -1) return
     saved[idx].nombre = form.value.nombre.trim()
-    saved[idx].correo = form.value.correo.trim().toLowerCase()
-    saved[idx].rol = form.value.rol
     if (form.value.password) saved[idx].password = form.value.password
     if (saved[idx].suscripcion) {
       saved[idx].suscripcion.plan = form.value.plan
@@ -136,8 +139,13 @@ function saveUser() {
 function deleteUser(user) {
   const session = JSON.parse(localStorage.getItem('movieSession') || '{}')
   if (session.correo === user.correo) {
-    selfDeleteError.value = true
-    setTimeout(() => { selfDeleteError.value = false }, 2500)
+    selfDeleteUser.value = user
+    setTimeout(() => { selfDeleteUser.value = null }, 2500)
+    return
+  }
+  if (user.rol === 'admin') {
+    adminDeleteBlocked.value = user
+    setTimeout(() => { adminDeleteBlocked.value = null }, 2500)
     return
   }
   deleteTarget.value = user
@@ -189,12 +197,10 @@ onMounted(() => {
           </p>
           <h1 class="text-4xl font-semibold tracking-normal sm:text-5xl" style="color: var(--color-text);">Panel de administración</h1>
           <p class="mt-2" style="color: var(--color-text-muted);">Gestión de usuarios registrados.</p>
-          <p v-if="selfDeleteError" class="mt-1 text-sm" style="color: var(--color-error, #dc2626);">No puedes eliminarte a ti mismo.</p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button
-            class="btn rounded-pill px-4 py-2 soft-button icon-link"
-            style="background: var(--color-accent-bg); color: var(--color-accent-text); border-color: var(--color-accent-border);"
+            class="btn rounded-pill px-4 py-2 soft-button icon-link glass-accent-btn"
             type="button"
             @click="openCreate"
           >
@@ -296,26 +302,65 @@ onMounted(() => {
                   <span v-else style="color: var(--color-text-muted);">—</span>
                 </td>
                 <td class="px-4 py-3 sm:px-6">
-                  <div class="flex items-center gap-1">
-                    <button
-                      class="btn rounded-pill px-2 py-1 soft-button"
-                      style="color: var(--color-text-secondary); border-color: transparent; background: transparent;"
-                      title="Editar"
-                      type="button"
-                      @click="openEdit(user)"
-                    >
-                      <Edit3 :size="14" />
-                    </button>
-                    <button
-                      class="btn rounded-pill px-2 py-1 soft-button"
-                      style="color: var(--color-error); border-color: transparent; background: transparent;"
-                      title="Eliminar"
-                      type="button"
-                      @click="deleteUser(user)"
-                    >
-                      <Trash2 :size="14" />
-                    </button>
-                  </div>
+                  <template v-if="deleteTarget === user">
+                    <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
+                      <span style="color: var(--color-text-muted);">¿Eliminar?</span>
+                      <button
+                        class="btn rounded-pill px-2 py-1 soft-button"
+                        style="color: var(--color-error); border-color: transparent; background: transparent;"
+                        title="Confirmar"
+                        type="button"
+                        @click="confirmDelete"
+                      >
+                        <Trash2 :size="13" />
+                      </button>
+                      <button
+                        class="btn rounded-pill px-2 py-1 soft-button"
+                        style="color: var(--color-text-secondary); border-color: transparent; background: transparent;"
+                        title="Cancelar"
+                        type="button"
+                        @click="cancelDelete"
+                      >
+                        <X :size="13" />
+                      </button>
+                    </div>
+                  </template>
+                  <template v-else-if="selfDeleteUser === user">
+                    <Transition name="msg-fade">
+                      <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
+                        <span style="color: var(--color-error);">Este es tu usuario, no lo puedes borrar</span>
+                      </div>
+                    </Transition>
+                  </template>
+                  <template v-else-if="adminDeleteBlocked === user">
+                    <Transition name="msg-fade">
+                      <div class="flex items-center gap-1.5 text-xs whitespace-nowrap">
+                        <span style="color: var(--color-error);">Es administrador, no lo puedes borrar</span>
+                      </div>
+                    </Transition>
+                  </template>
+                  <template v-else>
+                    <div class="flex items-center gap-1">
+                      <button
+                        class="btn rounded-pill px-2 py-1 soft-button"
+                        style="color: var(--color-accent); border-color: transparent; background: transparent;"
+                        title="Editar"
+                        type="button"
+                        @click="openEdit(user)"
+                      >
+                        <Edit3 :size="14" />
+                      </button>
+                      <button
+                        class="btn rounded-pill px-2 py-1 soft-button"
+                        style="color: var(--color-error); border-color: transparent; background: transparent;"
+                        title="Eliminar"
+                        type="button"
+                        @click="deleteUser(user)"
+                      >
+                        <Trash2 :size="14" />
+                      </button>
+                    </div>
+                  </template>
                 </td>
               </tr>
               <tr v-if="!filteredUsers.length">
@@ -325,35 +370,6 @@ onMounted(() => {
               </tr>
             </tbody>
           </table>
-          <!-- delete confirmation overlay -->
-          <div
-            v-if="deleteTarget"
-            class="delete-confirm-overlay"
-          >
-            <div class="delete-confirm-box">
-              <p class="text-sm font-medium" style="color: var(--color-text);">
-                ¿Eliminar a <strong>{{ deleteTarget.nombre }}</strong>?
-              </p>
-              <div class="flex items-center gap-2 mt-2">
-                <button
-                  class="btn rounded-pill px-3 py-1.5 soft-button text-sm"
-                  type="button"
-                  style="border: 1px solid var(--color-border); color: var(--color-text); background: transparent;"
-                  @click="cancelDelete"
-                >
-                  Cancelar
-                </button>
-                <button
-                  class="btn rounded-pill px-3 py-1.5 soft-button text-sm"
-                  type="button"
-                  style="background: var(--color-error, #dc2626); color: #fff; border-color: var(--color-error, #dc2626);"
-                  @click="confirmDelete"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
         <div
           class="flex items-center justify-between border-t px-4 py-3 text-xs sm:px-6"
@@ -402,9 +418,17 @@ onMounted(() => {
                 <Users :size="15" />
                 <span>Correo electrónico</span>
               </label>
-              <input id="modal-correo" v-model="form.correo" class="form-control rounded-pill px-4 py-2.5 text-sm" type="email" required />
+              <input
+                id="modal-correo"
+                v-model="form.correo"
+                class="form-control rounded-pill px-4 py-2.5 text-sm"
+                type="email"
+                :readonly="!!editingUser"
+                :required="!editingUser"
+                :style="editingUser ? { opacity: 0.6 } : {}"
+              />
             </div>
-            <div>
+            <div v-if="!editingUser">
               <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="modal-password">
                 <span>Contraseña</span>
               </label>
@@ -412,12 +436,11 @@ onMounted(() => {
                 id="modal-password"
                 v-model="form.password"
                 class="form-control rounded-pill px-4 py-2.5 text-sm"
-                :placeholder="editingUser ? 'Dejar vacío para no cambiar' : ''"
                 type="password"
-                :required="!editingUser"
+                required
               />
             </div>
-            <div>
+            <div v-if="!editingUser">
               <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="modal-rol">
                 <ShieldCheck :size="15" />
                 <span>Rol</span>
@@ -446,9 +469,8 @@ onMounted(() => {
                 Cancelar
               </button>
               <button
-                class="btn rounded-pill px-4 py-2 soft-button icon-link"
+                class="btn rounded-pill px-4 py-2 soft-button icon-link glass-accent-btn"
                 type="submit"
-                style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);"
               >
                 <UserPlus :size="16" />
                 <span>{{ editingUser ? 'Guardar cambios' : 'Crear usuario' }}</span>

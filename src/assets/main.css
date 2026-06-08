@@ -32,11 +32,15 @@
 .ios-surface {
   background: var(--color-surface);
   border: 1px solid var(--color-border-surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 .dark .ios-surface {
   background: var(--color-surface-strong);
   border-color: var(--color-border-surface);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
 .ios-chip {
@@ -94,6 +98,25 @@
   color: var(--color-error);
   font-size: 0.78rem;
   line-height: 1.25;
+}
+
+.glass-accent-btn {
+  background: var(--glass-nav);
+  color: var(--color-accent);
+  border: none;
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  font-weight: 600;
+}
+
+.glass-accent-btn:hover {
+  background: var(--color-surface-hover);
+  color: var(--color-accent);
+  transform: translateY(-1px);
+}
+
+.form-check-input {
+  accent-color: var(--color-accent);
 }
 
 /* ── Dark mode text overrides ── */

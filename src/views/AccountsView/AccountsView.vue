@@ -49,7 +49,7 @@ onMounted(() => {
         <User :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
         <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">Cuenta no encontrada</h2>
         <p class="mb-4" style="color: var(--color-text-muted);">No pudimos encontrar tu información de suscripción.</p>
-        <RouterLink class="btn rounded-pill px-5 py-2 soft-button icon-link" to="/signup" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
+        <RouterLink class="btn rounded-pill px-5 py-2 soft-button icon-link glass-accent-btn" to="/signup">
           <User :size="17" />
           <span>Crear cuenta</span>
         </RouterLink>
@@ -92,26 +92,26 @@ onMounted(() => {
             </div>
           </div>
 
-          <div class="relative flex-1 min-w-[14rem] overflow-hidden rounded-xl bg-gradient-to-br from-stone-800 to-stone-950 p-3 text-white shadow-lg">
+          <div class="relative flex-1 min-w-[14rem] overflow-hidden rounded-xl p-3" style="background: linear-gradient(135deg, #c41e3a, #ff2d55); color: #fff;">
             <div class="mb-2 flex items-center justify-between">
-              <span class="text-[0.55rem] font-medium uppercase tracking-widest text-stone-400">{{ user.pago?.marca || 'Tarjeta' }}</span>
-              <CreditCard :size="15" class="text-stone-400" />
+              <span class="text-[0.55rem] font-medium uppercase tracking-widest" style="color: rgba(255,255,255,0.65);">{{ user.pago?.marca || 'Tarjeta' }}</span>
+              <CreditCard :size="15" style="color: rgba(255,255,255,0.65);" />
             </div>
             <p class="mb-2 font-mono text-sm tracking-[0.2em]">
               •••• •••• •••• {{ user.pago?.ultimos4 || '••••' }}
             </p>
             <div class="flex items-center justify-between text-[0.6rem]">
               <div>
-                <p class="text-stone-400">Titular</p>
+                <p style="color: rgba(255,255,255,0.65);">Titular</p>
                 <p class="font-medium truncate max-w-[9rem]">{{ user.pago?.titular || user.nombre }}</p>
               </div>
               <div class="text-right shrink-0">
-                <p class="text-stone-400">Vence</p>
+                <p style="color: rgba(255,255,255,0.65);">Vence</p>
                 <p class="font-medium">{{ user.pago?.vencimiento || '—' }}</p>
               </div>
             </div>
-            <div class="absolute -bottom-3 -right-3 h-14 w-14 rounded-full bg-white/5" />
-            <div class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full bg-white/5" />
+            <div class="absolute -bottom-3 -right-3 h-14 w-14 rounded-full" style="background: rgba(255,255,255,0.12);" />
+            <div class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full" style="background: rgba(255,255,255,0.12);" />
           </div>
         </div>
 

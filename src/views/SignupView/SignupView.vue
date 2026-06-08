@@ -338,7 +338,7 @@ function submitSignup() {
             </div>
           </div>
 
-          <button class="btn rounded-pill py-3 soft-button icon-link justify-center md:col-span-2" type="submit" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center md:col-span-2 glass-accent-btn" type="submit">
             <UserPlus :size="17" />
             <span>Registrarme</span>
           </button>

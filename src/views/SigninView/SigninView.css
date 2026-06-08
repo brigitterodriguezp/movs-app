@@ -172,3 +172,12 @@
     gap: 0.85rem !important;
   }
 }
+
+.form-check-input {
+  accent-color: var(--color-accent);
+}
+
+.form-check-input:checked {
+  background-color: var(--color-accent);
+  border-color: var(--color-accent);
+}

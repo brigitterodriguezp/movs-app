@@ -129,16 +129,12 @@ function submitSignin() {
 
           <p v-if="error" class="auth-error m-0 rounded-4 px-4 py-3 text-sm">{{ error }}</p>
 
-          <button class="btn rounded-pill py-3 soft-button icon-link justify-center" type="submit" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center glass-accent-btn" type="submit">
             <LogIn :size="17" />
             <span>Entrar</span>
           </button>
         </form>
 
-        <p class="mt-5 mb-0 text-center text-sm" style="color: var(--color-text-muted);">
-          ¿No tienes cuenta?
-          <RouterLink class="font-medium" style="color: var(--color-text);" to="/signup">Regístrate</RouterLink>
-        </p>
       </div>
     </section>
   </main>
