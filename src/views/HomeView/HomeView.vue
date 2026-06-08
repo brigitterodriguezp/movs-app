@@ -3,34 +3,49 @@ import HomeSkeleton from '@/components/skeletons/HomeSkeleton/HomeSkeleton.vue'
 import coverImage from '@/assets/movies/main-cover.png'
 import videoTrailer from '@/assets/videos/video_trailer.mp4'
 import { Play, Pause, UserPlus } from '@lucide/vue'
-import { onMounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref } from 'vue'
 
 const isLoading = ref(true)
 const isPlaying = ref(false)
 const videoVisible = ref(false)
+const showWelcome = ref(!localStorage.getItem('welcomeDone'))
 const videoRef = ref(null)
 const coverRef = ref(null)
 
 onMounted(() => {
+  if (showWelcome.value) {
+    document.documentElement.style.overflow = 'hidden'
+    document.body.style.overflow = 'hidden'
+  }
   window.setTimeout(() => {
     isLoading.value = false
   }, 650)
 })
 
+onUnmounted(() => {
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
+})
+
+function startVideo() {
+  if (!videoRef.value) return
+  videoVisible.value = true
+  isPlaying.value = true
+  const savedTime = parseFloat(localStorage.getItem('movieTrailerTime') || '0')
+  videoRef.value.currentTime = savedTime
+  videoRef.value.volume = 0
+  videoRef.value.play()
+  const interval = setInterval(() => {
+    if (!videoRef.value) { clearInterval(interval); return }
+    videoRef.value.volume = Math.min(1, videoRef.value.volume + 0.04)
+    if (videoRef.value.volume >= 1) clearInterval(interval)
+  }, 60)
+}
+
 function toggleVideo() {
   if (!videoRef.value) return
   if (!isPlaying.value) {
-    videoVisible.value = true
-    isPlaying.value = true
-    const savedTime = parseFloat(localStorage.getItem('movieTrailerTime') || '0')
-    videoRef.value.currentTime = savedTime
-    videoRef.value.volume = 0
-    videoRef.value.play()
-    const interval = setInterval(() => {
-      if (!videoRef.value) { clearInterval(interval); return }
-      videoRef.value.volume = Math.min(1, videoRef.value.volume + 0.04)
-      if (videoRef.value.volume >= 1) clearInterval(interval)
-    }, 60)
+    startVideo()
   } else {
     const interval = setInterval(() => {
       if (!videoRef.value) { clearInterval(interval); return }
@@ -43,6 +58,14 @@ function toggleVideo() {
       }
     }, 60)
   }
+}
+
+function dismissWelcome() {
+  localStorage.setItem('welcomeDone', 'true')
+  document.documentElement.style.overflow = ''
+  document.body.style.overflow = ''
+  showWelcome.value = false
+  startVideo()
 }
 
 function onTimeUpdate() {
@@ -58,6 +81,38 @@ function onVideoEnded() {
 </script>
 
 <template>
+  <div
+    v-if="showWelcome && !isLoading"
+    class="fixed inset-0 z-[9999] flex items-center justify-center"
+    style="background: var(--color-page);"
+  >
+    <div class="ios-surface relative z-10 w-[88%] max-w-3xl rounded-[2rem] flex overflow-hidden min-h-[28rem]">
+      <div class="w-[40%] relative hidden sm:block min-h-[28rem]">
+        <img
+          :src="coverImage"
+          class="absolute inset-0 h-full w-full object-cover"
+          alt=""
+        />
+      </div>
+      <div class="flex-1 p-8 sm:p-10 text-center flex flex-col justify-center gap-3">
+        <h3 class="text-4xl font-black sm:text-5xl" style="color: var(--color-text);">Si la vida te da mandarinas</h3>
+        <p class="text-sm leading-6" style="color: var(--color-text-muted); font-style: italic;">
+          Sooni nunca pidió permiso. Gwansik construyó un mundo para sus versos.
+        </p>
+
+        <button
+          class="mt-6 w-full rounded-pill px-5 py-2.5 soft-button icon-link justify-center gap-2 text-base glass-accent-btn"
+          style="border: 1px solid var(--color-accent-border);"
+          type="button"
+          @click="dismissWelcome"
+        >
+          <Play :size="18" />
+          <span>Continuar</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
   <main class="page-shell flex min-h-[60vh] flex-col items-center px-4 pt-28">
     <HomeSkeleton v-if="isLoading" />
     <section
@@ -110,14 +165,6 @@ function onVideoEnded() {
             <span>Crear cuenta</span>
           </RouterLink>
         </div>
-      </div>
-      <div
-        v-show="isPlaying"
-        class="absolute bottom-0 left-0 right-0 flex items-center justify-center pb-8 sm:pb-12 pointer-events-none"
-      >
-        <p class="text-balance text-center text-lg italic text-white/85 sm:text-2xl">
-          "La vida florece entre mandarinas."
-        </p>
       </div>
     </section>
   </main>
