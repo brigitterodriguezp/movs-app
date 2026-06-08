@@ -1,17 +1,13 @@
 .ios-media {
   border: 1px solid var(--color-border-surface);
-  box-shadow:
-    var(--shadow-sm),
-    0 10px 26px color-mix(in srgb, var(--color-text) 6.5%, transparent);
 }
 
 .dark .ios-media {
   border-color: rgba(255, 255, 255, 0.08);
-  box-shadow: var(--shadow-sm), var(--shadow-md);
 }
 
 .dark .about-carousel {
-  border-color: rgba(110, 231, 183, 0.12);
+  border-color: rgba(255, 45, 85, 0.12);
 }
 
 .about-carousel {

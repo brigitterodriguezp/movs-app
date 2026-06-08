@@ -125,7 +125,7 @@ const carouselMovies = [
       </div>
 
       <div class="ios-surface rounded-[1.75rem] p-6 sm:p-8 lg:p-10">
-        <p class="mb-3 inline-flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-emerald-700">
+        <p class="mb-3 inline-flex items-center gap-2 text-sm uppercase tracking-[0.28em]" style="color: var(--color-accent-text);">
           <Clapperboard :size="17" />
           <span>Movs App</span>
         </p>
@@ -137,17 +137,17 @@ const carouselMovies = [
         </p>
         <div class="mt-8 grid gap-3 sm:grid-cols-3">
           <div class="rounded-4 border border-stone-200 bg-white/70 p-4">
-            <Film class="mb-3 text-emerald-700" :size="21" />
+            <Film class="mb-3" :size="21" style="color: var(--color-accent);" />
             <p class="mb-1 text-2xl font-semibold text-stone-950">8</p>
             <p class="m-0 text-sm text-stone-500">Películas</p>
           </div>
           <div class="rounded-4 border border-stone-200 bg-white/70 p-4">
-            <Layers class="mb-3 text-emerald-700" :size="21" />
+            <Layers class="mb-3" :size="21" style="color: var(--color-accent);" />
             <p class="mb-1 text-2xl font-semibold text-stone-950">6</p>
             <p class="m-0 text-sm text-stone-500">Géneros</p>
           </div>
           <div class="rounded-4 border border-stone-200 bg-white/70 p-4">
-            <Clapperboard class="mb-3 text-emerald-700" :size="21" />
+            <Clapperboard class="mb-3" :size="21" style="color: var(--color-accent);" />
             <p class="mb-1 text-2xl font-semibold text-stone-950">1</p>
             <p class="m-0 text-sm text-stone-500">Lista</p>
           </div>

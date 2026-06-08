@@ -82,23 +82,23 @@ function submitSignin() {
       </div>
 
       <div class="ios-surface signin-form-surface rounded-[1.35rem] p-6 sm:p-8">
-        <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+        <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium" style="color: var(--color-accent-text);">
           <LogIn :size="17" />
           <span>Movs App</span>
         </p>
-        <h1 class="mb-2 text-3xl font-semibold tracking-normal text-stone-950">Iniciar sesión</h1>
-        <p class="mb-6 text-sm leading-6 text-stone-500">Entra para continuar con tu selección de películas.</p>
+        <h1 class="mb-2 text-3xl font-semibold tracking-normal" style="color: var(--color-text);">Iniciar sesión</h1>
+        <p class="mb-6 text-sm leading-6" style="color: var(--color-text-muted);">Entra para continuar con tu selección de películas.</p>
 
         <form class="d-grid gap-3" @submit.prevent="submitSignin">
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="correo">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="correo">
               <Mail :size="15" />
               <span>Correo</span>
             </label>
             <input id="correo" v-model="form.correo" class="form-control rounded-pill px-4 py-3" type="email" />
           </div>
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="clave">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="clave">
               <KeyRound :size="15" />
               <span>Clave</span>
             </label>
@@ -110,9 +110,10 @@ function submitSignin() {
                 :type="showClave ? 'text' : 'password'"
               />
               <button
-                class="btn btn-link position-absolute top-50 end-0 translate-middle-y p-2 text-stone-400"
+                class="btn btn-link position-absolute top-50 end-0 translate-middle-y p-2"
                 type="button"
                 tabindex="-1"
+                style="color: var(--color-text-muted);"
                 @click="showClave = !showClave"
               >
                 <Eye v-if="!showClave" :size="18" />
@@ -121,22 +122,22 @@ function submitSignin() {
             </div>
           </div>
 
-          <label class="d-flex align-items-center gap-2 text-sm text-stone-600" style="cursor: pointer">
+          <label class="d-flex align-items-center gap-2 text-sm" style="color: var(--color-text-secondary); cursor: pointer">
             <input v-model="form.recordar" type="checkbox" class="form-check-input m-0" />
             Recordar contraseña
           </label>
 
           <p v-if="error" class="auth-error m-0 rounded-4 px-4 py-3 text-sm">{{ error }}</p>
 
-          <button class="btn btn-dark rounded-pill py-3 soft-button icon-link justify-center" type="submit">
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center" type="submit" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
             <LogIn :size="17" />
             <span>Entrar</span>
           </button>
         </form>
 
-        <p class="mt-5 mb-0 text-center text-sm text-stone-500">
+        <p class="mt-5 mb-0 text-center text-sm" style="color: var(--color-text-muted);">
           ¿No tienes cuenta?
-          <RouterLink class="font-medium text-stone-950" to="/signup">Regístrate</RouterLink>
+          <RouterLink class="font-medium" style="color: var(--color-text);" to="/signup">Regístrate</RouterLink>
         </p>
       </div>
     </section>

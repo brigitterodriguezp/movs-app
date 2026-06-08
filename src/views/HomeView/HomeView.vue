@@ -24,7 +24,7 @@ onMounted(() => {
       />
       <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent"></div>
       <div class="absolute bottom-0 left-0 max-w-3xl p-6 text-white sm:p-10 lg:p-14">
-        <p class="mb-3 text-sm uppercase tracking-[0.35em] text-emerald-200/90">Cine coreano</p>
+        <p class="mb-3 text-sm uppercase tracking-[0.35em]" style="color: rgba(255, 45, 85, 0.75);">Cine coreano</p>
         <h1 class="text-balance text-4xl font-semibold tracking-normal sm:text-6xl">
           Películas para días lentos
         </h1>

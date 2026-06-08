@@ -1,7 +1,6 @@
 .movie-card {
   background: var(--color-surface);
   border: 1px solid var(--color-border-surface);
-  box-shadow: var(--shadow-sm), var(--shadow-md);
   animation: cardIn 620ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
@@ -13,16 +12,18 @@
 }
 
 .dark .movie-mood-chip {
-  color: #ecfdf5;
-  background: var(--color-emerald-bg);
-  border-color: var(--color-emerald-border);
-  box-shadow: var(--shadow-sm), 0 8px 18px rgba(0, 0, 0, 0.22);
+  color: var(--color-accent);
+  background: var(--color-accent-bg);
+  border-color: var(--color-accent-border);
 }
 
 .dark .movie-card {
   background: var(--color-surface);
   border-color: var(--color-border-surface);
-  box-shadow: var(--shadow-sm), var(--shadow-lg);
+}
+
+.movie-card:hover {
+  transform: translateY(-3px);
 }
 
 .movie-bento-grid {
@@ -30,13 +31,6 @@
   grid-template-columns: repeat(1, minmax(0, 1fr));
   gap: 1.25rem;
   min-width: 0;
-}
-
-.movie-card:hover {
-  transform: translateY(-3px);
-  box-shadow:
-    var(--shadow-sm),
-    0 13px 28px color-mix(in srgb, var(--color-text) 7.5%, transparent);
 }
 
 @media (min-width: 768px) {

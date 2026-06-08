@@ -1,22 +1,15 @@
 .glass-nav {
   z-index: 20;
-  background: var(--nav-bg);
-  border: 1px solid var(--nav-border);
-  box-shadow:
-    var(--shadow-sm),
-    0 8px 20px color-mix(in srgb, var(--color-text) 5.5%, transparent);
+  background: var(--glass-sheen), var(--glass-nav);
+  background-blend-mode: screen, normal;
+  border: 1px solid var(--color-border);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
 }
 
-.dark .glass-nav {
-  box-shadow:
-    var(--shadow-sm),
-    0 16px 38px var(--shadow-lg);
-  backdrop-filter: blur(18px);
-}
-
-.navbar-brand,
-.nav-link {
-  color: var(--nav-text) !important;
+.glass-nav .navbar-brand,
+.glass-nav .nav-link {
+  color: var(--color-text);
 }
 
 .main-navbar-inner {
@@ -35,149 +28,69 @@
 }
 
 .glass-nav .btn-outline-dark {
-  color: var(--nav-text);
-  border-color: var(--nav-text);
-}
-
-.dark .glass-nav .btn-outline-dark {
-  border-color: rgba(245, 245, 244, 0.32);
+  color: var(--color-text);
+  border-color: var(--color-border);
 }
 
 .glass-nav .nav-action,
 .glass-nav .theme-toggle {
   --bs-btn-color: var(--color-text);
   --bs-btn-border-color: var(--color-border);
-  --bs-btn-bg: var(--nav-action-bg);
-  --bs-btn-hover-color: var(--nav-action-hover-text);
-  --bs-btn-hover-bg: var(--nav-action-hover-bg);
-  --bs-btn-hover-border-color: var(--nav-action-hover-bg);
-  --bs-btn-active-color: var(--nav-action-hover-text);
-  --bs-btn-active-bg: var(--nav-action-hover-bg);
-  --bs-btn-active-border-color: var(--nav-action-hover-bg);
-  --bs-btn-focus-shadow-rgb: 16, 185, 129;
-}
-
-.glass-nav .nav-action {
-  --bs-btn-color: var(--nav-action-hover-text) !important;
-  --bs-btn-border-color: var(--nav-action-hover-bg);
-  --bs-btn-bg: var(--nav-action-hover-bg);
-  --bs-btn-hover-color: var(--nav-action-hover-text);
-  --bs-btn-hover-bg: var(--color-surface-dark);
-  --bs-btn-hover-border-color: var(--color-surface-dark);
-  --bs-btn-active-color: var(--nav-action-hover-text);
-  --bs-btn-active-bg: #44403c;
-  --bs-btn-active-border-color: #44403c;
-  color: var(--bs-btn-color) !important;
-  background: var(--bs-btn-bg) !important;
-  border-color: var(--bs-btn-border-color) !important;
+  --bs-btn-bg: transparent;
+  --bs-btn-hover-color: var(--color-accent);
+  --bs-btn-hover-bg: var(--color-surface-hover);
+  --bs-btn-hover-border-color: var(--color-accent-border);
+  --bs-btn-active-color: var(--color-accent);
+  --bs-btn-active-bg: var(--color-surface-strong);
+  --bs-btn-active-border-color: var(--color-accent-border);
+  --bs-btn-focus-shadow-rgb: 255, 45, 85;
+  color: var(--bs-btn-color);
+  background: var(--bs-btn-bg);
+  border-color: var(--bs-btn-border-color);
 }
 
 .glass-nav .nav-action:hover,
 .glass-nav .nav-action:focus-visible,
-.glass-nav .nav-action:active {
-  color: var(--bs-btn-hover-color) !important;
-  background: var(--bs-btn-hover-bg) !important;
-  border-color: var(--bs-btn-hover-border-color) !important;
-}
-
-.glass-nav .nav-action span,
-.glass-nav .nav-action svg {
-  color: inherit !important;
-  stroke: currentColor !important;
-}
-
-.glass-nav .theme-toggle {
-  --bs-btn-color: var(--color-text);
-  --bs-btn-border-color: var(--color-border);
-  --bs-btn-bg: rgba(255, 255, 255, 0.64);
-  --bs-btn-hover-color: var(--color-text);
-  --bs-btn-hover-bg: color-mix(in srgb, var(--color-emerald) 14%, transparent);
-  --bs-btn-hover-border-color: color-mix(in srgb, var(--color-emerald) 34%, transparent);
-  --bs-btn-active-color: var(--color-text);
-  --bs-btn-active-bg: color-mix(in srgb, var(--color-emerald) 18%, transparent);
-  --bs-btn-active-border-color: color-mix(in srgb, var(--color-emerald) 44%, transparent);
-  width: 2.45rem;
-  justify-content: center;
-  padding-right: 0 !important;
-  padding-left: 0 !important;
-  color: var(--bs-btn-color) !important;
-  background: var(--bs-btn-bg) !important;
-  border-color: var(--bs-btn-border-color) !important;
-}
-
+.glass-nav .nav-action:active,
 .glass-nav .theme-toggle:hover,
 .glass-nav .theme-toggle:focus-visible,
 .glass-nav .theme-toggle:active {
-  color: var(--bs-btn-hover-color) !important;
-  background: var(--bs-btn-hover-bg) !important;
-  border-color: var(--bs-btn-hover-border-color) !important;
+  color: var(--bs-btn-hover-color);
+  background: var(--bs-btn-hover-bg);
+  border-color: var(--bs-btn-hover-border-color);
 }
 
+.glass-nav .nav-action span,
+.glass-nav .nav-action svg,
+.glass-nav .theme-toggle span,
 .glass-nav .theme-toggle svg {
-  color: inherit !important;
-  stroke: currentColor !important;
+  color: inherit;
+  stroke: currentColor;
 }
 
-.dark .glass-nav .nav-action,
-.dark .glass-nav .theme-toggle {
-  --bs-btn-color: #f8fafc;
-  --bs-btn-border-color: rgba(255, 255, 255, 0.18);
-  --bs-btn-bg: var(--nav-action-bg);
-  --bs-btn-hover-color: #ecfdf5;
-  --bs-btn-hover-bg: rgba(16, 185, 129, 0.18);
-  --bs-btn-hover-border-color: rgba(110, 231, 183, 0.46);
-  --bs-btn-active-color: #ffffff;
-  --bs-btn-active-bg: rgba(16, 185, 129, 0.24);
-  --bs-btn-active-border-color: rgba(110, 231, 183, 0.58);
-  color: var(--bs-btn-color) !important;
-  background: var(--bs-btn-bg) !important;
-  border-color: var(--bs-btn-border-color) !important;
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.16);
+.glass-nav .theme-toggle {
+  width: 2.45rem;
+  justify-content: center;
+  padding-right: 0;
+  padding-left: 0;
 }
 
-.dark .glass-nav .theme-toggle {
-  --bs-btn-color: #ede9fe;
-  --bs-btn-border-color: rgba(196, 181, 253, 0.28);
-  --bs-btn-bg: rgba(167, 139, 250, 0.14);
-  --bs-btn-hover-color: #ffffff;
-  --bs-btn-hover-bg: rgba(167, 139, 250, 0.24);
-  --bs-btn-hover-border-color: rgba(196, 181, 253, 0.44);
-}
-
-.dark .glass-nav .nav-action:hover,
-.dark .glass-nav .nav-action:focus-visible,
-.dark .glass-nav .nav-action:active,
-.dark .glass-nav .nav-action.show,
-.dark .glass-nav .theme-toggle:hover,
-.dark .glass-nav .theme-toggle:focus-visible,
-.dark .glass-nav .theme-toggle:active,
-.dark .glass-nav .theme-toggle.show {
-  color: var(--bs-btn-hover-color) !important;
-  background: var(--bs-btn-hover-bg) !important;
-  border-color: var(--bs-btn-hover-border-color) !important;
-}
-
-.dark .glass-nav .nav-action span,
-.dark .glass-nav .nav-action svg,
-.dark .glass-nav .theme-toggle span,
-.dark .glass-nav .theme-toggle svg {
-  color: inherit !important;
-  stroke: currentColor !important;
-}
-
-.nav-link.router-link-active {
-  background: color-mix(in srgb, var(--color-emerald) 12%, transparent);
-  color: var(--color-emerald-text);
-}
-
-.dark .nav-link.router-link-active {
-  background: color-mix(in srgb, var(--color-emerald) 20%, transparent);
-  color: var(--color-emerald-text);
+.glass-nav .nav-link.router-link-active {
+  background: transparent;
+  color: var(--color-accent);
 }
 
 .glass-nav .user-dropdown-menu a,
 .glass-nav .user-dropdown-menu button {
   text-decoration: none;
+}
+
+.dropdown-item-link {
+  color: var(--color-text);
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
 }
 
 .glass-nav .user-dropdown-menu a:hover,
@@ -205,11 +118,11 @@
     right: auto;
     bottom: calc(env(safe-area-inset-bottom) + 0.55rem);
     left: 50%;
-    width: min(calc(100vw - 1rem), 19rem) !important;
+    width: min(calc(100vw - 1rem), 19rem);
     max-width: calc(100vw - 1rem);
-    margin-top: 0 !important;
+    margin-top: 0;
     border-radius: 1.15rem;
-    padding: 0.35rem !important;
+    padding: 0.35rem;
     transform: translateX(-50%);
   }
 
@@ -225,7 +138,7 @@
   }
 
   .about-nav-link {
-    display: none !important;
+    display: none;
   }
 
   .main-navbar-links {
@@ -249,7 +162,7 @@
     justify-content: center;
     gap: 0.12rem;
     border-width: 0;
-    padding: 0.32rem 0.2rem !important;
+    padding: 0.32rem 0.2rem;
     font-size: 0.67rem;
     line-height: 1.1;
     text-align: center;

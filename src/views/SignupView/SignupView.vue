@@ -22,6 +22,10 @@ const form = reactive({
   cardCvv: '',
 })
 
+function capitalize(str) {
+  return str.trim().replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
+}
+
 const errors = reactive({
   nombres: '',
   apellidos: '',
@@ -156,7 +160,7 @@ function submitSignup() {
 
   const user = {
     id: nextId,
-    nombre: `${form.nombres.trim()} ${form.apellidos.trim()}`,
+    nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
     correo,
     password: form.clave,
     rol: form.rol,
@@ -171,7 +175,7 @@ function submitSignup() {
     },
     pago: {
       metodo: 'card',
-      titular: form.cardName.trim(),
+      titular: capitalize(form.cardName),
       marca: detectCardBrand(cardNumber),
       ultimos4: cardNumber.slice(-4),
       vencimiento: form.cardExpiry,
@@ -191,19 +195,19 @@ function submitSignup() {
       <div class="ios-surface grid gap-8 rounded-[1.35rem] p-6 md:grid-cols-[0.8fr_1.2fr] sm:p-8">
         <div class="flex flex-col justify-between gap-8">
           <div>
-            <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium text-emerald-700">
+            <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium" style="color: var(--color-accent-text);">
               <UserPlus :size="17" />
               <span>Movs App</span>
             </p>
-            <h1 class="mb-3 text-3xl font-semibold tracking-normal text-stone-950">Crear cuenta</h1>
-            <p class="m-0 text-sm leading-6 text-stone-500">Elige un plan y empieza a organizar tus películas favoritas.</p>
+            <h1 class="mb-3 text-3xl font-semibold tracking-normal" style="color: var(--color-text);">Crear cuenta</h1>
+            <p class="m-0 text-sm leading-6" style="color: var(--color-text-muted);">Elige un plan y empieza a organizar tus películas favoritas.</p>
           </div>
-          <RouterLink class="w-fit font-medium text-stone-950" to="/signin">Ya tengo cuenta</RouterLink>
+          <RouterLink class="w-fit font-medium" style="color: var(--color-text);" to="/signin">Ya tengo cuenta</RouterLink>
         </div>
 
         <form class="grid gap-3 md:grid-cols-2" @submit.prevent="submitSignup">
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="nombres">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="nombres">
               <User :size="15" />
               <span>Nombres</span>
             </label>
@@ -211,7 +215,7 @@ function submitSignup() {
             <p v-if="errors.nombres" class="auth-field-error">{{ errors.nombres }}</p>
           </div>
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="apellidos">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="apellidos">
               <Users :size="15" />
               <span>Apellidos</span>
             </label>
@@ -219,7 +223,7 @@ function submitSignup() {
             <p v-if="errors.apellidos" class="auth-field-error">{{ errors.apellidos }}</p>
           </div>
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="correo">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="correo">
               <Mail :size="15" />
               <span>Correo</span>
             </label>
@@ -227,7 +231,7 @@ function submitSignup() {
             <p v-if="errors.correo" class="auth-field-error">{{ errors.correo }}</p>
           </div>
           <div>
-            <label class="form-label auth-field-label text-sm text-stone-700" for="clave">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="clave">
               <KeyRound :size="15" />
               <span>Clave</span>
             </label>
@@ -236,7 +240,7 @@ function submitSignup() {
           </div>
 
           <div class="md:col-span-2">
-            <label class="form-label auth-field-label text-sm text-stone-700" for="rol">
+            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="rol">
               <ShieldCheck :size="15" />
               <span>Tipo de cuenta</span>
             </label>
@@ -273,7 +277,7 @@ function submitSignup() {
             </p>
             <div class="payment-box">
               <div class="md:col-span-2">
-                <label class="form-label auth-field-label text-sm text-stone-700" for="cardName">
+                <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="cardName">
                   <User :size="15" />
                   <span>Titular</span>
                 </label>
@@ -281,7 +285,7 @@ function submitSignup() {
                 <p v-if="errors.cardName" class="auth-field-error">{{ errors.cardName }}</p>
               </div>
               <div class="md:col-span-2">
-                <label class="form-label auth-field-label text-sm text-stone-700" for="cardNumber">
+                <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="cardNumber">
                   <CreditCard :size="15" />
                   <span>Número de tarjeta</span>
                 </label>
@@ -300,7 +304,7 @@ function submitSignup() {
                 <p v-if="errors.cardNumber" class="auth-field-error">{{ errors.cardNumber }}</p>
               </div>
               <div>
-                <label class="form-label auth-field-label text-sm text-stone-700" for="cardExpiry">
+                <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="cardExpiry">
                   <CreditCard :size="15" />
                   <span>Vence</span>
                 </label>
@@ -316,7 +320,7 @@ function submitSignup() {
                 <p v-if="errors.cardExpiry" class="auth-field-error">{{ errors.cardExpiry }}</p>
               </div>
               <div>
-                <label class="form-label auth-field-label text-sm text-stone-700" for="cardCvv">
+                <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="cardCvv">
                   <KeyRound :size="15" />
                   <span>CVV</span>
                 </label>
@@ -334,7 +338,7 @@ function submitSignup() {
             </div>
           </div>
 
-          <button class="btn btn-dark rounded-pill py-3 soft-button icon-link justify-center md:col-span-2" type="submit">
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center md:col-span-2" type="submit" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
             <UserPlus :size="17" />
             <span>Registrarme</span>
           </button>

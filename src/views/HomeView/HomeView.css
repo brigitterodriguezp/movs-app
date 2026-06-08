@@ -1,7 +1,4 @@
 .home-cover {
-  box-shadow:
-    0 2px 3px color-mix(in srgb, var(--color-text) 5%, transparent),
-    var(--shadow-lg);
   animation: coverIn 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 

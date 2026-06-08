@@ -46,7 +46,7 @@ onMounted(() => {
     <section class="mx-auto max-w-7xl">
       <div class="mb-8 flex flex-col justify-between gap-4 md:flex-row md:items-end">
         <div>
-          <p class="mb-2 inline-flex items-center gap-2 text-sm uppercase tracking-[0.28em] text-emerald-700">
+          <p class="mb-2 inline-flex items-center gap-2 text-sm uppercase tracking-[0.28em]" style="color: var(--color-accent-text);">
             <Library :size="17" />
             <span>Mi selección</span>
           </p>

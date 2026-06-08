@@ -11,15 +11,14 @@
   flex-direction: column;
   gap: 0.45rem;
   border-radius: 1rem;
-  border: 1px solid var(--color-border-subtle);
-  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-strong);
   padding: 0.9rem;
 }
 
 .plan-option.selected {
-  border-color: var(--color-emerald-border);
-  background: var(--color-emerald-bg);
-  box-shadow: 0 8px 22px color-mix(in srgb, var(--color-emerald) 12%, transparent);
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-bg);
 }
 
 .plan-option-top {
@@ -35,7 +34,7 @@
 }
 
 .plan-option-top em {
-  color: var(--color-emerald-text);
+  color: var(--color-accent-text);
   font-style: normal;
   font-weight: 700;
 }
@@ -44,7 +43,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  color: var(--color-text-secondary);
+  color: var(--color-text-muted);
   font-size: 0.82rem;
   line-height: 1.25;
 }
@@ -54,8 +53,8 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 0.75rem;
   border-radius: 1rem;
-  border: 1px solid var(--color-border-subtle);
-  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  background: var(--color-surface-strong);
   padding: 1rem;
 }
 
@@ -64,7 +63,7 @@
 }
 
 .card-number-wrap .form-control {
-  padding-right: 8rem !important;
+  padding-right: 8rem;
 }
 
 .card-number-wrap span {
@@ -73,7 +72,7 @@
   right: 1rem;
   max-width: 6.5rem;
   overflow: hidden;
-  color: var(--color-emerald-text);
+  color: var(--color-accent-text);
   font-size: 0.78rem;
   font-weight: 700;
   text-overflow: ellipsis;
@@ -82,14 +81,13 @@
 }
 
 .dark .plan-option {
-  border-color: var(--color-border-subtle);
+  border-color: var(--color-border);
   background: rgba(255, 255, 255, 0.06);
 }
 
 .dark .plan-option.selected {
-  border-color: var(--color-emerald-border);
-  background: var(--color-emerald-bg);
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.22);
+  border-color: var(--color-accent-border);
+  background: var(--color-accent-bg);
 }
 
 .dark .plan-option-top strong {
@@ -101,7 +99,7 @@
 }
 
 .dark .payment-box {
-  border-color: var(--color-border-subtle);
+  border-color: var(--color-border);
   background: rgba(255, 255, 255, 0.05);
 }
 
@@ -121,7 +119,7 @@
   }
 
   .card-number-wrap .form-control {
-    padding-right: 5.8rem !important;
+    padding-right: 5.8rem;
   }
 
   .card-number-wrap span {

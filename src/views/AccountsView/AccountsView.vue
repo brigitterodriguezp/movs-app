@@ -12,9 +12,9 @@ function daysUntilExpiry(expiracion) {
 }
 
 function expiracionColor(dias) {
-  if (dias < 0) return 'text-red-600'
+  if (dias < 0)   return 'text-red-500'
   if (dias < 30) return 'text-amber-600'
-  return 'text-emerald-600'
+  return ''
 }
 
 onMounted(() => {
@@ -30,11 +30,11 @@ onMounted(() => {
   <main class="page-shell flex justify-center px-4 pb-4 pt-28 sm:px-6">
     <section class="w-fit">
       <div class="mb-4">
-        <p class="mb-1 inline-flex items-center gap-2 text-xs font-medium text-emerald-700">
+        <p class="mb-1 inline-flex items-center gap-2 text-xs font-medium" style="color: var(--color-accent-text);">
           <BadgeCheck :size="14" />
           <span>Mi cuenta</span>
         </p>
-        <h1 class="text-2xl font-semibold tracking-normal text-stone-950 sm:text-3xl">Mi suscripción</h1>
+        <h1 class="text-2xl font-semibold tracking-normal sm:text-3xl" style="color: var(--color-text);">Mi suscripción</h1>
       </div>
 
       <div v-if="isLoading" class="page-skeleton">
@@ -46,10 +46,10 @@ onMounted(() => {
       </div>
 
       <div v-else-if="!user" class="ios-surface rounded-[1.35rem] p-8 text-center">
-        <User :size="40" class="mx-auto mb-4 text-stone-400" />
-        <h2 class="mb-2 text-xl font-semibold text-stone-700">Cuenta no encontrada</h2>
-        <p class="mb-4 text-stone-500">No pudimos encontrar tu información de suscripción.</p>
-        <RouterLink class="btn btn-dark rounded-pill px-5 py-2 soft-button icon-link" to="/signup">
+        <User :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
+        <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">Cuenta no encontrada</h2>
+        <p class="mb-4" style="color: var(--color-text-muted);">No pudimos encontrar tu información de suscripción.</p>
+        <RouterLink class="btn rounded-pill px-5 py-2 soft-button icon-link" to="/signup" style="background: var(--color-accent); color: #fff; border-color: var(--color-accent);">
           <User :size="17" />
           <span>Crear cuenta</span>
         </RouterLink>
@@ -57,35 +57,36 @@ onMounted(() => {
 
       <div v-else class="ios-surface rounded-[1.35rem] p-4 sm:p-5">
         <div class="flex items-center gap-2">
-          <h2 class="truncate text-lg font-semibold text-stone-950">{{ user.nombre }}</h2>
+          <h2 class="truncate text-lg font-semibold" style="color: var(--color-text);">{{ user.nombre }}</h2>
           <span
             class="inline-flex shrink-0 items-center gap-1 rounded-pill px-2.5 py-0.5 text-[0.65rem] font-medium"
-            :class="user.suscripcion?.estado === 'active'
-              ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300'
-              : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'"
+            :style="user.suscripcion?.estado === 'active'
+              ? { background: 'var(--color-accent-bg)', color: 'var(--color-accent-text)' }
+              : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }"
           >
             <ShieldCheck :size="11" />
             {{ user.suscripcion?.estado === 'active' ? 'Activa' : user.suscripcion?.estado }}
           </span>
         </div>
 
-        <p class="mt-0.5 inline-flex items-center gap-1.5 text-sm text-stone-500">
+        <p class="mt-0.5 inline-flex items-center gap-1.5 text-sm" style="color: var(--color-text-muted);">
           <Mail :size="13" />
           {{ user.correo }}
         </p>
 
         <div class="mt-3 flex flex-wrap gap-3">
-          <div class="flex-1 min-w-[14rem] rounded-xl border border-stone-300 bg-white p-3 dark:border-stone-700 dark:bg-stone-800/50">
-            <p class="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wider text-stone-500">Plan</p>
-            <p class="text-base font-semibold text-stone-900">{{ user.suscripcion?.nombre || user.suscripcion?.plan }}</p>
-            <p class="text-xs text-stone-500">{{ user.suscripcion?.precio }}/mes</p>
+          <div class="flex-1 min-w-[14rem] rounded-xl border p-3" style="border-color: var(--color-border); background: var(--color-surface-strong);">
+            <p class="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wider" style="color: var(--color-text-muted);">Plan</p>
+            <p class="text-base font-semibold" style="color: var(--color-text);">{{ user.suscripcion?.nombre || user.suscripcion?.plan }}</p>
+            <p class="text-xs" style="color: var(--color-text-muted);">{{ user.suscripcion?.precio }}/mes</p>
             <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
               <span
                 v-for="benefit in user.suscripcion?.beneficios"
                 :key="benefit"
-                class="inline-flex items-center gap-1 text-[0.65rem] text-stone-600 dark:text-stone-400"
+                class="inline-flex items-center gap-1 text-[0.65rem]"
+                style="color: var(--color-text-secondary);"
               >
-                <ShieldCheck :size="10" class="text-emerald-600" />
+                <ShieldCheck :size="10" style="color: var(--color-accent);" />
                 {{ benefit }}
               </span>
             </div>
@@ -114,8 +115,8 @@ onMounted(() => {
           </div>
         </div>
 
-        <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-t border-stone-100 pt-3 text-[0.65rem] dark:border-stone-800">
-          <p class="inline-flex items-center gap-1.5 text-stone-500">
+        <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-t pt-3 text-[0.65rem]" style="border-color: var(--color-border-subtle);">
+          <p class="inline-flex items-center gap-1.5" style="color: var(--color-text-muted);">
             <Calendar :size="12" />
             Inicio: {{ user.suscripcion?.fecha_inicio || '—' }}
           </p>

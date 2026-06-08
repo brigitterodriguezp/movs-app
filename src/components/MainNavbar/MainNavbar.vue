@@ -37,10 +37,28 @@ function signOut() {
   router.push('/signin')
 }
 
-function toggleTheme() {
-  isDark.value = !isDark.value
-  document.documentElement.classList.toggle('dark', isDark.value)
-  localStorage.setItem('movieTheme', isDark.value ? 'dark' : 'light')
+function toggleTheme(e) {
+  const x = e.clientX || e.pageX || 0
+  const y = e.clientY || e.pageY || 0
+  document.documentElement.style.setProperty('--theme-x', `${x}px`)
+  document.documentElement.style.setProperty('--theme-y', `${y}px`)
+
+  if (document.startViewTransition) {
+    const next = !isDark.value
+    document.documentElement.classList.add('theme-transition')
+    const transition = document.startViewTransition(() => {
+      isDark.value = next
+      document.documentElement.classList.toggle('dark', next)
+      localStorage.setItem('movieTheme', next ? 'dark' : 'light')
+    })
+    transition.finished.finally(() => {
+      document.documentElement.classList.remove('theme-transition')
+    })
+  } else {
+    isDark.value = !isDark.value
+    document.documentElement.classList.toggle('dark', isDark.value)
+    localStorage.setItem('movieTheme', isDark.value ? 'dark' : 'light')
+  }
 }
 
 function handleBlur(e) {
@@ -53,7 +71,8 @@ function handleBlur(e) {
 <template>
   <nav class="fixed-top glass-nav mx-auto mt-3 w-fit max-w-[95vw] rounded-pill px-3 py-2">
     <div class="main-navbar-inner">
-      <RouterLink class="navbar-brand fw-semibold tracking-tight me-3 text-decoration-none" to="/">
+      <RouterLink class="navbar-brand fw-semibold tracking-tight me-3 text-decoration-none d-inline-flex align-items-center gap-1" to="/" style="color: var(--color-accent);">
+        <Clapperboard :size="18" />
         Movs App
       </RouterLink>
 
@@ -78,7 +97,7 @@ function handleBlur(e) {
           <LogIn :size="17" />
           <span>Entrar</span>
         </RouterLink>
-        <RouterLink v-if="!hasSession" class="btn btn-outline-dark rounded-pill px-4 soft-button icon-link nav-action" to="/signup">
+        <RouterLink v-if="!hasSession" class="btn rounded-pill px-4 soft-button icon-link nav-action" to="/signup">
           <UserPlus :size="17" />
           <span>Registro</span>
         </RouterLink>
@@ -99,11 +118,11 @@ function handleBlur(e) {
           </button>
           <div
             v-if="showMenu"
-            class="user-dropdown-menu position-absolute end-0 w-48 overflow-hidden rounded-xl border border-stone-200 bg-white shadow-lg dark:border-stone-700 dark:bg-stone-900"
-            style="z-index: 30;"
+            class="user-dropdown-menu position-absolute end-0 w-48 overflow-hidden rounded-xl shadow-lg"
+            style="z-index: 30; background: var(--color-dropdown-bg); border: 1px solid var(--color-dropdown-border); backdrop-filter: blur(26px); -webkit-backdrop-filter: blur(26px);"
           >
             <RouterLink
-              class="d-flex align-items-center gap-2 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-200"
+              class="d-flex align-items-center gap-2 px-4 py-2.5 text-sm dropdown-item-link"
               to="/app"
               @click="closeMenu"
             >
@@ -111,7 +130,7 @@ function handleBlur(e) {
               Mi cuenta
             </RouterLink>
             <button
-              class="d-flex w-full align-items-center gap-2 px-4 py-2.5 text-sm text-stone-900 dark:text-stone-200"
+              class="d-flex w-full align-items-center gap-2 px-4 py-2.5 text-sm dropdown-item-link"
               type="button"
               @click="signOut"
             >
@@ -121,7 +140,7 @@ function handleBlur(e) {
           </div>
         </div>
         <button
-          class="btn btn-outline-dark rounded-pill px-3 soft-button icon-link theme-toggle"
+          class="btn rounded-pill px-3 soft-button icon-link theme-toggle"
           type="button"
           :aria-label="isDark ? 'Activar modo claro' : 'Activar modo oscuro'"
           :title="isDark ? 'Modo claro' : 'Modo oscuro'"

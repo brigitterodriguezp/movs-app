@@ -1,9 +1,9 @@
 .site-footer {
-  background: color-mix(in srgb, var(--color-surface-solid) 35%, transparent);
+  background: var(--color-surface);
 }
 
 .dark .site-footer {
-  background: color-mix(in srgb, var(--color-bg) 28%, transparent);
+  background: rgba(16, 16, 15, 0.28);
   color: var(--color-text-muted);
 }
 
