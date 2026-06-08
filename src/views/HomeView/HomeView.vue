@@ -2,7 +2,7 @@
 import HomeSkeleton from '@/components/skeletons/HomeSkeleton/HomeSkeleton.vue'
 import coverImage from '@/assets/movies/main-cover.png'
 import videoTrailer from '@/assets/videos/video_trailer.mp4'
-import { Play, Pause, UserPlus } from '@lucide/vue'
+import { Play, Pause } from '@lucide/vue'
 import { onMounted, onUnmounted, ref } from 'vue'
 
 const isLoading = ref(true)
@@ -143,27 +143,19 @@ function onVideoEnded() {
           class="max-w-3xl transition-all duration-500 ease-out"
           :class="isPlaying ? 'opacity-0 pointer-events-none' : 'opacity-100'"
         >
-          <p class="mb-3 text-sm uppercase tracking-[0.35em]" style="color: rgba(255, 45, 85, 0.75);">Cine coreano</p>
-          <h1 class="text-balance text-4xl font-semibold tracking-normal sm:text-6xl">
-            Películas para días lentos
-          </h1>
-          <p class="mt-5 max-w-xl text-base leading-7 text-white/80 sm:text-lg">
-            Guarda historias, vuelve a ellas y encuentra tu próxima película sin ruido.
-          </p>
           <p class="mt-6 max-w-lg text-sm italic text-white/75 sm:text-base">
-            "La vida también florece entre mandarinas."
+            "Tú y yo, siempre"
+          </p>
+          <p class="mt-4 text-[10px] uppercase tracking-[0.25em] opacity-60">
+            Esperanza, Resiliencia, Vida
           </p>
         </div>
-        <div class="mt-8 flex flex-wrap gap-3" :class="isPlaying ? 'justify-center' : ''">
+        <div class="mt-6 flex flex-wrap gap-3" :class="isPlaying ? 'justify-center' : ''">
           <button class="btn btn-light rounded-pill px-4 py-2 soft-button icon-link" type="button" @click.stop="toggleVideo">
             <Play v-if="!isPlaying" :size="17" />
             <Pause v-else :size="17" />
             <span v-if="!isPlaying">Ver ahora</span>
           </button>
-          <RouterLink v-if="!isPlaying" class="btn btn-outline-light rounded-pill px-4 py-2 soft-button icon-link" to="/signup">
-            <UserPlus :size="17" />
-            <span>Crear cuenta</span>
-          </RouterLink>
         </div>
       </div>
     </section>

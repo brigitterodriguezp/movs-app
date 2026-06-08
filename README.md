@@ -62,30 +62,30 @@ El sistema permite registrar múltiples usuarios con planes de suscripción (Bas
 
 ## 3. Tecnologías utilizadas
 
-| Tecnología     | Versión | Propósito                                |
-| -------------- | ------- | ---------------------------------------- |
-| Vue 3          | ^3.5.32 | Framework de interfaz por componentes    |
-| Vite           | ^8.0.8  | Servidor de desarrollo y build           |
-| Vue Router     | ^5.0.4  | Enrutamiento con guardias de autenticación y rol |
-| Tailwind CSS   | ^4.3.0  | Estilos utilitarios responsive           |
-| Bootstrap      | ^5.3.8  | Componentes base (botones, formularios)  |
-| Lucide Vue     | ^1.16.0 | Iconos vectoriales                       |
-| localStorage   | —       | Almacenamiento de usuarios, sesión y tema |
+| Tecnología   | Versión | Propósito                                        |
+| ------------ | ------- | ------------------------------------------------ |
+| Vue 3        | ^3.5.32 | Framework de interfaz por componentes            |
+| Vite         | ^8.0.8  | Servidor de desarrollo y build                   |
+| Vue Router   | ^5.0.4  | Enrutamiento con guardias de autenticación y rol |
+| Tailwind CSS | ^4.3.0  | Estilos utilitarios responsive                   |
+| Bootstrap    | ^5.3.8  | Componentes base (botones, formularios)          |
+| Lucide Vue   | ^1.16.0 | Iconos vectoriales                               |
+| localStorage | —       | Almacenamiento de usuarios, sesión y tema        |
 
 ---
 
 ## 4. Rutas disponibles
 
-| Ruta            | Nombre       | Acceso         | Descripción                              |
-| --------------- | ------------ | -------------- | ---------------------------------------- |
-| `/`             | home         | Público        | Página principal de bienvenida           |
-| `/signin`       | signin       | Público        | Inicio de sesión                         |
-| `/signup`       | signup       | Público        | Registro de nuevo usuario                |
-| `/about`        | about        | Público        | Información del proyecto                 |
-| `/app`          | accounts     | Usuario logged | Panel de suscripción del usuario actual  |
-| `/movies`       | movie-app    | Usuario logged | Catálogo de películas con buscador       |
-| `/admin`        | admin        | Solo admin     | Panel de administración de usuarios      |
-| `/unauthorized` | unauthorized | Público        | Página 403 de acceso no autorizado       |
+| Ruta            | Nombre       | Acceso         | Descripción                             |
+| --------------- | ------------ | -------------- | --------------------------------------- |
+| `/`             | home         | Público        | Página principal de bienvenida          |
+| `/signin`       | signin       | Público        | Inicio de sesión                        |
+| `/signup`       | signup       | Público        | Registro de nuevo usuario               |
+| `/about`        | about        | Público        | Información del proyecto                |
+| `/app`          | accounts     | Usuario logged | Panel de suscripción del usuario actual |
+| `/movies`       | movie-app    | Usuario logged | Catálogo de películas con buscador      |
+| `/admin`        | admin        | Solo admin     | Panel de administración de usuarios     |
+| `/unauthorized` | unauthorized | Público        | Página 403 de acceso no autorizado      |
 
 ---
 
@@ -131,7 +131,3 @@ El sistema permite registrar múltiples usuarios con planes de suscripción (Bas
 ```
 
 ---
-
-## 6. Integrantes
-
-- Brigitte Rodríguez — Programación Web — P1 Examen

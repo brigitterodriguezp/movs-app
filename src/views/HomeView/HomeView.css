@@ -1,10 +1,30 @@
 .home-cover {
   animation: coverIn 850ms cubic-bezier(0.22, 1, 0.36, 1) both;
-  transition: width 700ms ease-out, max-width 700ms ease-out;
+  transition: width 700ms ease-out, max-width 700ms ease-out, transform 2500ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+.home-cover::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
+  opacity: 0;
+  transition: opacity 2500ms cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+
+.home-cover:hover {
+  transform: scale(1.01);
+}
+
+.home-cover:hover::after {
+  opacity: 1;
 }
 
 .home-cover img {
-  transition: opacity 700ms ease-out, transform 700ms ease-out;
+  transition: opacity 700ms ease-out, transform 2500ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 @media (max-width: 768px) {
