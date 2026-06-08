@@ -91,43 +91,17 @@ El sistema permite registrar múltiples usuarios con planes de suscripción (Bas
 
 ## 5. Diagrama de login
 
-```
-                    ┌──────────────┐
-                    │   Landing    │
-                    │     (/)      │
-                    └──────┬───────┘
-                           │
-              ┌────────────┴────────────┐
-              │                         │
-       ┌──────▼──────┐          ┌───────▼───────┐
-       │   Signup    │          │    Signin     │
-       │  /signup    │          │   /signin     │
-       └──────┬──────┘          └───────┬───────┘
-              │                         │
-              │       ┌─────────────────┴──────────────┐
-              │       │      Validar credenciales      │
-              │       │  (busca en movieUsers array)   │
-              │       └────────┬───────────┬───────────┘
-              │                │           │
-              │          ┌─────▼──┐  ┌─────▼─────┐
-              │          │ Admin  │  │  Usuario  │
-              │          │ rol=ad │  │ rol=user  │
-              │          └───┬────┘  └─────┬─────┘
-              │              │             │
-              │       ┌──────▼──┐    ┌─────▼──────┐
-              │       │ /admin  │    │   /app     │
-              │       │ Panel   │    │  Mi cuenta │
-              │       │ gestión │    │ suscripción│
-              │       └─────────┘    └─────┬──────┘
-              │                            │
-              │                     ┌──────▼──────┐
-              │                     │  /movies    │
-              │                     │  Catálogo   │
-              │                     └─────────────┘
-              │
-              └── Guardia de rutas ──
-                  - Sin sesión → redirect /signin
-                  - /admin sin rol=admin → /unauthorized (403)
+```mermaid
+flowchart TD
+    A["Landing (/)"] --> B["Registrarse<br/>/signup"]
+    A --> C["Iniciar sesión<br/>/signin"]
+    C --> D["Validar credenciales<br/>(busca en movieUsers)"]
+    D -->|"rol=admin"| E["/admin<br/>Panel de gestión"]
+    D -->|"rol=user"| F["/app<br/>Mi cuenta / suscripción"]
+    F --> G["/movies<br/>Catálogo"]
+
+    H["Guardia de rutas"] -.->|"Sin sesión"| C
+    E -.->|"Sin rol=admin"| I["/unauthorized<br/>(403)"]
 ```
 
 ---
