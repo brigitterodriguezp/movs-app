@@ -71,7 +71,7 @@ function handleBlur(e) {
 <template>
   <nav class="fixed-top glass-nav mx-auto mt-3 w-fit max-w-[95vw] rounded-pill px-3 py-2">
     <div class="main-navbar-inner">
-      <RouterLink class="navbar-brand fw-semibold tracking-tight me-3 text-decoration-none d-inline-flex align-items-center gap-1" to="/" style="color: var(--color-accent);">
+      <RouterLink class="navbar-brand fw-semibold tracking-tight me-3 text-decoration-none d-inline-flex align-items-center gap-1 d-none d-md-flex" to="/" style="color: var(--color-accent);">
         <Clapperboard :size="18" />
         Movs App
       </RouterLink>
@@ -79,27 +79,27 @@ function handleBlur(e) {
       <div class="main-navbar-links">
         <RouterLink class="nav-link rounded-pill px-3 icon-link" to="/">
           <Home :size="17" />
-          <span>Inicio</span>
+          <span class="d-none d-md-inline">Inicio</span>
         </RouterLink>
-        <RouterLink class="nav-link rounded-pill px-3 icon-link about-nav-link" to="/about">
+        <RouterLink class="nav-link rounded-pill px-3 icon-link about-nav-link d-none d-md-flex" to="/about">
           <Info :size="17" />
-          <span>Acerca</span>
+          <span class="d-none d-md-inline">Acerca</span>
         </RouterLink>
         <RouterLink v-if="hasSession" class="nav-link rounded-pill px-3 icon-link" to="/movies">
           <Clapperboard :size="17" />
-          <span>Películas</span>
+          <span class="d-none d-md-inline">Películas</span>
         </RouterLink>
-        <RouterLink v-if="isAdmin" class="nav-link rounded-pill px-3 icon-link" to="/admin">
+        <RouterLink v-if="isAdmin" class="nav-link rounded-pill px-3 icon-link d-none d-md-flex" to="/admin">
           <ShieldCheck :size="17" />
-          <span>Admin</span>
+          <span class="d-none d-md-inline">Admin</span>
         </RouterLink>
-        <RouterLink v-if="!hasSession" class="nav-link rounded-pill px-3 icon-link" to="/signin">
+        <RouterLink v-if="!hasSession" class="nav-link rounded-pill px-3 icon-link d-none d-md-flex" to="/signin">
           <LogIn :size="17" />
-          <span>Entrar</span>
+          <span class="d-none d-md-inline">Entrar</span>
         </RouterLink>
-        <RouterLink v-if="!hasSession" class="btn rounded-pill px-4 soft-button icon-link nav-action" to="/signup">
+        <RouterLink v-if="!hasSession" class="btn rounded-pill px-4 soft-button icon-link nav-action d-none d-md-flex" to="/signup">
           <UserPlus :size="17" />
-          <span>Registro</span>
+          <span class="d-none d-md-inline">Registro</span>
         </RouterLink>
         <div
           v-if="hasSession"
@@ -107,8 +107,15 @@ function handleBlur(e) {
           tabindex="-1"
           @blur="handleBlur"
         >
+          <RouterLink
+            class="nav-link rounded-pill px-3 icon-link d-md-none"
+            to="/app"
+            @click="closeMenu"
+          >
+            <User :size="17" />
+          </RouterLink>
           <button
-            class="btn rounded-pill px-3 py-2 soft-button icon-link"
+            class="btn rounded-pill px-3 py-2 soft-button icon-link d-none d-md-flex"
             type="button"
             @click="showMenu = !showMenu"
           >

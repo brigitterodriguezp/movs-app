@@ -133,14 +133,6 @@
     justify-content: center;
   }
 
-  .navbar-brand {
-    display: none;
-  }
-
-  .about-nav-link {
-    display: none;
-  }
-
   .main-navbar-links {
     width: 100%;
     max-width: 100%;
@@ -149,9 +141,7 @@
     gap: 0.18rem;
   }
 
-  .main-navbar-links .btn,
-  .main-navbar-links .nav-link,
-  .main-navbar-links .user-dropdown-wrap {
+  .main-navbar-links .nav-link {
     display: flex;
     width: auto;
     flex: 1 1 0;
@@ -169,40 +159,27 @@
     white-space: normal;
   }
 
-  .main-navbar-links .user-dropdown-wrap .btn {
-    all: unset;
+  .main-navbar-links .btn {
     display: flex;
+    width: auto;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 2.72rem;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     gap: 0.12rem;
-    width: 100%;
-    font-size: 0.67rem;
-    line-height: 1.1;
-    color: var(--color-text);
-    cursor: pointer;
+    border-width: 0;
+    padding: 0.32rem 0.2rem;
   }
 
-  .main-navbar-links .btn span,
-  .main-navbar-links .nav-link span,
-  .main-navbar-links .user-dropdown-wrap span {
-    display: block;
-    min-width: 0;
+  .main-navbar-links .user-dropdown-wrap .btn.d-none.d-md-flex {
+    display: none !important;
   }
 
-  .main-navbar-links .btn svg,
-  .main-navbar-links .nav-link svg,
-  .main-navbar-links .user-dropdown-wrap svg {
+  .main-navbar-links svg {
     width: 1rem;
     height: 1rem;
-  }
-
-  .main-navbar-links .btn span,
-  .main-navbar-links .nav-link span,
-  .main-navbar-links .user-dropdown-wrap span {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 
   .user-dropdown-wrap .user-dropdown-menu {
