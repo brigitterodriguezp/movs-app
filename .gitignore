@@ -41,6 +41,8 @@ __screenshots__/
 
 # Maven
 target/
+.env
+.maven-cache/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
