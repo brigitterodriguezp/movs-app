@@ -3,11 +3,12 @@ import SignupSkeleton from '@/components/skeletons/SignupSkeleton/SignupSkeleton
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { BadgeCheck, CreditCard, KeyRound, Mail, ShieldCheck, User, UserPlus, Users } from '@lucide/vue'
-import { api, login } from '@/services/api'
+import { api, login, PLAN_IDS } from '@/services/api'
 import plansData from '@/data/plans.json'
 
 const router = useRouter()
 const isLoading = ref(true)
+const submitting = ref(false)
 const plans = ref([])
 
 const form = reactive({
@@ -26,6 +27,8 @@ const form = reactive({
 function capitalize(str) {
   return str.trim().replace(/\S+/g, (w) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase())
 }
+
+const formError = ref('')
 
 const errors = reactive({
   nombres: '',
@@ -88,6 +91,7 @@ function formatExpiry() {
 }
 
 async function submitSignup() {
+  formError.value = ''
   errors.nombres = ''
   errors.apellidos = ''
   errors.correo = ''
@@ -155,29 +159,36 @@ async function submitSignup() {
     return
   }
 
+  submitting.value = true
   try {
-    const [user, apiPlans] = await Promise.all([
-      api.post('/api/usuarios', {
-        nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
-        correo,
-        password: form.clave,
-        rol: form.rol,
-      }),
-      api.get('/api/planes'),
-    ])
-    const apiPlan = apiPlans.find((p) => p.codigo === selectedPlanCode)
+    const user = await api.post('/api/usuarios', {
+      nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
+      correo,
+      password: form.clave,
+      rol: form.rol,
+    })
+    let planId
+    try {
+      const apiPlans = await api.get('/api/planes')
+      const apiPlan = apiPlans.find((p) => p.codigo === selectedPlanCode)
+      planId = apiPlan ? apiPlan.id : PLAN_IDS[selectedPlanCode]
+    } catch {
+      planId = PLAN_IDS[selectedPlanCode]
+    }
     await Promise.all([
       login(correo, form.clave),
       api.post('/api/suscripciones', {
         usuarioId: user.id,
-        planId: apiPlan.id,
+        planId,
         fechaInicio: new Date().toISOString().slice(0, 10),
         estado: 'ACTIVA',
       }),
     ])
     router.push(form.rol === 'admin' ? '/admin' : '/app')
   } catch (err) {
-    errors.correo = err.message || 'No se pudo crear la cuenta.'
+    formError.value = err.message || 'No se pudo crear la cuenta.'
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -332,10 +343,12 @@ async function submitSignup() {
             </div>
           </div>
 
-          <button class="btn rounded-pill py-3 soft-button icon-link justify-center md:col-span-2 glass-accent-btn" type="submit">
-            <UserPlus :size="17" />
-            <span>Registrarme</span>
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center md:col-span-2 glass-accent-btn" type="submit" :disabled="submitting">
+            <span v-if="submitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <UserPlus v-else :size="17" />
+            <span>{{ submitting ? 'Registrando…' : 'Registrarme' }}</span>
           </button>
+          <p v-if="formError" class="auth-error m-0 rounded-4 px-4 py-3 text-sm md:col-span-2">{{ formError }}</p>
         </form>
       </div>
     </section>

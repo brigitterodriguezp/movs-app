@@ -22,7 +22,7 @@ export function currentUser() {
   return getSession()
 }
 
-async function request(path, options = {}, timeoutMs = 15000) {
+async function request(path, options = {}, timeoutMs = 5000) {
   const session = getSession()
   const headers = {
     Accept: 'application/json',
@@ -34,11 +34,19 @@ async function request(path, options = {}, timeoutMs = 15000) {
   const controller = new AbortController()
   const timer = setTimeout(() => controller.abort(), timeoutMs)
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    headers,
-    signal: controller.signal,
-  }).finally(() => clearTimeout(timer))
+  let response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      headers,
+      signal: controller.signal,
+    })
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('El servidor no respondió a tiempo.')
+    throw new Error('Error interno en el servidor.')
+  } finally {
+    clearTimeout(timer)
+  }
 
   if (response.status === 204) return null
 
@@ -46,7 +54,7 @@ async function request(path, options = {}, timeoutMs = 15000) {
   const data = contentType.includes('application/json') ? await response.json() : await response.text()
 
   if (!response.ok) {
-    const message = data?.mensaje || data?.message || 'No se pudo completar la operación.'
+    const message = data?.mensaje || data?.message || 'Error interno en el servidor.'
     throw new Error(message)
   }
 
@@ -60,7 +68,7 @@ export const api = {
   delete: (path) => request(path, { method: 'DELETE' }),
 }
 
-const PLAN_IDS = { basic: 1, plus: 2 }
+export const PLAN_IDS = { basic: 1, plus: 2 }
 
 export async function login(correo, password) {
   const session = await api.post('/api/auth/login', { correo, password })

@@ -9,6 +9,7 @@ import { login } from '@/services/api'
 const router = useRouter()
 const error = ref('')
 const isLoading = ref(true)
+const submitting = ref(false)
 
 const form = reactive({
   correo: '',
@@ -30,11 +31,14 @@ async function submitSignin() {
     return
   }
 
+  submitting.value = true
   try {
     const session = await login(correo, form.clave)
     router.push(session.rol === 'admin' ? '/admin' : '/app')
   } catch (err) {
     error.value = err.message || 'Correo o clave incorrectos.'
+  } finally {
+    submitting.value = false
   }
 }
 </script>
@@ -100,9 +104,10 @@ async function submitSignin() {
 
           <p v-if="error" class="auth-error m-0 rounded-4 px-4 py-3 text-sm">{{ error }}</p>
 
-          <button class="btn rounded-pill py-3 soft-button icon-link justify-center glass-accent-btn" type="submit">
-            <LogIn :size="17" />
-            <span>Entrar</span>
+          <button class="btn rounded-pill py-3 soft-button icon-link justify-center glass-accent-btn" type="submit" :disabled="submitting">
+            <span v-if="submitting" class="spinner-border spinner-border-sm me-2" role="status"></span>
+            <LogIn v-else :size="17" />
+            <span>{{ submitting ? 'Entrando…' : 'Entrar' }}</span>
           </button>
         </form>
 
