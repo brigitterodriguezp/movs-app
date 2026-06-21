@@ -83,15 +83,15 @@ src/main/java/com/movsapp/backend/
 
 ## Responsabilidad de capas
 
-| Capa | Responsabilidad |
-|---|---|
-| Controller | Rutas, códigos HTTP y validación de entrada |
-| Service | Reglas, transacciones y transformación de modelos |
-| Repository | Consultas y persistencia |
-| Entity | Relaciones y restricciones del dominio persistido |
-| DTO | Contrato sin exposición del modelo interno |
-| Exception | Respuestas de error uniformes |
-| Config | CORS, cifrado de contraseñas y OpenAPI |
+| Capa       | Responsabilidad                                   |
+| ---------- | ------------------------------------------------- |
+| Controller | Rutas, códigos HTTP y validación de entrada       |
+| Service    | Reglas, transacciones y transformación de modelos |
+| Repository | Consultas y persistencia                          |
+| Entity     | Relaciones y restricciones del dominio persistido |
+| DTO        | Contrato sin exposición del modelo interno        |
+| Exception  | Respuestas de error uniformes                     |
+| Config     | CORS, cifrado de contraseñas y OpenAPI            |
 
 ## Relaciones entre entidades
 
@@ -105,25 +105,25 @@ erDiagram
   PELICULA { bigint id PK }
 ```
 
-| Entidad | Descripción |
-|---|---|
-| `roles` | Catálogo de roles del sistema (`admin`, `usuario`) |
-| `usuarios` | Usuarios registrados con nombre, correo único y contraseña hasheada |
-| `planes` | Planes de suscripción con código único, nombre, precio y duración en días |
-| `plan_beneficios` | Beneficios asociados a cada plan (ordenados) |
-| `suscripciones` | Suscripción activa de un usuario a un plan, con fechas de inicio y expiración |
-| `peliculas` | Catálogo de películas con título, año, género, descripción e imagen |
-| `sesiones` | Control de sesión única por usuario con marca de inicio y cierre |
+| Entidad           | Descripción                                                                   |
+| ----------------- | ----------------------------------------------------------------------------- |
+| `roles`           | Catálogo de roles del sistema (`admin`, `usuario`)                            |
+| `usuarios`        | Usuarios registrados con nombre, correo único y contraseña hasheada           |
+| `planes`          | Planes de suscripción con código único, nombre, precio y duración en días     |
+| `plan_beneficios` | Beneficios asociados a cada plan (ordenados)                                  |
+| `suscripciones`   | Suscripción activa de un usuario a un plan, con fechas de inicio y expiración |
+| `peliculas`       | Catálogo de películas con título, año, género, descripción e imagen           |
+| `sesiones`        | Control de sesión única por usuario con marca de inicio y cierre              |
 
-| Entidad | PK | UK | FK | CHECK / Restricciones |
-|---|---|---|---|---|
-| `roles` | `id` | `nombre` | — | — |
-| `usuarios` | `id` | `correo` | `rol_id` → `roles(id)` | — |
-| `planes` | `id` | `codigo`, `nombre` | — | `precio >= 0`, `duracion_dias > 0` |
-| `plan_beneficios` | `(plan_id, orden)` | — | `plan_id` → `planes(id)` ON DELETE CASCADE | — |
-| `suscripciones` | `id` | `usuario_id` | `usuario_id` → `usuarios(id)`, `plan_id` → `planes(id)` | `fecha_expiracion > fecha_inicio`, `estado IN ('ACTIVA','VENCIDA','CANCELADA')` |
-| `peliculas` | `id` | — | — | `anio BETWEEN 1888 AND 2100` |
-| `sesiones` | `id` | `usuario_id` | `usuario_id` → `usuarios(id)` ON DELETE CASCADE | — |
+| Entidad           | PK                 | UK                 | FK                                                      | Restricciones                                                                   |
+| ----------------- | ------------------ | ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
+| `roles`           | `id`               | `nombre`           | —                                                       | —                                                                               |
+| `usuarios`        | `id`               | `correo`           | `rol_id` → `roles(id)`                                  | —                                                                               |
+| `planes`          | `id`               | `codigo`, `nombre` | —                                                       | `precio >= 0`, `duracion_dias > 0`                                              |
+| `plan_beneficios` | `(plan_id, orden)` | —                  | `plan_id` → `planes(id)` ON DELETE CASCADE              | —                                                                               |
+| `suscripciones`   | `id`               | `usuario_id`       | `usuario_id` → `usuarios(id)`, `plan_id` → `planes(id)` | `fecha_expiracion > fecha_inicio`, `estado IN ('ACTIVA','VENCIDA','CANCELADA')` |
+| `peliculas`       | `id`               | —                  | —                                                       | `anio BETWEEN 1888 AND 2100`                                                    |
+| `sesiones`        | `id`               | `usuario_id`       | `usuario_id` → `usuarios(id)` ON DELETE CASCADE         | —                                                                               |
 
 ## Decisiones técnicas
 
