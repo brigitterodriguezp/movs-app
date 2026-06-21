@@ -28,6 +28,9 @@
   --color-error: #c41e3a;
   --color-error-bg: rgba(255, 45, 85, 0.08);
   --color-error-border: rgba(255, 45, 85, 0.25);
+  --color-success: #1a7d36;
+  --color-success-bg: rgba(52, 199, 89, 0.1);
+  --color-success-border: rgba(52, 199, 89, 0.3);
   --skeleton-bg: #f0e4ea;
   --skeleton-shimmer: rgba(255, 255, 255, 0.5);
 
@@ -75,6 +78,9 @@
   --color-error: #ff475e;
   --color-error-bg: rgba(255, 45, 85, 0.12);
   --color-error-border: rgba(255, 45, 85, 0.25);
+  --color-success: #34c759;
+  --color-success-bg: rgba(52, 199, 89, 0.15);
+  --color-success-border: rgba(52, 199, 89, 0.35);
   --skeleton-bg: #25252a;
   --skeleton-shimmer: rgba(255, 255, 255, 0.08);
 

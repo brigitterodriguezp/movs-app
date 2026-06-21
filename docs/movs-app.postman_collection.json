@@ -1,0 +1,516 @@
+{
+  "info": {
+    "name": "Movs App API",
+    "description": "Colección para testear todos los endpoints de Movs App.\n\nVariables de colección:\n- `base_url`: `http://localhost:8080`\n- `token`: se asigna automáticamente tras login\n- `usuario_id`: ID de prueba\n- `plan_id`: ID de prueba\n- `suscripcion_id`: ID de prueba\n- `pelicula_id`: ID de prueba",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Autenticación",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    var json = pm.response.json();",
+                  "    pm.collectionVariables.set('token', json.token);",
+                  "    pm.collectionVariables.set('usuario_id', json.usuarioId);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"correo\":\"ana@example.com\",\"password\":\"ClaveSegura123\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/auth/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "login"]
+            }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "logout"]
+            }
+          }
+        },
+        {
+          "name": "Consultar sesión",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/auth/sesion/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "auth", "sesion", "{{usuario_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\":\"Nuevo Usuario\",\"correo\":\"nuevo@example.com\",\"password\":\"ClaveSegura123\",\"rol\":\"usuario\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Listar usuarios",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios"]
+            }
+          }
+        },
+        {
+          "name": "Obtener usuario por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "{{usuario_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Obtener perfil actual (me)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "me"]
+            }
+          }
+        },
+        {
+          "name": "Listar por rol",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/rol/usuario",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "rol", "usuario"]
+            }
+          }
+        },
+        {
+          "name": "Actualizar usuario",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"nombre\":\"Ana Pérez Actualizada\",\"correo\":\"ana.actualizado@example.com\",\"password\":\"NuevaClave123\",\"rol\":\"usuario\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "{{usuario_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar usuario",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/usuarios/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "usuarios", "{{usuario_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Planes",
+      "item": [
+        {
+          "name": "Listar planes",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/planes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "planes"]
+            }
+          }
+        },
+        {
+          "name": "Obtener plan por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/planes/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "planes", "1"]
+            }
+          }
+        },
+        {
+          "name": "Crear plan",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"codigo\":\"premium\",\"nombre\":\"Premium\",\"precio\":9.99,\"duracionDias\":30,\"beneficios\":[\"4 pantallas\",\"Calidad 4K\",\"Descargas ilimitadas\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/planes",
+              "host": ["{{base_url}}"],
+              "path": ["api", "planes"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('plan_id', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar plan",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"codigo\":\"basic\",\"nombre\":\"Basic Plus\",\"precio\":5.99,\"duracionDias\":30,\"beneficios\":[\"1 pantalla\",\"Calidad HD\",\"Subtítulos\"]}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/planes/{{plan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "planes", "{{plan_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar plan",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/planes/{{plan_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "planes", "{{plan_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Suscripciones",
+      "item": [
+        {
+          "name": "Listar suscripciones",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones"]
+            }
+          }
+        },
+        {
+          "name": "Obtener suscripción por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones", "1"]
+            }
+          }
+        },
+        {
+          "name": "Obtener suscripción por usuario",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones/usuario/{{usuario_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones", "usuario", "{{usuario_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Crear suscripción",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usuarioId\":{{usuario_id}},\"planId\":1,\"fechaInicio\":\"2026-06-21\",\"estado\":\"ACTIVA\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('suscripcion_id', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar suscripción",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"usuarioId\":{{usuario_id}},\"planId\":1,\"fechaInicio\":\"2026-06-21\",\"estado\":\"VENCIDA\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones/{{suscripcion_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones", "{{suscripcion_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar suscripción",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/suscripciones/{{suscripcion_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "suscripciones", "{{suscripcion_id}}"]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Películas",
+      "item": [
+        {
+          "name": "Listar películas",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/peliculas",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas"]
+            }
+          }
+        },
+        {
+          "name": "Obtener película por ID",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/peliculas/1",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas", "1"]
+            }
+          }
+        },
+        {
+          "name": "Listar por género",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/peliculas/genero/Drama",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas", "genero", "Drama"]
+            }
+          }
+        },
+        {
+          "name": "Buscar por título",
+          "request": {
+            "method": "GET",
+            "url": {
+              "raw": "{{base_url}}/api/peliculas/buscar?titulo=Cover",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas", "buscar"],
+              "query": [
+                { "key": "titulo", "value": "Cover" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Crear película",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"titulo\":\"Nueva Película\",\"anio\":2026,\"genero\":\"Acción\",\"descripcion\":\"Película de prueba\",\"imagenUrl\":\"test-001.png\",\"variante\":\"movie-card-featured\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/peliculas",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas"]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 201) {",
+                  "    pm.collectionVariables.set('pelicula_id', pm.response.json().id);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Actualizar película",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\"titulo\":\"Cover Story Editado\",\"anio\":2026,\"genero\":\"Drama\",\"descripcion\":\"Descripción actualizada\",\"imagenUrl\":\"001-cover.png\",\"variante\":\"movie-card-featured\"}"
+            },
+            "url": {
+              "raw": "{{base_url}}/api/peliculas/{{pelicula_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas", "{{pelicula_id}}"]
+            }
+          }
+        },
+        {
+          "name": "Eliminar película",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/peliculas/{{pelicula_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "peliculas", "{{pelicula_id}}"]
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "token", "value": "" },
+    { "key": "usuario_id", "value": "" },
+    { "key": "plan_id", "value": "2" },
+    { "key": "suscripcion_id", "value": "" },
+    { "key": "pelicula_id", "value": "" }
+  ]
+}

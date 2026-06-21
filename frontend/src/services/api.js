@@ -55,7 +55,10 @@ async function request(path, options = {}, timeoutMs = 5000) {
 
   if (!response.ok) {
     const message = data?.mensaje || data?.message || 'Error interno en el servidor.'
-    throw new Error(message)
+    const err = new Error(message)
+    err.validaciones = data?.validaciones || null
+    err.status = response.status
+    throw err
   }
 
   return data

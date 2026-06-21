@@ -29,6 +29,7 @@ function capitalize(str) {
 }
 
 const formError = ref('')
+const successMessage = ref('')
 
 const errors = reactive({
   nombres: '',
@@ -92,6 +93,7 @@ function formatExpiry() {
 
 async function submitSignup() {
   formError.value = ''
+  successMessage.value = ''
   errors.nombres = ''
   errors.apellidos = ''
   errors.correo = ''
@@ -101,8 +103,11 @@ async function submitSignup() {
   errors.cardExpiry = ''
   errors.cardCvv = ''
 
-  if (!form.nombres.trim()) {
+  const nombresTrim = form.nombres.trim()
+  if (!nombresTrim) {
     errors.nombres = 'Ingresa tus nombres.'
+  } else if (nombresTrim.length < 3) {
+    errors.nombres = 'El nombre debe tener al menos 3 caracteres.'
   }
 
   if (!form.apellidos.trim()) {
@@ -175,18 +180,26 @@ async function submitSignup() {
     } catch {
       planId = PLAN_IDS[selectedPlanCode]
     }
-    await Promise.all([
-      login(correo, form.clave),
-      api.post('/api/suscripciones', {
-        usuarioId: user.id,
-        planId,
-        fechaInicio: new Date().toISOString().slice(0, 10),
-        estado: 'ACTIVA',
-      }),
-    ])
-    router.push(form.rol === 'admin' ? '/admin' : '/app')
+    await login(correo, form.clave)
+    await api.post('/api/suscripciones', {
+      usuarioId: user.id,
+      planId,
+      fechaInicio: new Date().toISOString().slice(0, 10),
+      estado: 'ACTIVA',
+    })
+    successMessage.value = 'Cuenta creada con éxito. Redirigiendo…'
+    setTimeout(() => router.push(form.rol === 'admin' ? '/admin' : '/app'), 1500)
   } catch (err) {
-    formError.value = err.message || 'No se pudo crear la cuenta.'
+    if (err.validaciones) {
+      const map = { nombre: 'nombres', password: 'clave', correo: 'correo' }
+      for (const [field, msg] of Object.entries(err.validaciones)) {
+        const key = map[field] || field
+        if (errors[key] !== undefined) errors[key] = msg
+      }
+    }
+    if (!Object.values(errors).some(Boolean)) {
+      formError.value = err.message || 'No se pudo crear la cuenta.'
+    }
   } finally {
     submitting.value = false
   }
@@ -349,6 +362,7 @@ async function submitSignup() {
             <span>{{ submitting ? 'Registrando…' : 'Registrarme' }}</span>
           </button>
           <p v-if="formError" class="auth-error m-0 rounded-4 px-4 py-3 text-sm md:col-span-2">{{ formError }}</p>
+          <p v-if="successMessage" class="auth-success m-0 rounded-4 px-4 py-3 text-sm md:col-span-2">{{ successMessage }}</p>
         </form>
       </div>
     </section>

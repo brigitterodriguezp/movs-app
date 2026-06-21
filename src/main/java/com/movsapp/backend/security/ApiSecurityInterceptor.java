@@ -50,10 +50,12 @@ public class ApiSecurityInterceptor implements HandlerInterceptor {
 
     private boolean isPublic(HttpServletRequest request) {
         String uri = request.getRequestURI();
-        return "OPTIONS".equalsIgnoreCase(request.getMethod())
+        String method = request.getMethod();
+        return "OPTIONS".equalsIgnoreCase(method)
             || "/api/auth/login".equals(uri)
-            || ("/api/planes".equals(uri) && "GET".equalsIgnoreCase(request.getMethod()))
-            || ("/api/usuarios".equals(uri) && "POST".equalsIgnoreCase(request.getMethod()))
+            || ("GET".equalsIgnoreCase(method) && uri.startsWith("/api/planes"))
+            || ("GET".equalsIgnoreCase(method) && uri.startsWith("/api/peliculas"))
+            || ("/api/usuarios".equals(uri) && "POST".equalsIgnoreCase(method))
             || uri.startsWith("/swagger-ui")
             || uri.startsWith("/v3/api-docs");
     }
