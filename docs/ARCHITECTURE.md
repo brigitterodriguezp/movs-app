@@ -1,5 +1,18 @@
 # Arquitectura
 
+## Tabla de contenido
+
+1. [Arquitectura por capas](#arquitectura-por-capas)
+2. [Modelo C4 simplificado](#modelo-c4-simplificado)
+   - [Nivel 1: Contexto](#nivel-1-contexto)
+   - [Nivel 2: Contenedores](#nivel-2-contenedores)
+   - [Nivel 3: Componentes](#nivel-3-componentes)
+3. [Estructura de carpetas](#estructura-de-carpetas)
+4. [Responsabilidad de capas](#responsabilidad-de-capas)
+5. [Relaciones entre entidades](#relaciones-entre-entidades)
+6. [Decisiones técnicas](#decisiones-técnicas)
+7. [Control de sesión única](#control-de-sesión-única)
+
 ## Arquitectura por capas
 
 El backend aplica dependencias unidireccionales. El controlador traduce HTTP, el servicio concentra reglas y transacciones, el repositorio abstrae JPA y la entidad representa persistencia. Los DTO delimitan el contrato externo. La configuración define componentes transversales y la capa de excepciones normaliza fallos.
