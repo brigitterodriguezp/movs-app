@@ -11,7 +11,9 @@
 4. [Responsabilidad de capas](#responsabilidad-de-capas)
 5. [Relaciones entre entidades](#relaciones-entre-entidades)
 6. [Decisiones técnicas](#decisiones-técnicas)
-7. [Control de sesión única](#control-de-sesión-única)
+7. [Anotaciones JPA](#anotaciones-jpa)
+8. [Control de sesión única](#control-de-sesión-única)
+9. [Flujo completo API ↔ MySQL](#flujo-completo-api--mysql)
 
 ## Arquitectura por capas
 
@@ -132,6 +134,24 @@ erDiagram
 ## Decisiones técnicas
 
 La API utiliza DTO para impedir que el hash forme parte de la serialización. JPA mantiene el modelo y `schema.sql` controla el DDL evaluable. La aplicación no valida el esquema durante el arranque para evitar caída si MySQL no está disponible; la validación del DDL se realiza de forma manual o en pruebas. CORS proviene del entorno. La fecha de expiración deriva de la fecha inicial y la duración vigente del plan.
+
+## Anotaciones JPA
+
+| Anotación | Ámbito | Por qué | Para qué |
+|---|---|---|---|
+| `@Entity` | Todas las entidades | Obligatoria de JPA | Marca la clase como entidad persistible |
+| `@Table` | Todas las entidades | Personalizar el DDL generado | Nombrar tabla, UKs e índices en MySQL (ej. `uk_usuarios_correo`, `idx_peliculas_genero`) |
+| `@Id` + `@GeneratedValue(IDENTITY)` | Todas las entidades | Estándar para PK autoincremental | Delega el autoincremento a MySQL (`AUTO_INCREMENT`) |
+| `@Column` | Todos los campos | Control fino del esquema | `nullable`, `length`, `name`, `precision`/`scale` para que JPA genere el DDL exacto |
+| `@ManyToOne(fetch=LAZY)` | `Usuario.rol`, `Suscripcion.plan`, `Suscripcion.usuario` | Relación N:1 con carga diferida | `Usuario.rol` y `Suscripcion.plan` — evita traer el objeto completo si no se necesita |
+| `@OneToOne(fetch=LAZY)` | `Suscripcion.usuario`, `Sesion.usuario` | Relación 1:1 con carga diferida | Restricción de fila única por usuario |
+| `@JoinColumn` | Todas las FK | Nombrar la columna FK | `rol_id`, `usuario_id`, `plan_id` — coincide con el DDL de `schema.sql` |
+| `@ForeignKey` | Todas las FK | Nombrar la restricción FK | `fk_usuarios_roles`, `fk_suscripciones_planes` — DDL explícito y mantenible |
+| `@Enumerated(STRING)` | `Suscripcion.estado` | Persistencia legible de enums | `EstadoSuscripcion` se guarda como `'ACTIVA'`/`'VENCIDA'` en vez de ordinal numérico |
+| `@ElementCollection` + `@CollectionTable` | `Plan.beneficios` | Mapear lista sin entidad propia | `beneficios` → tabla `plan_beneficios` con FK a `planes` |
+| `@OrderColumn` | `Plan.beneficios` | Preservar orden de lista | Columna `orden` para mantener la posición de cada beneficio |
+| `@UniqueConstraint` | `@Table` | Definir restricciones UK en el DDL | `uk_usuarios_correo`, `uk_planes_codigo`, `uk_suscripciones_usuario` |
+| `@Index` | `@Table` | Definir índices en el DDL | `idx_peliculas_titulo`, `idx_usuarios_rol` — rendimiento en búsquedas |
 
 ## Control de sesión única
 
