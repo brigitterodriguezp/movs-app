@@ -115,6 +115,16 @@ erDiagram
 | `peliculas` | Catálogo de películas con título, año, género, descripción e imagen |
 | `sesiones` | Control de sesión única por usuario con marca de inicio y cierre |
 
+| Entidad | PK | UK | FK | CHECK / Restricciones |
+|---|---|---|---|---|
+| `roles` | `id` | `nombre` | — | — |
+| `usuarios` | `id` | `correo` | `rol_id` → `roles(id)` | — |
+| `planes` | `id` | `codigo`, `nombre` | — | `precio >= 0`, `duracion_dias > 0` |
+| `plan_beneficios` | `(plan_id, orden)` | — | `plan_id` → `planes(id)` ON DELETE CASCADE | — |
+| `suscripciones` | `id` | `usuario_id` | `usuario_id` → `usuarios(id)`, `plan_id` → `planes(id)` | `fecha_expiracion > fecha_inicio`, `estado IN ('ACTIVA','VENCIDA','CANCELADA')` |
+| `peliculas` | `id` | — | — | `anio BETWEEN 1888 AND 2100` |
+| `sesiones` | `id` | `usuario_id` | `usuario_id` → `usuarios(id)` ON DELETE CASCADE | — |
+
 ## Decisiones técnicas
 
 La API utiliza DTO para impedir que el hash forme parte de la serialización. JPA mantiene el modelo y `schema.sql` controla el DDL evaluable. La aplicación no valida el esquema durante el arranque para evitar caída si MySQL no está disponible; la validación del DDL se realiza de forma manual o en pruebas. CORS proviene del entorno. La fecha de expiración deriva de la fecha inicial y la duración vigente del plan.
