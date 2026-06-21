@@ -105,6 +105,16 @@ erDiagram
   PELICULA { bigint id PK }
 ```
 
+| Entidad | Descripción |
+|---|---|
+| `roles` | Catálogo de roles del sistema (`admin`, `usuario`) |
+| `usuarios` | Usuarios registrados con nombre, correo único y contraseña hasheada |
+| `planes` | Planes de suscripción con código único, nombre, precio y duración en días |
+| `plan_beneficios` | Beneficios asociados a cada plan (ordenados) |
+| `suscripciones` | Suscripción activa de un usuario a un plan, con fechas de inicio y expiración |
+| `peliculas` | Catálogo de películas con título, año, género, descripción e imagen |
+| `sesiones` | Control de sesión única por usuario con marca de inicio y cierre |
+
 ## Decisiones técnicas
 
 La API utiliza DTO para impedir que el hash forme parte de la serialización. JPA mantiene el modelo y `schema.sql` controla el DDL evaluable. La aplicación no valida el esquema durante el arranque para evitar caída si MySQL no está disponible; la validación del DDL se realiza de forma manual o en pruebas. CORS proviene del entorno. La fecha de expiración deriva de la fecha inicial y la duración vigente del plan.
