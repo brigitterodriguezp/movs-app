@@ -107,7 +107,7 @@ erDiagram
 
 ## Decisiones técnicas
 
-La API utiliza DTO para impedir que el hash forme parte de la serialización. JPA mantiene el modelo y `schema.sql` controla el DDL evaluable. `ddl-auto=validate` detecta diferencias sin modificar la base. CORS proviene del entorno. La fecha de expiración deriva de la fecha inicial y la duración vigente del plan.
+La API utiliza DTO para impedir que el hash forme parte de la serialización. JPA mantiene el modelo y `schema.sql` controla el DDL evaluable. La aplicación no valida el esquema durante el arranque para evitar caída si MySQL no está disponible; la validación del DDL se realiza de forma manual o en pruebas. CORS proviene del entorno. La fecha de expiración deriva de la fecha inicial y la duración vigente del plan.
 
 ## Control de sesión única
 

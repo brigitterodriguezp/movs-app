@@ -1,0 +1,20 @@
+Nombre del proyecto
+El proyecto se llama Movs app. La aplicación presenta una plataforma orientada a la gestión de usuarios, planes de suscripción, sesiones y catálogo de películas para un servicio de entretenimiento digital.
+
+Problema que resuelve
+Movs app resuelve la necesidad de administrar una plataforma básica de películas con usuarios registrados, planes disponibles y control de acceso por sesión. El sistema centraliza la información principal del servicio y permite organizar el catálogo, las suscripciones y la actividad de los usuarios desde una misma aplicación.
+
+Tipo de usuario
+El sistema contempla usuarios comunes y usuarios administradores. El usuario común accede al catálogo y consulta información relacionada con su cuenta, mientras que el administrador gestiona usuarios, planes, suscripciones y películas desde funciones protegidas del sistema.
+
+Framework frontend utilizado
+El frontend utiliza Vue como framework principal. La interfaz se apoya en Vite para el entorno de desarrollo y construcción, además de Bootstrap y Tailwind CSS para la presentación visual de los componentes.
+
+Módulos principales
+Los módulos principales del sistema son autenticación, usuarios, roles, sesiones, planes, suscripciones y películas. Estos módulos estructuran el flujo central de la aplicación y separan las responsabilidades entre acceso, administración de cuentas, gestión de membresías y contenido audiovisual.
+
+Información que almacena
+La aplicación almacena datos de usuarios, roles, contraseñas cifradas, sesiones, planes, suscripciones y películas. También conserva información como correos, nombres, estado de sesión, duración de planes, precios, fechas de suscripción, estados y datos descriptivos del catálogo.
+
+Operaciones del sistema
+El sistema permite registrar usuarios, iniciar sesión, cerrar sesión, consultar sesiones, administrar usuarios, filtrar usuarios por rol, crear planes, actualizar planes, eliminar planes, gestionar suscripciones y administrar películas. También permite listar, buscar y filtrar contenido del catálogo según las rutas disponibles de la API.

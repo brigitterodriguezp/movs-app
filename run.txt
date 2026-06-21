@@ -1,1 +1,2 @@
-./mvnw spring-boot:run
+Backend: sudo /opt/lampp/lampp startmysql && mvn spring-boot:run
+Frontend: cd frontend && npm install && npm run dev
