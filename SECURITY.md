@@ -1,5 +1,18 @@
 # Seguridad
 
+## Tabla de contenido
+
+1. [Variables de entorno](#variables-de-entorno)
+2. [Protección de credenciales](#protección-de-credenciales)
+3. [BCrypt](#bcrypt)
+4. [Control de sesión única](#control-de-sesión-única)
+5. [Validaciones](#validaciones)
+6. [CORS](#cors)
+7. [Manejo de errores](#manejo-de-errores)
+8. [Protección de datos](#protección-de-datos)
+9. [Riesgos conocidos](#riesgos-conocidos)
+10. [Mejoras futuras](#mejoras-futuras)
+
 ## Variables de entorno
 
 La configuración sensible se obtiene de variables de entorno. `.env.example` define los nombres requeridos sin constituir una configuración de producción. El archivo `.env` permanece excluido del repositorio.
