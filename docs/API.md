@@ -10,6 +10,8 @@
 
 La base local es `http://localhost:8080`. Todas las solicitudes y respuestas usan `application/json`. OpenAPI constituye la referencia ejecutable en `/v3/api-docs` y Swagger UI la representa en `/swagger-ui.html`.
 
+Salvo `/api/auth/login` y `POST /api/usuarios`, las rutas bajo `/api/**` requieren el encabezado `Authorization: Bearer <token>`.
+
 ## Recursos
 
 | Método | Ruta | Solicitud | Respuesta correcta |
@@ -44,10 +46,12 @@ La base local es `http://localhost:8080`. Todas las solicitudes y respuestas usa
 | Método | Ruta | Solicitud | Respuesta correcta |
 |---|---|---|---|
 | POST | `/api/auth/login` | `LoginRequest` | `200`, sesión activa |
-| POST | `/api/auth/logout` | `LogoutRequest` | `204` |
+| POST | `/api/auth/logout` | — | `204` |
 | GET | `/api/auth/sesion/{idUsuario}` | — | `200`, estado de sesión |
 
 Una cuenta con sesión activa no admite otro inicio. La API devuelve `409` y el mensaje `El usuario ya tiene una sesión activa. Cierre la sesión anterior antes de iniciar nuevamente.`.
+
+El token devuelto por el login debe enviarse como Bearer token en las solicitudes protegidas. Las operaciones administrativas requieren rol `admin`. La consulta de sesión o suscripción por usuario requiere ser el mismo usuario autenticado o tener rol `admin`.
 
 ## Solicitudes JSON
 
@@ -71,10 +75,6 @@ Una cuenta con sesión activa no admite otro inicio. La API devuelve `409` y el 
 {"correo":"ana@example.com","password":"ClaveSegura123"}
 ```
 
-```json
-{"idUsuario":3}
-```
-
 ## Respuestas JSON
 
 La respuesta de usuario nunca contiene contraseña ni hash:
@@ -86,7 +86,7 @@ La respuesta de usuario nunca contiene contraseña ni hash:
 La respuesta de sesión identifica su vigencia:
 
 ```json
-{"id":3,"usuarioId":3,"correo":"ana@example.com","rol":"usuario","activa":true,"fechaInicio":"2026-06-21T10:30:00","fechaCierre":null}
+{"id":3,"usuarioId":3,"correo":"ana@example.com","rol":"usuario","activa":true,"fechaInicio":"2026-06-21T10:30:00","fechaCierre":null,"token":"<bearer-token>","tokenExpira":"2026-06-21T16:30:00Z"}
 ```
 
 ## Errores
@@ -94,8 +94,8 @@ La respuesta de sesión identifica su vigencia:
 | Código | Condición |
 |---:|---|
 | 400 | Validación o solicitud inválida |
-| 401 | Credenciales incorrectas |
-| 403 | Operación sin permisos cuando se incorpore autorización por recurso |
+| 401 | Credenciales incorrectas, token ausente, inválido o expirado |
+| 403 | Operación sin permisos para el rol o usuario autenticado |
 | 404 | Recurso inexistente |
 | 409 | Correo, código, suscripción o sesión duplicada; restricción de integridad |
 | 500 | Error interno controlado |

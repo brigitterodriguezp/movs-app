@@ -22,17 +22,21 @@ Las credenciales y configuraciones sensibles deben mantenerse fuera del reposito
 
 Las cuentas demo deben eliminarse, deshabilitarse o rotarse antes de un despliegue en producción.
 
+La variable `APP_SECURITY_JWT_SECRET` debe definirse con un valor fuerte y privado antes de ejecutar la aplicación fuera de desarrollo.
+
 ## 2. Diseño
 
 | ID | Control | Descripción | Estado |
 |---|---|---|---|
 | D-01 | Autenticación | La aplicación contempla autenticación de usuarios mediante credenciales y validación de contraseñas con `PasswordEncoder`. | Implementado |
-| D-02 | Autorización | Aunque existen roles de usuario, la autorización por roles todavía no está implementada en el backend. | Pendiente |
-| D-03 | Gestión de sesiones | La tabla `sesiones` mantiene una fila única por usuario. El inicio y cierre de sesión aplican bloqueo pesimista dentro de una transacción. | Implementado parcial |
-| D-04 | Control de sesión única | Un segundo inicio activo devuelve HTTP 409 para impedir sesiones simultáneas del mismo usuario. | Implementado |
-| D-05 | Protección de datos | Se limita la información expuesta mediante DTO, normalización de correo y omisión de contraseñas o hashes en respuestas. | Implementado |
-| D-06 | CORS | La configuración CORS se controla mediante `APP_ALLOWED_ORIGINS`, permitiendo restringir orígenes autorizados desde variables de entorno. | Implementado |
-| D-07 | HTTPS/TLS | En producción, la aplicación debe desplegarse usando HTTPS/TLS para proteger el tráfico entre cliente y servidor. | Pendiente |
+| D-02 | Autenticación por solicitud | Las rutas `/api/**`, excepto login y registro inicial de usuario, requieren `Authorization: Bearer <token>`. | Implementado |
+| D-03 | Autorización | El backend valida roles mediante controles de autorización para operaciones administrativas. | Implementado |
+| D-04 | Gestión de sesiones | La tabla `sesiones` mantiene una fila única por usuario. El inicio y cierre de sesión aplican bloqueo pesimista dentro de una transacción. | Implementado |
+| D-05 | Control de sesión única | Un segundo inicio activo devuelve HTTP 409 para impedir sesiones simultáneas del mismo usuario. | Implementado |
+| D-06 | Tokens de acceso | El inicio de sesión emite un token firmado con expiración configurable para validar solicitudes posteriores. | Implementado |
+| D-07 | Protección de datos | Se limita la información expuesta mediante DTO, normalización de correo y omisión de contraseñas o hashes en respuestas. | Implementado |
+| D-08 | CORS | La configuración CORS se controla mediante `APP_ALLOWED_ORIGINS`, permitiendo restringir orígenes autorizados desde variables de entorno. | Implementado |
+| D-09 | HTTPS/TLS | La aplicación permite exigir HTTPS mediante `APP_SECURITY_REQUIRE_HTTPS` en producción. | Implementado configurable |
 
 ## 3. Implementación
 
@@ -45,54 +49,55 @@ Las cuentas demo deben eliminarse, deshabilitarse o rotarse antes de un desplieg
 | I-05 | Integridad en base de datos | Las restricciones e índices de MySQL refuerzan la integridad de los datos. | Implementado |
 | I-06 | Consultas parametrizadas | Las consultas JPA parametrizadas reducen el riesgo de inyección SQL. | Implementado |
 | I-07 | Manejo seguro de errores | El manejador global entrega mensajes controlados. Las respuestas 500 no muestran trazas, consultas ni detalles internos. | Implementado |
+| I-08 | Validación de tokens | Un interceptor valida firma, expiración, sesión activa y rol antes de permitir acceso a rutas protegidas. | Implementado |
+| I-09 | Configuración de seguridad | La expiración de tokens, secreto de firma, rate limiting y exigencia de HTTPS se controlan mediante variables de entorno. | Implementado |
 
 ## 4. Verificación
 
 | ID | Verificación | Descripción | Estado |
 |---|---|---|---|
 | V-01 | Revisión contra OWASP ASVS | La seguridad debe verificarse revisando los controles implementados frente a OWASP ASVS. | Pendiente |
-| V-02 | Pruebas de autenticación | Se deben validar los flujos de inicio de sesión, credenciales inválidas y cierre de sesión. | Implementado parcial |
-| V-03 | Pruebas de sesión única | Se debe verificar que un segundo inicio activo devuelva HTTP 409. | Implementado parcial |
+| V-02 | Pruebas de autenticación | Se validan credenciales inválidas y rechazo de segunda sesión activa. | Implementado parcial |
+| V-03 | Pruebas de sesión única | Se verifica que un segundo inicio activo devuelva HTTP 409. | Implementado |
 | V-04 | Pruebas de manejo de errores | Se debe comprobar que los errores controlados no expongan trazas, consultas ni detalles internos. | Pendiente |
 | V-05 | Pruebas de protección de datos | Se debe verificar que las respuestas no incluyan contraseñas, hashes ni información sensible innecesaria. | Pendiente |
 | V-06 | Pruebas de validación de entrada | Se debe comprobar el comportamiento ante datos inválidos, campos obligatorios y formatos incorrectos. | Pendiente |
 | V-07 | Revisión de dependencias | Las dependencias del backend y frontend deben revisarse periódicamente para identificar vulnerabilidades conocidas. | Pendiente |
+| V-08 | Pruebas de autorización | Se deben agregar pruebas para rutas protegidas, roles administrativos y acceso propio por usuario. | Pendiente |
 
 ## 5. Operaciones
 
 | ID | Control operativo | Descripción | Estado |
 |---|---|---|---|
 | O-01 | Protección de logs | Los registros de la aplicación no deben incluir contraseñas, hashes, tokens ni información sensible. | Definido |
-| O-02 | Eventos de seguridad | Se recomienda registrar intentos de inicio de sesión, errores controlados y acciones críticas. | Pendiente |
-| O-03 | Límite de frecuencia | Debe incorporarse rate limiting para reducir ataques de fuerza bruta contra el inicio de sesión. | Pendiente |
+| O-02 | Eventos de seguridad | Se registran inicios de sesión exitosos, intentos fallidos y cierres de sesión sin contraseñas ni tokens. | Implementado básico |
+| O-03 | Límite de frecuencia | El login aplica límite configurable de intentos por origen y correo. | Implementado básico |
 | O-04 | Respaldo y recuperación | La base de datos debe contar con mecanismos de respaldo y recuperación antes de pasar a producción. | Pendiente |
 | O-05 | Reporte de vulnerabilidades | Debe definirse un canal para reportar vulnerabilidades encontradas en la aplicación. | Pendiente |
+| O-06 | HTTPS en producción | `APP_SECURITY_REQUIRE_HTTPS` permite rechazar solicitudes HTTP cuando se active en despliegues productivos. | Implementado configurable |
 
 ## 6. Riesgos conocidos
 
 | ID | Riesgo | Impacto | Estado | Mitigación prevista |
 |---|---|---|---|---|
-| R-01 | La API todavía no cuenta con autenticación por solicitud. | Los endpoints CRUD pueden ser consumidos sin validar la identidad del usuario en cada petición. | Pendiente | Implementar Spring Security con JWT, cookies seguras o un mecanismo equivalente. |
-| R-02 | La autorización por roles aún no está implementada en el backend. | Las restricciones aplicadas solo desde el frontend pueden ser omitidas al consumir la API directamente. | Pendiente | Implementar autorización por roles y permisos en backend. |
-| R-03 | El cierre y la consulta de sesión dependen del identificador del usuario. | Puede existir riesgo de suplantación si se manipula el `idUsuario`. | Pendiente | Asociar las operaciones de sesión a un token o contexto autenticado. |
-| R-04 | Las sesiones no tienen expiración automática documentada. | Una sesión activa depende del cierre manual. | Pendiente | Incorporar expiración, revocación y renovación controlada de sesiones. |
-| R-05 | El uso de HTTP sin TLS fuera de local expone el tráfico. | Credenciales y datos pueden viajar sin cifrado en entornos no seguros. | Pendiente | Exigir HTTPS/TLS en producción. |
-| R-06 | No existe límite de frecuencia para el inicio de sesión. | El endpoint de login puede ser más vulnerable a intentos repetidos de fuerza bruta. | Pendiente | Implementar rate limiting y bloqueo temporal ante intentos fallidos. |
-| R-07 | No existe una estrategia formal de auditoría y monitoreo de seguridad. | Puede dificultarse la detección de actividad sospechosa o incidentes. | Pendiente | Registrar eventos críticos y definir alertas de seguridad. |
-| R-08 | No se documenta un proceso periódico de revisión de dependencias. | Vulnerabilidades conocidas en librerías pueden pasar desapercibidas. | Pendiente | Incorporar revisión periódica con herramientas de análisis de dependencias. |
-| R-09 | Las cuentas demo pueden permanecer activas antes de producción. | Cuentas conocidas o débiles pueden facilitar accesos no autorizados. | Pendiente | Eliminar, deshabilitar o rotar cuentas demo antes del despliegue. |
+| R-01 | El secreto de firma tiene un valor por defecto solo apto para desarrollo. | Si no se cambia en producción, los tokens podrían quedar expuestos a falsificación. | Pendiente de configuración | Definir `APP_SECURITY_JWT_SECRET` con un valor fuerte y privado en producción. |
+| R-02 | El rate limiting implementado es en memoria. | En despliegues con varias instancias, cada instancia tendría su propio contador. | Riesgo residual | Usar Redis, base de datos o gateway/API manager para rate limiting distribuido. |
+| R-03 | No existen tokens de renovación rotativos. | El usuario debe volver a iniciar sesión cuando expire el token de acceso. | Riesgo aceptado temporal | Incorporar refresh tokens rotativos si se requiere una experiencia de sesión prolongada. |
+| R-04 | HTTPS depende de la configuración del despliegue. | Si `APP_SECURITY_REQUIRE_HTTPS` no se activa en producción, podría aceptarse tráfico HTTP. | Pendiente de configuración | Activar `APP_SECURITY_REQUIRE_HTTPS=true` y terminar TLS en proxy/servidor seguro. |
+| R-05 | No se documenta todavía un proceso periódico de revisión de dependencias. | Vulnerabilidades conocidas en librerías pueden pasar desapercibidas. | Pendiente | Incorporar revisión periódica con herramientas de análisis de dependencias. |
+| R-06 | Las cuentas demo pueden permanecer activas antes de producción. | Cuentas conocidas o débiles pueden facilitar accesos no autorizados. | Pendiente operativo | Eliminar, deshabilitar o rotar cuentas demo antes del despliegue. |
+| R-07 | No existe estrategia documentada de respaldo y recuperación. | Una pérdida o corrupción de datos podría dificultar la continuidad del servicio. | Pendiente operativo | Definir política de backups, periodicidad, cifrado y pruebas de restauración. |
+| R-08 | No existe canal formal de reporte de vulnerabilidades. | Hallazgos de seguridad podrían no llegar al equipo responsable. | Pendiente operativo | Publicar canal de contacto y procedimiento de respuesta. |
 
 ## 7. Mejoras futuras
 
 | ID | Mejora | Relacionado con | Prioridad | Descripción |
 |---|---|---|---|---|
-| M-01 | Implementar Spring Security | R-01, R-02 | Alta | Incorporar una capa formal de seguridad para autenticar solicitudes y proteger endpoints. |
-| M-02 | Usar JWT de corta duración | R-01, R-03, R-04 | Alta | Emitir tokens con expiración limitada para reducir el impacto de sesiones comprometidas. |
-| M-03 | Incorporar tokens de renovación rotativos | R-04 | Media | Permitir renovación controlada de sesión reduciendo el riesgo de reutilización de tokens. |
-| M-04 | Aplicar autorización por roles | R-02 | Alta | Restringir operaciones según rol, por ejemplo `admin` o `usuario`, desde el backend. |
-| M-05 | Agregar revocación centralizada | R-03, R-04 | Media | Permitir invalidar sesiones o tokens activos desde el servidor. |
-| M-06 | Exigir HTTPS/TLS en producción | R-05 | Alta | Proteger credenciales y datos transmitidos entre cliente y servidor. |
-| M-07 | Implementar límites de frecuencia | R-06 | Media | Reducir intentos repetidos de inicio de sesión y ataques de fuerza bruta. |
-| M-08 | Definir auditoría y monitoreo | R-07 | Media | Registrar eventos de seguridad y habilitar alertas ante actividad sospechosa. |
-| M-09 | Automatizar revisión de dependencias | R-08 | Media | Revisar periódicamente librerías del backend y frontend para detectar vulnerabilidades conocidas. |
-| M-10 | Gestionar cuentas demo antes de producción | R-09 | Alta | Eliminar, deshabilitar o rotar credenciales demo antes de desplegar en producción. |
+| M-01 | Migrar a Spring Security completo | R-01, R-03 | Media | Reemplazar o complementar la seguridad personalizada con filtros y configuración estándar de Spring Security. |
+| M-02 | Incorporar tokens de renovación rotativos | R-03 | Media | Permitir renovación controlada de sesión reduciendo el riesgo de reutilización de tokens. |
+| M-03 | Usar rate limiting distribuido | R-02 | Media | Centralizar los contadores de intentos usando Redis, base de datos o gateway. |
+| M-04 | Automatizar revisión de dependencias | R-05 | Media | Revisar periódicamente librerías del backend y frontend para detectar vulnerabilidades conocidas. |
+| M-05 | Gestionar cuentas demo antes de producción | R-06 | Alta | Eliminar, deshabilitar o rotar credenciales demo antes de desplegar en producción. |
+| M-06 | Formalizar respaldos y recuperación | R-07 | Alta | Definir política de backups, cifrado, retención y pruebas de restauración. |
+| M-07 | Definir canal de reporte de vulnerabilidades | R-08 | Media | Publicar un correo o proceso para recibir, clasificar y responder hallazgos de seguridad. |
+| M-08 | Ampliar pruebas de seguridad | V-04, V-05, V-06, V-08 | Alta | Agregar pruebas automatizadas para errores, datos sensibles, validaciones, tokens y roles. |

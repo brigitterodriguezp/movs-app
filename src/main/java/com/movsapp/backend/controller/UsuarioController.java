@@ -1,6 +1,7 @@
 package com.movsapp.backend.controller;
 
 import com.movsapp.backend.dto.*;
+import com.movsapp.backend.security.RequireRole;
 import com.movsapp.backend.service.UsuarioService;
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.responses.*;
@@ -13,6 +14,7 @@ import java.net.URI;
 import java.util.List;
 
 @RestController @RequestMapping("/api/usuarios") @RequiredArgsConstructor @Tag(name="Usuarios")
+@RequireRole("admin")
 public class UsuarioController {
     private final UsuarioService service;
     @GetMapping @Operation(summary="Lista usuarios") public List<UsuarioResponse> listar(){ return service.listar(); }

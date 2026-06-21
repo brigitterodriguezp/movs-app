@@ -4,6 +4,7 @@ import com.movsapp.backend.dto.*;
 import com.movsapp.backend.entity.*;
 import com.movsapp.backend.exception.*;
 import com.movsapp.backend.repository.*;
+import com.movsapp.backend.security.TokenService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -16,6 +17,7 @@ public class AuthService {
     private final UsuarioRepository usuarios;
     private final SesionRepository sesiones;
     private final PasswordEncoder encoder;
+    private final TokenService tokens;
 
     @Transactional
     public SesionResponse login(LoginRequest request) {
@@ -26,7 +28,7 @@ public class AuthService {
         LocalDateTime ahora=LocalDateTime.now();
         if(sesion==null) sesion=Sesion.builder().usuario(usuario).activa(true).fechaInicio(ahora).build();
         else { sesion.setActiva(true); sesion.setFechaInicio(ahora); sesion.setFechaCierre(null); }
-        return response(sesiones.save(sesion));
+        return responseWithToken(sesiones.save(sesion));
     }
     @Transactional
     public void logout(Long usuarioId) {
@@ -38,5 +40,9 @@ public class AuthService {
     public SesionResponse sesion(Long usuarioId) {
         return response(sesiones.findByUsuarioId(usuarioId).orElseThrow(() -> new RecursoNoEncontradoException("Sesión no encontrada.")));
     }
-    private SesionResponse response(Sesion s){ return new SesionResponse(s.getId(),s.getUsuario().getId(),s.getUsuario().getCorreo(),s.getUsuario().getRol().getNombre(),s.isActiva(),s.getFechaInicio(),s.getFechaCierre()); }
+    private SesionResponse response(Sesion s){ return new SesionResponse(s.getId(),s.getUsuario().getId(),s.getUsuario().getCorreo(),s.getUsuario().getRol().getNombre(),s.isActiva(),s.getFechaInicio(),s.getFechaCierre(),null,null); }
+    private SesionResponse responseWithToken(Sesion s){
+        TokenService.TokenData token = tokens.issue(s.getUsuario().getId(), s.getUsuario().getCorreo(), s.getUsuario().getRol().getNombre(), s.getId());
+        return new SesionResponse(s.getId(),s.getUsuario().getId(),s.getUsuario().getCorreo(),s.getUsuario().getRol().getNombre(),s.isActiva(),s.getFechaInicio(),s.getFechaCierre(),token.token(),token.expiresAt());
+    }
 }

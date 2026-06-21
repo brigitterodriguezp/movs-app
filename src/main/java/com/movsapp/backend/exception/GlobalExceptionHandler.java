@@ -27,6 +27,10 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> unauthorized(NoAutorizadoException ex, HttpServletRequest req) {
         return error(HttpStatus.UNAUTHORIZED, ex.getMessage(), req, Map.of());
     }
+    @ExceptionHandler(ProhibidoException.class)
+    ResponseEntity<ApiError> forbidden(ProhibidoException ex, HttpServletRequest req) {
+        return error(HttpStatus.FORBIDDEN, ex.getMessage(), req, Map.of());
+    }
     @ExceptionHandler(SolicitudInvalidaException.class)
     ResponseEntity<ApiError> badRequest(SolicitudInvalidaException ex, HttpServletRequest req) {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage(), req, Map.of());

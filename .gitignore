@@ -42,6 +42,7 @@ __screenshots__/
 # Maven
 target/
 .env
+.mvn/
 .maven-cache/
 pom.xml.tag
 pom.xml.releaseBackup
@@ -50,7 +51,6 @@ pom.xml.next
 release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
-.mvn/timing.properties
 
 # Java
 *.class
