@@ -3,24 +3,25 @@ import { onMounted, ref, computed } from 'vue'
 import {
   BadgeCheck, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
 } from '@lucide/vue'
-import plansData from '@/data/plans.json'
+import { currentUser, getUsers, getSubscriptions, createUser, updateUser, deleteUser as apiDeleteUser, createSubscription, updateSubscription, getPlans } from '@/services/api'
 
-const session = JSON.parse(localStorage.getItem('movieSession') || '{}')
-const isAdmin = session.rol === 'admin'
+const session = currentUser()
+const isAdmin = session?.rol === 'admin'
 
 const allUsers = ref([])
+const subscriptions = ref([])
+const plans = ref([])
 const isLoading = ref(true)
 const searchQuery = ref('')
 const showModal = ref(false)
 const editingUser = ref(null)
-const plans = plansData
 
 const form = ref({
   nombre: '',
   correo: '',
   password: '',
   rol: 'usuario',
-  plan: 'basic',
+  planApiId: null,
 })
 
 const deleteTarget = ref(null)
@@ -31,20 +32,47 @@ function clearSelfDelete() {
   selfDeleteUser.value = null
 }
 
+function getUserSubscription(userId) {
+  return subscriptions.value.find((s) => s.usuarioId === userId) || null
+}
+
+function getUserPlanName(userId) {
+  const sub = getUserSubscription(userId)
+  return sub?.plan || '—'
+}
+
+function getUserPlanEstado(userId) {
+  const sub = getUserSubscription(userId)
+  return sub?.estado || null
+}
+
+function getUserExpiry(userId) {
+  const sub = getUserSubscription(userId)
+  return sub?.fechaExpiracion || null
+}
+
+const mergedUsers = computed(() => {
+  return allUsers.value.map((u) => {
+    const sub = getUserSubscription(u.id)
+    return { ...u, suscripcion: sub ? { plan: sub.plan, estado: sub.estado, fechaExpiracion: sub.fechaExpiracion, fechaInicio: sub.fechaInicio, id: sub.id, planId: sub.planId } : null }
+  })
+})
+
 const filteredUsers = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
-  if (!q) return allUsers.value
-  return allUsers.value.filter(
+  if (!q) return mergedUsers.value
+  return mergedUsers.value.filter(
     (u) =>
       u.nombre?.toLowerCase().includes(q) ||
       u.correo?.toLowerCase().includes(q) ||
       u.rol?.toLowerCase().includes(q) ||
-      u.suscripcion?.plan?.toLowerCase().includes(q) ||
-      u.suscripcion?.estado?.toLowerCase().includes(q)
+      (u.suscripcion?.plan?.toLowerCase() || '').includes(q) ||
+      (u.suscripcion?.estado?.toLowerCase() || '').includes(q)
   )
 })
 
 function daysUntilExpiry(expiracion) {
+  if (!expiracion) return Infinity
   const diff = new Date(expiracion) - new Date()
   return Math.ceil(diff / 86400000)
 }
@@ -55,24 +83,45 @@ function expiracionColor(dias) {
   return ''
 }
 
-function loadUsers() {
-  allUsers.value = JSON.parse(localStorage.getItem('movieUsers') || '[]')
+async function loadData() {
+  try {
+    const [usersData, subsData, plansData] = await Promise.all([
+      getUsers(),
+      getSubscriptions(),
+      getPlans(),
+    ])
+    allUsers.value = usersData
+    subscriptions.value = subsData
+    plans.value = plansData.map((p) => ({
+      id: p.id,
+      codigo: p.codigo,
+      name: p.nombre,
+      price: `$${Number(p.precio).toFixed(2)}`,
+      benefits: p.beneficios || [],
+      duracionDias: p.duracionDias,
+    }))
+  } catch {
+    allUsers.value = []
+    subscriptions.value = []
+    plans.value = []
+  }
 }
 
 function openCreate() {
   editingUser.value = null
-  form.value = { nombre: '', correo: '', password: '', rol: 'usuario', plan: 'basic' }
+  form.value = { nombre: '', correo: '', password: '', rol: 'usuario', planApiId: plans.value[0]?.id || null }
   showModal.value = true
 }
 
 function openEdit(user) {
   editingUser.value = user
+  const sub = getUserSubscription(user.id)
   form.value = {
     nombre: user.nombre || '',
     correo: user.correo || '',
     password: '',
     rol: user.rol || 'usuario',
-    plan: user.suscripcion?.plan || 'basic',
+    planApiId: sub?.planId || plans.value[0]?.id || null,
   }
   showModal.value = true
 }
@@ -82,63 +131,49 @@ function closeModal() {
   editingUser.value = null
 }
 
-function saveUser() {
+async function saveUser() {
   if (!form.value.nombre.trim() || !form.value.correo.trim()) return
 
-  const saved = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-
-  if (editingUser.value) {
-    const idx = saved.findIndex((u) => u.id === editingUser.value.id)
-    if (idx === -1) return
-    saved[idx].nombre = form.value.nombre.trim()
-    if (form.value.password) saved[idx].password = form.value.password
-    if (saved[idx].suscripcion) {
-      saved[idx].suscripcion.plan = form.value.plan
-      const now = new Date()
-      const expiry = new Date(now)
-      expiry.setDate(expiry.getDate() + 30)
-      saved[idx].suscripcion.fecha_inicio = now.toISOString().slice(0, 10)
-      saved[idx].suscripcion.fecha_expiracion = expiry.toISOString().slice(0, 10)
-      const selectedPlan = plans.find((p) => p.id === form.value.plan)
-      if (selectedPlan) {
-        saved[idx].suscripcion.nombre = selectedPlan.name
-        saved[idx].suscripcion.precio = selectedPlan.price
-        saved[idx].suscripcion.beneficios = selectedPlan.benefits
+  try {
+    if (editingUser.value) {
+      await updateUser(editingUser.value.id, {
+        nombre: form.value.nombre.trim(),
+        correo: form.value.correo.trim(),
+        password: form.value.password || undefined,
+        rol: form.value.rol,
+      })
+      const sub = getUserSubscription(editingUser.value.id)
+      if (sub) {
+        await updateSubscription(sub.id, {
+          usuarioId: editingUser.value.id,
+          planId: form.value.planApiId,
+          fechaInicio: sub.fechaInicio,
+          estado: sub.estado,
+        })
       }
+    } else {
+      const user = await createUser({
+        nombre: form.value.nombre.trim(),
+        correo: form.value.correo.trim().toLowerCase(),
+        password: form.value.password,
+        rol: form.value.rol,
+      })
+      await createSubscription({
+        usuarioId: user.id,
+        planId: form.value.planApiId,
+        fechaInicio: new Date().toISOString().slice(0, 10),
+        estado: 'ACTIVA',
+      })
     }
-  } else {
-    const existing = saved.find((u) => u.correo === form.value.correo.trim().toLowerCase())
-    if (existing) return
-    const nextId = saved.reduce((max, u) => Math.max(max, u.id || 0), 0) + 1
-    const selectedPlan = plans.find((p) => p.id === form.value.plan)
-    const now = new Date()
-    const expiry = new Date(now); expiry.setDate(expiry.getDate() + 30)
-    saved.push({
-      id: nextId,
-      nombre: form.value.nombre.trim(),
-      correo: form.value.correo.trim().toLowerCase(),
-      password: form.value.password || 'default123',
-      rol: form.value.rol,
-      suscripcion: {
-        plan: form.value.plan,
-        nombre: selectedPlan?.name || form.value.plan,
-        precio: selectedPlan?.price || '',
-        beneficios: selectedPlan?.benefits || [],
-        estado: 'active',
-        fecha_inicio: now.toISOString().slice(0, 10),
-        fecha_expiracion: expiry.toISOString().slice(0, 10),
-      },
-    })
+    await loadData()
+    closeModal()
+  } catch (err) {
+    alert(err.message || 'Error al guardar usuario.')
   }
-
-  localStorage.setItem('movieUsers', JSON.stringify(saved))
-  loadUsers()
-  closeModal()
 }
 
 function deleteUser(user) {
-  const session = JSON.parse(localStorage.getItem('movieSession') || '{}')
-  if (session.correo === user.correo) {
+  if (session?.correo === user.correo) {
     selfDeleteUser.value = user
     setTimeout(() => { selfDeleteUser.value = null }, 2500)
     return
@@ -151,38 +186,39 @@ function deleteUser(user) {
   deleteTarget.value = user
 }
 
-function confirmDelete() {
+async function confirmDelete() {
   if (!deleteTarget.value) return
-  const saved = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-  const filtered = saved.filter((u) => u.id !== deleteTarget.value.id)
-  localStorage.setItem('movieUsers', JSON.stringify(filtered))
-  deleteTarget.value = null
-  loadUsers()
+  try {
+    await apiDeleteUser(deleteTarget.value.id)
+    deleteTarget.value = null
+    await loadData()
+  } catch (err) {
+    alert(err.message || 'Error al eliminar usuario.')
+  }
 }
 
 function cancelDelete() {
   deleteTarget.value = null
 }
 
-function deleteExpired() {
-  const saved = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-  const now = new Date()
-  const filtered = saved.filter((u) => {
-    if (!u.suscripcion?.fecha_expiracion) return true
-    return new Date(u.suscripcion.fecha_expiracion) > now
+async function deleteExpired() {
+  const expired = mergedUsers.value.filter((u) => {
+    if (!u.suscripcion?.fechaExpiracion) return false
+    return new Date(u.suscripcion.fechaExpiracion) <= new Date()
   })
-  const count = saved.length - filtered.length
-  if (!count) return
-  if (!confirm(`¿Eliminar ${count} usuario(s) con suscripción vencida?`)) return
-  localStorage.setItem('movieUsers', JSON.stringify(filtered))
-  loadUsers()
+  if (!expired.length) return
+  if (!confirm(`¿Eliminar ${expired.length} usuario(s) con suscripción vencida?`)) return
+  try {
+        await Promise.all(expired.map((u) => apiDeleteUser(u.id)))
+    await loadData()
+  } catch (err) {
+    alert(err.message || 'Error al eliminar usuarios vencidos.')
+  }
 }
 
-onMounted(() => {
-  window.setTimeout(() => {
-    loadUsers()
-    isLoading.value = false
-  }, 650)
+onMounted(async () => {
+  await loadData()
+  isLoading.value = false
 })
 </script>
 
@@ -275,27 +311,27 @@ onMounted(() => {
                 <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">
                   <span class="inline-flex items-center gap-1">
                     <BadgeCheck :size="13" style="color: var(--color-accent);" />
-                    {{ user.suscripcion?.nombre || user.suscripcion?.plan || '—' }}
+                    {{ user.suscripcion?.plan || '—' }}
                   </span>
                 </td>
                 <td class="px-4 py-3 sm:px-6">
                   <span
                     class="inline-flex items-center gap-1 rounded-pill px-2.5 py-0.5 text-xs font-medium"
-                    :style="user.suscripcion?.estado === 'active'
+                    :style="user.suscripcion?.estado === 'ACTIVA'
                       ? { background: 'var(--color-accent-bg)', color: 'var(--color-accent-text)' }
                       : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }"
                   >
-                    {{ user.suscripcion?.estado === 'active' ? 'Activa' : user.suscripcion?.estado || '—' }}
+                    {{ user.suscripcion?.estado === 'ACTIVA' ? 'Activa' : user.suscripcion?.estado || '—' }}
                   </span>
                 </td>
                 <td
                   class="px-4 py-3 font-medium sm:px-6"
-                  :class="user.suscripcion?.fecha_expiracion ? expiracionColor(daysUntilExpiry(user.suscripcion.fecha_expiracion)) : ''"
+                  :class="user.suscripcion?.fechaExpiracion ? expiracionColor(daysUntilExpiry(user.suscripcion.fechaExpiracion)) : ''"
                 >
-                  <template v-if="user.suscripcion?.fecha_expiracion">
-                    {{ user.suscripcion.fecha_expiracion }}
-                    <span v-if="daysUntilExpiry(user.suscripcion.fecha_expiracion) >= 0">
-                      ({{ daysUntilExpiry(user.suscripcion.fecha_expiracion) }}d)
+                  <template v-if="user.suscripcion?.fechaExpiracion">
+                    {{ user.suscripcion.fechaExpiracion }}
+                    <span v-if="daysUntilExpiry(user.suscripcion.fechaExpiracion) >= 0">
+                      ({{ daysUntilExpiry(user.suscripcion.fechaExpiracion) }}d)
                     </span>
                     <span v-else style="color: var(--color-error);">(vencida)</span>
                   </template>
@@ -428,19 +464,19 @@ onMounted(() => {
                 :style="editingUser ? { opacity: 0.6 } : {}"
               />
             </div>
-            <div v-if="!editingUser">
+            <div>
               <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="modal-password">
-                <span>Contraseña</span>
+                <span>Contraseña {{ editingUser ? '(dejar vacío para mantener)' : '' }}</span>
               </label>
               <input
                 id="modal-password"
                 v-model="form.password"
                 class="form-control rounded-pill px-4 py-2.5 text-sm"
                 type="password"
-                required
+                :required="!editingUser"
               />
             </div>
-            <div v-if="!editingUser">
+            <div>
               <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="modal-rol">
                 <ShieldCheck :size="15" />
                 <span>Rol</span>
@@ -455,7 +491,7 @@ onMounted(() => {
                 <BadgeCheck :size="15" />
                 <span>Plan de suscripción</span>
               </label>
-              <select id="modal-plan" v-model="form.plan" class="form-control rounded-pill px-4 py-2.5 text-sm">
+              <select id="modal-plan" v-model="form.planApiId" class="form-control rounded-pill px-4 py-2.5 text-sm">
                 <option v-for="plan in plans" :key="plan.id" :value="plan.id">{{ plan.name }} — {{ plan.price }}/mes</option>
               </select>
             </div>

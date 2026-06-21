@@ -2,38 +2,31 @@
 import { computed, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { ChevronDown, Clapperboard, Home, Info, LogIn, LogOut, Moon, ShieldCheck, Sun, User, UserPlus, Users } from '@lucide/vue'
+import { getSession, currentUser, logout as apiLogout } from '@/services/api'
 
 const route = useRoute()
 const router = useRouter()
 const isDark = ref(document.documentElement.classList.contains('dark'))
 const showMenu = ref(false)
 
-const hasSession = computed(() => {
-  route.fullPath
-  return Boolean(localStorage.getItem('movieSession'))
-})
-
 const sessionData = computed(() => {
   route.fullPath
-  const s = localStorage.getItem('movieSession')
-  return s ? JSON.parse(s) : null
+  return currentUser()
 })
+
+const hasSession = computed(() => Boolean(sessionData.value?.token))
 
 const isAdmin = computed(() => sessionData.value?.rol === 'admin')
 
-const firstName = computed(() => {
-  const users = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-  const u = users.find((x) => x.correo === sessionData.value?.correo)
-  return u?.nombre?.split(' ')[0] || 'Mi cuenta'
-})
+const firstName = computed(() => sessionData.value?.correo?.split('@')[0] || 'Mi cuenta')
 
 function closeMenu() {
   showMenu.value = false
 }
 
-function signOut() {
+async function signOut() {
   closeMenu()
-  localStorage.removeItem('movieSession')
+  await apiLogout()
   router.push('/signin')
 }
 
@@ -49,7 +42,6 @@ function toggleTheme(e) {
     const transition = document.startViewTransition(() => {
       isDark.value = next
       document.documentElement.classList.toggle('dark', next)
-      localStorage.setItem('movieTheme', next ? 'dark' : 'light')
     })
     transition.finished.finally(() => {
       document.documentElement.classList.remove('theme-transition')
@@ -57,7 +49,6 @@ function toggleTheme(e) {
   } else {
     isDark.value = !isDark.value
     document.documentElement.classList.toggle('dark', isDark.value)
-    localStorage.setItem('movieTheme', isDark.value ? 'dark' : 'light')
   }
 }
 

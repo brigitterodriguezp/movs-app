@@ -4,7 +4,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Eye, EyeOff, KeyRound, LogIn, Mail } from '@lucide/vue'
 import signinCover from '@/assets/movies/main-cover.png'
-import seedUsers from '@/data/users.json'
+import { login } from '@/services/api'
 
 const router = useRouter()
 const error = ref('')
@@ -18,53 +18,24 @@ const form = reactive({
 const showClave = ref(false)
 
 onMounted(() => {
-  const existing = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-  for (const seed of seedUsers) {
-    const idx = existing.findIndex((u) => u.id === seed.id)
-    if (idx !== -1) {
-      existing[idx] = seed
-    } else {
-      existing.push(seed)
-    }
-  }
-  localStorage.setItem('movieUsers', JSON.stringify(existing))
-  const saved = localStorage.getItem('rememberedUser')
-  if (saved) {
-    const data = JSON.parse(saved)
-    form.correo = data.correo
-    form.clave = data.clave
-    form.recordar = true
-  }
-  window.setTimeout(() => {
-    isLoading.value = false
-  }, 650)
+  isLoading.value = false
 })
 
-function submitSignin() {
+async function submitSignin() {
   error.value = ''
-  const savedUsers = JSON.parse(localStorage.getItem('movieUsers') || '[]')
   const correo = form.correo.trim().toLowerCase()
 
-  if (!savedUsers.length) {
-    error.value = 'Primero crea una cuenta.'
+  if (!correo || !form.clave) {
+    error.value = 'Ingresa correo y clave.'
     return
   }
 
-  const user = savedUsers.find((u) => u.correo === correo && u.password === form.clave)
-
-  if (!user) {
-    error.value = 'Correo o clave incorrectos.'
-    return
+  try {
+    const session = await login(correo, form.clave)
+    router.push(session.rol === 'admin' ? '/admin' : '/app')
+  } catch (err) {
+    error.value = err.message || 'Correo o clave incorrectos.'
   }
-
-  if (form.recordar) {
-    localStorage.setItem('rememberedUser', JSON.stringify({ correo, clave: form.clave }))
-  } else {
-    localStorage.removeItem('rememberedUser')
-  }
-
-  localStorage.setItem('movieSession', JSON.stringify({ correo, rol: user.rol }))
-  router.push(user.rol === 'admin' ? '/admin' : '/app')
 }
 </script>
 

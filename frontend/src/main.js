@@ -6,10 +6,7 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import router from './router'
 
-const savedTheme = localStorage.getItem('movieTheme')
-const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-
-if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+if (window.matchMedia('(prefers-color-scheme: dark)').matches) {
   document.documentElement.classList.add('dark')
 }
 

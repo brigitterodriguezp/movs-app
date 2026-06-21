@@ -3,11 +3,12 @@ import SignupSkeleton from '@/components/skeletons/SignupSkeleton/SignupSkeleton
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { BadgeCheck, CreditCard, KeyRound, Mail, ShieldCheck, User, UserPlus, Users } from '@lucide/vue'
+import { api, login } from '@/services/api'
 import plansData from '@/data/plans.json'
 
 const router = useRouter()
 const isLoading = ref(true)
-const plans = plansData
+const plans = ref([])
 
 const form = reactive({
   nombres: '',
@@ -38,9 +39,14 @@ const errors = reactive({
 })
 
 onMounted(() => {
-  window.setTimeout(() => {
-    isLoading.value = false
-  }, 650)
+  plans.value = plansData.map((plan) => ({
+    id: plan.id,
+    name: plan.name,
+    price: plan.price,
+    benefits: plan.benefits || [],
+  }))
+  if (plans.value.length) form.plan = plans.value[0].id
+  isLoading.value = false
 })
 
 function cardDigits() {
@@ -81,7 +87,7 @@ function formatExpiry() {
   form.cardExpiry = value.length > 2 ? `${value.slice(0, 2)}/${value.slice(2)}` : value
 }
 
-function submitSignup() {
+async function submitSignup() {
   errors.nombres = ''
   errors.apellidos = ''
   errors.correo = ''
@@ -143,48 +149,36 @@ function submitSignup() {
   }
 
   const correo = form.correo.trim().toLowerCase()
-  const savedUsers = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-
-  if (savedUsers.some((u) => u.correo === correo)) {
-    errors.correo = 'Ya existe una cuenta con ese correo.'
+  const selectedPlanCode = form.plan
+  if (!selectedPlanCode) {
+    errors.cardName = 'Selecciona un plan disponible.'
     return
   }
 
-  const selectedPlan = plans.find((plan) => plan.id === form.plan)
-  const now = new Date()
-  const fechaInicio = now.toISOString().slice(0, 10)
-  const expiryDate = new Date(now)
-  expiryDate.setDate(expiryDate.getDate() + 30)
-  const fechaExpiracion = expiryDate.toISOString().slice(0, 10)
-  const nextId = savedUsers.reduce((max, u) => Math.max(max, u.id || 0), 0) + 1
-
-  const user = {
-    id: nextId,
-    nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
-    correo,
-    password: form.clave,
-    rol: form.rol,
-    suscripcion: {
-      plan: form.plan,
-      nombre: selectedPlan?.name || form.plan,
-      precio: selectedPlan?.price || '',
-      beneficios: selectedPlan?.benefits || [],
-      estado: 'active',
-      fecha_inicio: fechaInicio,
-      fecha_expiracion: fechaExpiracion,
-    },
-    pago: {
-      metodo: 'card',
-      titular: capitalize(form.cardName),
-      marca: detectCardBrand(cardNumber),
-      ultimos4: cardNumber.slice(-4),
-      vencimiento: form.cardExpiry,
-    },
+  try {
+    const [user, apiPlans] = await Promise.all([
+      api.post('/api/usuarios', {
+        nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
+        correo,
+        password: form.clave,
+        rol: form.rol,
+      }),
+      api.get('/api/planes'),
+    ])
+    const apiPlan = apiPlans.find((p) => p.codigo === selectedPlanCode)
+    await Promise.all([
+      login(correo, form.clave),
+      api.post('/api/suscripciones', {
+        usuarioId: user.id,
+        planId: apiPlan.id,
+        fechaInicio: new Date().toISOString().slice(0, 10),
+        estado: 'ACTIVA',
+      }),
+    ])
+    router.push(form.rol === 'admin' ? '/admin' : '/app')
+  } catch (err) {
+    errors.correo = err.message || 'No se pudo crear la cuenta.'
   }
-
-  savedUsers.push(user)
-  localStorage.setItem('movieUsers', JSON.stringify(savedUsers))
-  router.push('/signin')
 }
 </script>
 

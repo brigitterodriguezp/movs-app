@@ -52,6 +52,7 @@ public class ApiSecurityInterceptor implements HandlerInterceptor {
         String uri = request.getRequestURI();
         return "OPTIONS".equalsIgnoreCase(request.getMethod())
             || "/api/auth/login".equals(uri)
+            || ("/api/planes".equals(uri) && "GET".equalsIgnoreCase(request.getMethod()))
             || ("/api/usuarios".equals(uri) && "POST".equalsIgnoreCase(request.getMethod()))
             || uri.startsWith("/swagger-ui")
             || uri.startsWith("/v3/api-docs");

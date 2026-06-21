@@ -12,8 +12,7 @@ public class SuscripcionController {
  @RequireRole("admin")
  @GetMapping("/{id}") @Operation(summary="Obtiene una suscripción") public SuscripcionResponse obtener(@PathVariable Long id){return service.obtener(id);}
  @GetMapping("/usuario/{idUsuario}") @Operation(summary="Obtiene la suscripción de un usuario") public SuscripcionResponse porUsuario(@PathVariable Long idUsuario){SecurityContext.requireSelfOrAdmin(idUsuario);return service.porUsuario(idUsuario);}
- @RequireRole("admin")
- @PostMapping @Operation(summary="Crea una suscripción") public ResponseEntity<SuscripcionResponse> crear(@Valid @RequestBody SuscripcionRequest r){SuscripcionResponse x=service.crear(r);return ResponseEntity.created(URI.create("/api/suscripciones/"+x.id())).body(x);}
+ @PostMapping @Operation(summary="Crea una suscripción") public ResponseEntity<SuscripcionResponse> crear(@Valid @RequestBody SuscripcionRequest r){SecurityContext.requireSelfOrAdmin(r.usuarioId());SuscripcionResponse x=service.crear(r);return ResponseEntity.created(URI.create("/api/suscripciones/"+x.id())).body(x);}
  @RequireRole("admin")
  @PutMapping("/{id}") @Operation(summary="Actualiza una suscripción") public SuscripcionResponse actualizar(@PathVariable Long id,@Valid @RequestBody SuscripcionRequest r){return service.actualizar(id,r);}
  @RequireRole("admin")

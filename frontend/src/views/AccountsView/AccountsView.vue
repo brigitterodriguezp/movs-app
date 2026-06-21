@@ -1,9 +1,11 @@
 <script setup>
 import { onMounted, ref } from 'vue'
-import { BadgeCheck, Calendar, Clock, CreditCard, Mail, ShieldCheck, User } from '@lucide/vue'
+import { BadgeCheck, Calendar, Clock, Mail, ShieldCheck, User } from '@lucide/vue'
+import { currentUser, getMyProfile, getSubscriptionByUser } from '@/services/api'
 
-const session = JSON.parse(localStorage.getItem('movieSession') || '{}')
+const session = currentUser()
 const user = ref(null)
+const subscription = ref(null)
 const isLoading = ref(true)
 
 function daysUntilExpiry(expiracion) {
@@ -17,12 +19,20 @@ function expiracionColor(dias) {
   return ''
 }
 
-onMounted(() => {
-  window.setTimeout(() => {
-    const users = JSON.parse(localStorage.getItem('movieUsers') || '[]')
-    user.value = users.find((u) => u.correo === session.correo) || null
+onMounted(async () => {
+  try {
+    const [profile, sub] = await Promise.all([
+      getMyProfile(),
+      getSubscriptionByUser(session.usuarioId),
+    ])
+    user.value = profile
+    subscription.value = sub
+  } catch {
+    user.value = null
+    subscription.value = null
+  } finally {
     isLoading.value = false
-  }, 650)
+  }
 })
 </script>
 
@@ -59,13 +69,14 @@ onMounted(() => {
         <div class="flex items-center gap-2">
           <h2 class="truncate text-lg font-semibold" style="color: var(--color-text);">{{ user.nombre }}</h2>
           <span
+            v-if="subscription"
             class="inline-flex shrink-0 items-center gap-1 rounded-pill px-2.5 py-0.5 text-[0.65rem] font-medium"
-            :style="user.suscripcion?.estado === 'active'
+            :style="subscription.estado === 'ACTIVA'
               ? { background: 'var(--color-accent-bg)', color: 'var(--color-accent-text)' }
               : { background: 'var(--color-surface)', color: 'var(--color-text-secondary)' }"
           >
             <ShieldCheck :size="11" />
-            {{ user.suscripcion?.estado === 'active' ? 'Activa' : user.suscripcion?.estado }}
+            {{ subscription.estado === 'ACTIVA' ? 'Activa' : subscription.estado }}
           </span>
         </div>
 
@@ -74,62 +85,50 @@ onMounted(() => {
           {{ user.correo }}
         </p>
 
-        <div class="mt-3 flex flex-wrap gap-3">
+        <div v-if="subscription" class="mt-3 flex flex-wrap gap-3">
           <div class="flex-1 min-w-[14rem] rounded-xl border p-3" style="border-color: var(--color-border); background: var(--color-surface-strong);">
             <p class="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wider" style="color: var(--color-text-muted);">Plan</p>
-            <p class="text-base font-semibold" style="color: var(--color-text);">{{ user.suscripcion?.nombre || user.suscripcion?.plan }}</p>
-            <p class="text-xs" style="color: var(--color-text-muted);">{{ user.suscripcion?.precio }}/mes</p>
-            <div class="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5">
-              <span
-                v-for="benefit in user.suscripcion?.beneficios"
-                :key="benefit"
-                class="inline-flex items-center gap-1 text-[0.65rem]"
-                style="color: var(--color-text-secondary);"
-              >
-                <ShieldCheck :size="10" style="color: var(--color-accent);" />
-                {{ benefit }}
-              </span>
-            </div>
+            <p class="text-base font-semibold" style="color: var(--color-text);">{{ subscription.plan }}</p>
+            <p class="text-xs" style="color: var(--color-text-muted);">{{ subscription.id }}</p>
           </div>
 
-          <div class="relative flex-1 min-w-[14rem] overflow-hidden rounded-xl p-3" style="background: linear-gradient(135deg, #c41e3a, #ff2d55); color: #fff;">
-            <div class="mb-2 flex items-center justify-between">
-              <span class="text-[0.55rem] font-medium uppercase tracking-widest" style="color: rgba(255,255,255,0.65);">{{ user.pago?.marca || 'Tarjeta' }}</span>
-              <CreditCard :size="15" style="color: rgba(255,255,255,0.65);" />
-            </div>
-            <p class="mb-2 font-mono text-sm tracking-[0.2em]">
-              •••• •••• •••• {{ user.pago?.ultimos4 || '••••' }}
+          <div class="flex-1 min-w-[14rem] rounded-xl border p-3" style="border-color: var(--color-border); background: var(--color-surface-strong);">
+            <p class="mb-0.5 text-[0.6rem] font-medium uppercase tracking-wider" style="color: var(--color-text-muted);">Detalles</p>
+            <p class="text-xs" style="color: var(--color-text-muted);">
+              Inicio: {{ subscription.fechaInicio }}
             </p>
-            <div class="flex items-center justify-between text-[0.6rem]">
-              <div>
-                <p style="color: rgba(255,255,255,0.65);">Titular</p>
-                <p class="font-medium truncate max-w-[9rem]">{{ user.pago?.titular || user.nombre }}</p>
-              </div>
-              <div class="text-right shrink-0">
-                <p style="color: rgba(255,255,255,0.65);">Vence</p>
-                <p class="font-medium">{{ user.pago?.vencimiento || '—' }}</p>
-              </div>
-            </div>
-            <div class="absolute -bottom-3 -right-3 h-14 w-14 rounded-full" style="background: rgba(255,255,255,0.12);" />
-            <div class="absolute -bottom-1 -right-1 h-7 w-7 rounded-full" style="background: rgba(255,255,255,0.12);" />
+            <p class="text-xs" style="color: var(--color-text-muted);">
+              Expira: {{ subscription.fechaExpiracion }}
+              <span v-if="daysUntilExpiry(subscription.fechaExpiracion) >= 0">
+                ({{ daysUntilExpiry(subscription.fechaExpiracion) }}d)
+              </span>
+              <span v-else style="color: var(--color-error);">(vencida)</span>
+            </p>
           </div>
         </div>
 
-        <div class="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-t pt-3 text-[0.65rem]" style="border-color: var(--color-border-subtle);">
+        <div v-if="!subscription" class="mt-3 rounded-xl border p-3 text-center" style="border-color: var(--color-border); background: var(--color-surface-strong);">
+          <p class="text-sm" style="color: var(--color-text-muted);">Sin suscripción activa</p>
+          <RouterLink class="btn rounded-pill px-4 py-2 mt-2 soft-button glass-accent-btn" to="/signup">
+            Adquirir plan
+          </RouterLink>
+        </div>
+
+        <div v-if="subscription" class="mt-3 flex flex-wrap gap-x-5 gap-y-1 border-t pt-3 text-[0.65rem]" style="border-color: var(--color-border-subtle);">
           <p class="inline-flex items-center gap-1.5" style="color: var(--color-text-muted);">
             <Calendar :size="12" />
-            Inicio: {{ user.suscripcion?.fecha_inicio || '—' }}
+            Inicio: {{ subscription.fechaInicio || '—' }}
           </p>
           <p
             class="inline-flex items-center gap-1.5 font-medium"
-            :class="user.suscripcion?.fecha_expiracion ? expiracionColor(daysUntilExpiry(user.suscripcion.fecha_expiracion)) : ''"
+            :class="subscription.fechaExpiracion ? expiracionColor(daysUntilExpiry(subscription.fechaExpiracion)) : ''"
             style="color: var(--color-text-muted);"
           >
             <Clock :size="12" />
-            <template v-if="user.suscripcion?.fecha_expiracion">
-              Expira: {{ user.suscripcion.fecha_expiracion }}
-              <template v-if="daysUntilExpiry(user.suscripcion.fecha_expiracion) >= 0">
-                ({{ daysUntilExpiry(user.suscripcion.fecha_expiracion) }}d)
+            <template v-if="subscription.fechaExpiracion">
+              Expira: {{ subscription.fechaExpiracion }}
+              <template v-if="daysUntilExpiry(subscription.fechaExpiracion) >= 0">
+                ({{ daysUntilExpiry(subscription.fechaExpiracion) }}d)
               </template>
               <template v-else>(vencida)</template>
             </template>

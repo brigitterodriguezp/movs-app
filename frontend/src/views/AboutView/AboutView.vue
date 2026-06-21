@@ -14,9 +14,7 @@ import { onMounted, ref } from 'vue'
 const isLoading = ref(true)
 
 onMounted(() => {
-  window.setTimeout(() => {
-    isLoading.value = false
-  }, 650)
+  isLoading.value = false
 })
 
 const carouselMovies = [

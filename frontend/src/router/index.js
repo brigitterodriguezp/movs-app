@@ -8,6 +8,7 @@ import AccountsView from '../views/AccountsView/AccountsView.vue'
 import AdminView from '../views/AdminView/AdminView.vue'
 import UnauthorizedView from '../views/UnauthorizedView/UnauthorizedView.vue'
 import NotFoundView from '../views/NotFoundView/NotFoundView.vue'
+import { getSession } from '../services/api'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -65,11 +66,14 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const session = localStorage.getItem('movieSession')
-  const sessionData = session ? JSON.parse(session) : null
+  const sessionData = getSession()
 
-  if ((to.path === '/app' || to.path === '/movies') && !sessionData) {
+  if ((to.path === '/app' || to.path === '/movies' || to.path === '/admin') && !sessionData) {
     return '/signin'
+  }
+
+  if (to.path === '/admin' && sessionData?.rol !== 'admin') {
+    return '/unauthorized'
   }
 })
 

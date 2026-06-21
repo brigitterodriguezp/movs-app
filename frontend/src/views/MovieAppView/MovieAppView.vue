@@ -35,9 +35,7 @@ const movies = computed(() => {
 })
 
 onMounted(() => {
-  window.setTimeout(() => {
-    isLoading.value = false
-  }, 750)
+  isLoading.value = false
 })
 </script>
 

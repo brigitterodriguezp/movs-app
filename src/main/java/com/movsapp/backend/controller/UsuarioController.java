@@ -1,7 +1,7 @@
 package com.movsapp.backend.controller;
 
 import com.movsapp.backend.dto.*;
-import com.movsapp.backend.security.RequireRole;
+import com.movsapp.backend.security.*;
 import com.movsapp.backend.service.UsuarioService;
 import io.swagger.v3.oas.annotations.*;
 import io.swagger.v3.oas.annotations.responses.*;
@@ -17,6 +17,9 @@ import java.util.List;
 @RequireRole("admin")
 public class UsuarioController {
     private final UsuarioService service;
+    @GetMapping("/me") @RequireRole({"admin","usuario"}) @Operation(summary="Obtiene el perfil del usuario autenticado")
+    public UsuarioResponse perfil(){ return service.obtener(SecurityContext.current().id()); }
+
     @GetMapping @Operation(summary="Lista usuarios") public List<UsuarioResponse> listar(){ return service.listar(); }
     @GetMapping("/{id}") @Operation(summary="Obtiene un usuario") public UsuarioResponse obtener(@PathVariable Long id){ return service.obtener(id); }
     @GetMapping("/rol/{rol}") @Operation(summary="Filtra usuarios por rol") public List<UsuarioResponse> porRol(@PathVariable String rol){ return service.porRol(rol); }

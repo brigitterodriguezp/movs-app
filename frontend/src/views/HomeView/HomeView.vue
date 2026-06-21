@@ -17,9 +17,7 @@ onMounted(() => {
     document.documentElement.style.overflow = 'hidden'
     document.body.style.overflow = 'hidden'
   }
-  window.setTimeout(() => {
-    isLoading.value = false
-  }, 650)
+  isLoading.value = false
 })
 
 onUnmounted(() => {
@@ -31,8 +29,6 @@ function startVideo() {
   if (!videoRef.value) return
   videoVisible.value = true
   isPlaying.value = true
-  const savedTime = parseFloat(localStorage.getItem('movieTrailerTime') || '0')
-  videoRef.value.currentTime = savedTime
   videoRef.value.volume = 0
   videoRef.value.play()
   const interval = setInterval(() => {
@@ -69,9 +65,6 @@ function dismissWelcome() {
 }
 
 function onTimeUpdate() {
-  if (videoRef.value) {
-    localStorage.setItem('movieTrailerTime', videoRef.value.currentTime)
-  }
 }
 
 function onVideoEnded() {
