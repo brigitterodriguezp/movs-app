@@ -107,17 +107,17 @@ erDiagram
   PELICULA { bigint id PK }
 ```
 
-### Descripción de entidades
+### Explicación de cada entidad
 
-| Entidad           | Descripción                                                                   |
-| ----------------- | ----------------------------------------------------------------------------- |
-| `roles`           | Catálogo de roles del sistema (`admin`, `usuario`)                            |
-| `usuarios`        | Usuarios registrados con nombre, correo único y contraseña hasheada           |
-| `planes`          | Planes de suscripción con código único, nombre, precio y duración en días     |
-| `plan_beneficios` | Beneficios asociados a cada plan (ordenados)                                  |
-| `suscripciones`   | Suscripción activa de un usuario a un plan, con fechas de inicio y expiración |
-| `peliculas`       | Catálogo de películas con título, año, género, descripción e imagen           |
-| `sesiones`        | Control de sesión única por usuario con marca de inicio y cierre              |
+| Entidad | Propósito | Relaciones | Datos que almacena |
+|---|---|---|---|
+| `roles` | Catálogo fijo de roles del sistema | Un rol → muchos usuarios | `id`, `nombre` (`admin`, `usuario`) |
+| `usuarios` | Representa una cuenta registrada | Muchos usuarios → un rol; un usuario → una suscripción; un usuario → una sesión | `id`, `nombre`, `correo` (único), `password_hash`, `rol_id` |
+| `planes` | Planes de suscripción disponibles | Un plan → muchas suscripciones; un plan → muchos beneficios | `id`, `codigo` (único), `nombre` (único), `precio`, `duracion_dias` |
+| `plan_beneficios` | Beneficios desglosados de cada plan | Muchos beneficios → un plan | `plan_id`, `orden`, `beneficio` |
+| `suscripciones` | Vínculo entre un usuario y un plan | Una suscripción → un usuario; una suscripción → un plan | `id`, `usuario_id` (único), `plan_id`, `fecha_inicio`, `fecha_expiracion`, `estado` |
+| `peliculas` | Catálogo de películas del sistema | No tiene FK | `id`, `titulo`, `anio`, `genero`, `descripcion`, `imagen_url`, `variante` |
+| `sesiones` | Control de sesión única por usuario | Una sesión → un usuario | `id`, `usuario_id` (único), `activa`, `fecha_inicio`, `fecha_cierre` |
 
 ### Claves primarias, foráneas y restricciones
 
