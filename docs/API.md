@@ -2,44 +2,16 @@
 
 ## Tabla de contenido
 
-1. [Recursos](#recursos)
-2. [Autenticación](#autenticación)
-3. [Solicitudes JSON](#solicitudes-json)
-4. [Respuestas JSON](#respuestas-json)
-5. [Errores](#errores)
+1. [Autenticación](#autenticación)
+2. [Usuarios](#usuarios)
+3. [Planes](#planes)
+4. [Suscripciones](#suscripciones)
+5. [Películas](#películas)
+6. [Errores](#errores)
 
 La base local es `http://localhost:8080`. Todas las solicitudes y respuestas usan `application/json`. OpenAPI constituye la referencia ejecutable en `/v3/api-docs` y Swagger UI la representa en `/swagger-ui.html`.
 
 Salvo `/api/auth/login` y `POST /api/usuarios`, las rutas bajo `/api/**` requieren el encabezado `Authorization: Bearer <token>`.
-
-## Recursos
-
-| Método | Ruta | Solicitud | Respuesta correcta |
-|---|---|---|---|
-| GET | `/api/usuarios` | — | `200`, lista de usuarios |
-| GET | `/api/usuarios/{id}` | — | `200`, usuario |
-| GET | `/api/usuarios/rol/{rol}` | — | `200`, lista filtrada |
-| POST | `/api/usuarios` | `UsuarioRequest` | `201`, usuario |
-| PUT | `/api/usuarios/{id}` | `UsuarioRequest` | `200`, usuario |
-| DELETE | `/api/usuarios/{id}` | — | `204` |
-| GET | `/api/planes` | — | `200`, lista de planes |
-| GET | `/api/planes/{id}` | — | `200`, plan |
-| POST | `/api/planes` | `PlanRequest` | `201`, plan |
-| PUT | `/api/planes/{id}` | `PlanRequest` | `200`, plan |
-| DELETE | `/api/planes/{id}` | — | `204` |
-| GET | `/api/suscripciones` | — | `200`, lista de suscripciones |
-| GET | `/api/suscripciones/{id}` | — | `200`, suscripción |
-| GET | `/api/suscripciones/usuario/{idUsuario}` | — | `200`, suscripción del usuario |
-| POST | `/api/suscripciones` | `SuscripcionRequest` | `201`, suscripción |
-| PUT | `/api/suscripciones/{id}` | `SuscripcionRequest` | `200`, suscripción |
-| DELETE | `/api/suscripciones/{id}` | — | `204` |
-| GET | `/api/peliculas` | — | `200`, lista de películas |
-| GET | `/api/peliculas/{id}` | — | `200`, película |
-| GET | `/api/peliculas/genero/{genero}` | — | `200`, lista filtrada |
-| GET | `/api/peliculas/buscar?titulo=texto` | — | `200`, coincidencias parciales |
-| POST | `/api/peliculas` | `PeliculaRequest` | `201`, película |
-| PUT | `/api/peliculas/{id}` | `PeliculaRequest` | `200`, película |
-| DELETE | `/api/peliculas/{id}` | — | `204` |
 
 ## Autenticación
 
@@ -53,40 +25,117 @@ Una cuenta con sesión activa no admite otro inicio. La API devuelve `409` y el 
 
 El token devuelto por el login debe enviarse como Bearer token en las solicitudes protegidas. Las operaciones administrativas requieren rol `admin`. La consulta de sesión o suscripción por usuario requiere ser el mismo usuario autenticado o tener rol `admin`.
 
-## Solicitudes JSON
-
-```json
-{"nombre":"Ana Pérez","correo":"ana@example.com","password":"ClaveSegura123","rol":"usuario"}
-```
-
-```json
-{"codigo":"basic","nombre":"Basic","precio":4.99,"duracionDias":30,"beneficios":["1 pantalla","Calidad HD"]}
-```
-
-```json
-{"usuarioId":3,"planId":1,"fechaInicio":"2026-06-21","estado":"ACTIVA"}
-```
-
-```json
-{"titulo":"Cover Story","anio":2026,"genero":"Drama","descripcion":"Descripción","imagenUrl":"001-cover.png","variante":"movie-card-featured"}
-```
+### Solicitud
 
 ```json
 {"correo":"ana@example.com","password":"ClaveSegura123"}
 ```
 
-## Respuestas JSON
+### Respuesta
 
-La respuesta de usuario nunca contiene contraseña ni hash:
+```json
+{"id":3,"usuarioId":3,"correo":"ana@example.com","rol":"usuario","activa":true,"fechaInicio":"2026-06-21T10:30:00","fechaCierre":null,"token":"<bearer-token>","tokenExpira":"2026-06-21T16:30:00Z"}
+```
+
+## Usuarios
+
+| Método | Ruta | Solicitud | Respuesta correcta |
+|---|---|---|---|
+| GET | `/api/usuarios` | — | `200`, lista de usuarios |
+| GET | `/api/usuarios/{id}` | — | `200`, usuario |
+| GET | `/api/usuarios/rol/{rol}` | — | `200`, lista filtrada |
+| GET | `/api/usuarios/me` | — | `200`, perfil del autenticado |
+| POST | `/api/usuarios` | `UsuarioRequest` | `201`, usuario creado |
+| PUT | `/api/usuarios/{id}` | `UsuarioRequest` | `200`, usuario actualizado |
+| DELETE | `/api/usuarios/{id}` | — | `204` |
+
+Salvo `POST /api/usuarios` (público) y `GET /api/usuarios/me` (autenticado), el resto requiere rol `admin`.
+
+### Solicitud
+
+```json
+{"nombre":"Ana Pérez","correo":"ana@example.com","password":"ClaveSegura123","rol":"usuario"}
+```
+
+### Respuesta
 
 ```json
 {"id":3,"nombre":"Ana Pérez","correo":"ana@example.com","rol":"usuario"}
 ```
 
-La respuesta de sesión identifica su vigencia:
+## Planes
+
+| Método | Ruta | Solicitud | Respuesta correcta |
+|---|---|---|---|
+| GET | `/api/planes` | — | `200`, lista de planes |
+| GET | `/api/planes/{id}` | — | `200`, plan |
+| POST | `/api/planes` | `PlanRequest` | `201`, plan creado |
+| PUT | `/api/planes/{id}` | `PlanRequest` | `200`, plan actualizado |
+| DELETE | `/api/planes/{id}` | — | `204` |
+
+`GET` es público; `POST`, `PUT` y `DELETE` requieren rol `admin`.
+
+### Solicitud
 
 ```json
-{"id":3,"usuarioId":3,"correo":"ana@example.com","rol":"usuario","activa":true,"fechaInicio":"2026-06-21T10:30:00","fechaCierre":null,"token":"<bearer-token>","tokenExpira":"2026-06-21T16:30:00Z"}
+{"codigo":"basic","nombre":"Basic","precio":4.99,"duracionDias":30,"beneficios":["1 pantalla","Calidad HD"]}
+```
+
+### Respuesta
+
+```json
+{"id":1,"codigo":"basic","nombre":"Basic","precio":4.99,"duracionDias":30,"beneficios":["1 pantalla","Calidad HD"]}
+```
+
+## Suscripciones
+
+| Método | Ruta | Solicitud | Respuesta correcta |
+|---|---|---|---|
+| GET | `/api/suscripciones` | — | `200`, lista de suscripciones |
+| GET | `/api/suscripciones/{id}` | — | `200`, suscripción |
+| GET | `/api/suscripciones/usuario/{idUsuario}` | — | `200`, suscripción del usuario |
+| POST | `/api/suscripciones` | `SuscripcionRequest` | `201`, suscripción creada |
+| PUT | `/api/suscripciones/{id}` | `SuscripcionRequest` | `200`, suscripción actualizada |
+| DELETE | `/api/suscripciones/{id}` | — | `204` |
+
+`GET /api/suscripciones/usuario/{idUsuario}` y `POST` requieren ser el mismo usuario o `admin`. El resto requiere `admin`.
+
+### Solicitud
+
+```json
+{"usuarioId":3,"planId":1,"fechaInicio":"2026-06-21","estado":"ACTIVA"}
+```
+
+### Respuesta
+
+```json
+{"id":1,"usuarioId":3,"planId":1,"plan":"Basic","fechaInicio":"2026-06-21","fechaExpiracion":"2026-07-21","estado":"ACTIVA"}
+```
+
+## Películas
+
+| Método | Ruta | Solicitud | Respuesta correcta |
+|---|---|---|---|
+| GET | `/api/peliculas` | — | `200`, lista de películas |
+| GET | `/api/peliculas/{id}` | — | `200`, película |
+| GET | `/api/peliculas/genero/{genero}` | — | `200`, lista filtrada |
+| GET | `/api/peliculas/buscar?titulo=texto` | — | `200`, coincidencias parciales |
+| POST | `/api/peliculas` | `PeliculaRequest` | `201`, película creada |
+| PUT | `/api/peliculas/{id}` | `PeliculaRequest` | `200`, película actualizada |
+| DELETE | `/api/peliculas/{id}` | — | `204` |
+
+`GET` es público; `POST`, `PUT` y `DELETE` requieren rol `admin`.
+
+### Solicitud
+
+```json
+{"titulo":"Cover Story","anio":2026,"genero":"Drama","descripcion":"Descripción","imagenUrl":"001-cover.png","variante":"movie-card-featured"}
+```
+
+### Respuesta
+
+```json
+{"id":1,"titulo":"Cover Story","anio":2026,"genero":"Drama","descripcion":"Descripción","imagenUrl":"001-cover.png","variante":"movie-card-featured"}
 ```
 
 ## Errores
