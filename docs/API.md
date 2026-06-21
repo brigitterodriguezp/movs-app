@@ -1,5 +1,13 @@
 # Contrato de la API
 
+## Tabla de contenido
+
+1. [Recursos](#recursos)
+2. [Autenticación](#autenticación)
+3. [Solicitudes JSON](#solicitudes-json)
+4. [Respuestas JSON](#respuestas-json)
+5. [Errores](#errores)
+
 La base local es `http://localhost:8080`. Todas las solicitudes y respuestas usan `application/json`. OpenAPI constituye la referencia ejecutable en `/v3/api-docs` y Swagger UI la representa en `/swagger-ui.html`.
 
 ## Recursos
