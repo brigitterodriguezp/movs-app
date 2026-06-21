@@ -105,6 +105,8 @@ erDiagram
   PELICULA { bigint id PK }
 ```
 
+### Descripción de entidades
+
 | Entidad           | Descripción                                                                   |
 | ----------------- | ----------------------------------------------------------------------------- |
 | `roles`           | Catálogo de roles del sistema (`admin`, `usuario`)                            |
@@ -114,6 +116,8 @@ erDiagram
 | `suscripciones`   | Suscripción activa de un usuario a un plan, con fechas de inicio y expiración |
 | `peliculas`       | Catálogo de películas con título, año, género, descripción e imagen           |
 | `sesiones`        | Control de sesión única por usuario con marca de inicio y cierre              |
+
+### Claves primarias, foráneas y restricciones
 
 | Entidad           | PK                 | UK                 | FK                                                      | Restricciones                                                                   |
 | ----------------- | ------------------ | ------------------ | ------------------------------------------------------- | ------------------------------------------------------------------------------- |
@@ -132,3 +136,55 @@ La API utiliza DTO para impedir que el hash forme parte de la serialización. JP
 ## Control de sesión única
 
 La restricción única de `sesiones.usuario_id` limita cada cuenta a un estado de sesión. El servicio bloquea esa fila con `PESSIMISTIC_WRITE`, comprueba `activa` y responde con conflicto antes de reabrirla. El cierre conserva la fecha de inicio, registra la fecha de cierre y permite el siguiente acceso.
+
+## Flujo completo API ↔ MySQL
+
+```mermaid
+sequenceDiagram
+  participant C as Cliente (Vue)
+  participant API as API REST (Spring Boot)
+  participant DB as MySQL
+
+  rect rgb(200, 240, 200)
+    Note over C,DB: Registro
+    C->>API: POST /api/usuarios
+    API->>DB: INSERT INTO usuarios
+    DB-->>API: fila creada
+    API-->>C: 201 usuario
+  end
+
+  rect rgb(200, 220, 255)
+    Note over C,DB: Login
+    C->>API: POST /api/auth/login
+    API->>DB: SELECT FROM usuarios WHERE correo=?
+    API->>DB: INSERT INTO sesiones
+    DB-->>API: sesión activa + token
+    API-->>C: 200 sesión con token
+  end
+
+  rect rgb(255, 230, 200)
+    Note over C,DB: CRUD autenticado
+    C->>API: GET /api/usuarios/me<br>Authorization: Bearer token
+    API->>DB: SELECT FROM usuarios WHERE id=?
+    DB-->>API: datos de usuario
+    API-->>C: 200 usuario
+
+    C->>API: GET /api/peliculas
+    API->>DB: SELECT * FROM peliculas
+    DB-->>API: lista de películas
+    API-->>C: 200 películas
+
+    C->>API: GET /api/suscripciones/usuario/{id}
+    API->>DB: SELECT FROM suscripciones WHERE usuario_id=?
+    DB-->>API: suscripción vigente
+    API-->>C: 200 suscripción
+  end
+
+  rect rgb(255, 200, 200)
+    Note over C,DB: Logout
+    C->>API: POST /api/auth/logout
+    API->>DB: UPDATE sesiones SET activa=0, fecha_cierre=NOW()
+    DB-->>API: fila actualizada
+    API-->>C: 204
+  end
+```
