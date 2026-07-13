@@ -114,12 +114,19 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 
 ## 5. APIs disponibles
 
+### 5.1. Autenticación y registro
+
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
 | `POST` | `/api/auth/login` | Público | Iniciar sesión y obtener JWT |
 | `POST` | `/api/auth/logout` | USER / ADMIN | Cerrar la sesión activa |
 | `GET` | `/api/auth/sesion/{idUsuario}` | Propio / ADMIN | Consultar una sesión |
 | `POST` | `/api/registro` | Público | Registrar un usuario `USER` con suscripción |
+
+### 5.2. Usuarios
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
 | `GET` | `/api/usuarios/me` | USER / ADMIN | Consultar el perfil autenticado |
 | `GET` | `/api/usuarios` | ADMIN | Listar usuarios |
 | `GET` | `/api/usuarios/{id}` | ADMIN | Consultar un usuario |
@@ -127,17 +134,32 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 | `POST` | `/api/usuarios` | ADMIN | Crear un usuario |
 | `PUT` | `/api/usuarios/{id}` | ADMIN | Actualizar un usuario |
 | `DELETE` | `/api/usuarios/{id}` | ADMIN | Eliminar un usuario |
+
+### 5.3. Planes
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
 | `GET` | `/api/planes` | Público | Listar planes |
 | `GET` | `/api/planes/{id}` | Público | Consultar un plan |
 | `POST` | `/api/planes` | ADMIN | Crear un plan |
 | `PUT` | `/api/planes/{id}` | ADMIN | Actualizar un plan |
 | `DELETE` | `/api/planes/{id}` | ADMIN | Eliminar un plan |
+
+### 5.4. Suscripciones
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
 | `GET` | `/api/suscripciones` | ADMIN | Listar suscripciones |
 | `GET` | `/api/suscripciones/{id}` | ADMIN | Consultar una suscripción |
 | `GET` | `/api/suscripciones/usuario/{idUsuario}` | Propio / ADMIN | Consultar una suscripción por usuario |
 | `POST` | `/api/suscripciones` | Propio / ADMIN | Crear una suscripción |
 | `PUT` | `/api/suscripciones/{id}` | ADMIN | Actualizar una suscripción |
 | `DELETE` | `/api/suscripciones/{id}` | ADMIN | Eliminar una suscripción |
+
+### 5.5. Películas
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
 | `GET` | `/api/peliculas` | Público | Listar películas |
 | `GET` | `/api/peliculas/{id}` | Público | Consultar una película |
 | `GET` | `/api/peliculas/genero/{genero}` | Público | Filtrar películas por género |
@@ -145,5 +167,10 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 | `POST` | `/api/peliculas` | ADMIN | Crear una película |
 | `PUT` | `/api/peliculas/{id}` | ADMIN | Actualizar una película |
 | `DELETE` | `/api/peliculas/{id}` | ADMIN | Eliminar una película |
+
+### 5.6. Documentación
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
 | `GET` | `/v3/api-docs` | Público | Consultar OpenAPI en JSON |
 | `GET` | `/swagger-ui.html` | Público | Abrir Swagger UI |
