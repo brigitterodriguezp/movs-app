@@ -287,3 +287,79 @@ erDiagram
     timestamp fecha_cierre
   }
 ```
+
+### 6.3. Diagrama de secuencia de autenticación
+
+El flujo muestra la autenticación, emisión del JWT y autorización de una solicitud protegida.
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as Usuario
+  participant F as Frontend Vue
+  participant C as AuthController
+  participant L as LoginRateLimitService
+  participant A as AuthService
+  participant DB as PostgreSQL
+  participant B as BCryptPasswordEncoder
+  participant T as TokenService
+  participant S as Spring Security
+
+  U->>F: Ingresa correo y contraseña
+  F->>C: POST /api/auth/login
+  C->>L: Verificar intentos por IP y correo
+
+  alt Límite de intentos excedido
+    L-->>C: Rechazar solicitud
+    C-->>F: 400 Demasiados intentos
+    F-->>U: Mostrar mensaje de espera
+  else Intento permitido
+    C->>A: login(credenciales)
+    A->>DB: Buscar usuario por correo
+    DB-->>A: Usuario y hash almacenado
+    A->>B: matches(contraseña, hash BCrypt)
+
+    alt Credenciales incorrectas
+      B-->>A: No coinciden
+      A-->>C: No autorizado
+      C-->>F: 401 Credenciales incorrectas
+      F-->>U: Mostrar error genérico
+    else Credenciales válidas
+      B-->>A: Coinciden
+      A->>DB: Bloquear y comprobar sesión
+
+      alt Ya existe una sesión activa
+        DB-->>A: Sesión activa
+        A-->>C: Conflicto
+        C-->>F: 409 Sesión duplicada
+        F-->>U: Solicitar cierre previo
+      else No existe una sesión activa
+        A->>DB: Crear o reactivar sesión
+        DB-->>A: ID de sesión
+        A->>T: Emitir JWT HS256 con rol y expiración
+        T-->>A: Token firmado
+        A-->>C: Sesión y JWT
+        C->>L: Reiniciar contador de intentos
+        C-->>F: 200 Sesión y JWT
+        F->>F: Guardar JWT según "Recordarme"
+        F-->>U: Mostrar vista autorizada
+      end
+    end
+  end
+
+  opt Solicitud a un recurso protegido
+    F->>S: Petición con Authorization: Bearer JWT
+    S->>T: Validar firma y expiración
+    T-->>S: Identidad, rol e ID de sesión
+    S->>DB: Comprobar sesión activa
+    DB-->>S: Estado de la sesión
+
+    alt Token o sesión inválidos
+      S-->>F: 401 Unauthorized
+    else Rol sin permiso
+      S-->>F: 403 Forbidden
+    else Acceso autorizado
+      S-->>F: Respuesta del recurso
+    end
+  end
+```
