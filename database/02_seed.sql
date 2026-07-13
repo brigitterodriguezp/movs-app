@@ -3,6 +3,41 @@
 INSERT INTO roles (id, nombre) VALUES (1, 'ADMIN'), (2, 'USER')
 ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre;
 
+-- Normaliza cuentas académicas heredadas a proveedores de correo reconocibles.
+-- La distribución conserva la mayoría en Gmail y una muestra en Outlook.
+UPDATE usuarios
+SET correo = split_part(correo, '@', 1) || '@' ||
+  CASE WHEN id % 5 = 0 THEN 'outlook.com' ELSE 'gmail.com' END
+WHERE lower(split_part(correo, '@', 2)) IN ('movs.test', 'movs.app');
+
+-- Sustituye identidades genéricas heredadas por nombres completos y correos coherentes.
+WITH catalogo AS (
+  SELECT
+    ARRAY[
+      'Sofia','Mateo','Valentina','Sebastian','Camila',
+      'Nicolas','Daniela','Gabriel','Martina','Samuel',
+      'Isabella','Julian','Emilia','Leonardo','Mariana',
+      'Tomas','Renata','Andres','Paula','Felipe',
+      'Natalia','Diego','Carolina','Martin','Elena'
+    ]::text[] AS nombres,
+    ARRAY['Garcia','Rodriguez','Lopez','Martinez','Gonzalez']::text[] AS apellidos
+), identidades AS (
+  SELECT
+    u.id,
+    c.nombres[((u.id - 1) % 25 + 1)::integer] AS nombre,
+    c.apellidos[(((u.id - 1) / 25) % 5 + 1)::integer] AS apellido
+  FROM usuarios u
+  CROSS JOIN catalogo c
+  WHERE u.nombre ~* '^(administración|administracion|usuario( [0-9]+)?)$'
+     OR lower(split_part(u.correo, '@', 1)) ~ '^(admin|usuario[0-9]*)$'
+)
+UPDATE usuarios u
+SET nombre = i.nombre || ' ' || i.apellido,
+    correo = lower(i.nombre) || '.' || lower(i.apellido) || '@' ||
+      CASE WHEN u.id % 5 = 0 THEN 'outlook.com' ELSE 'gmail.com' END
+FROM identidades i
+WHERE u.id = i.id;
+
 INSERT INTO planes (id, codigo, nombre, precio, duracion_dias) VALUES
   (1, 'basic', 'Basic', 4.99, 30),
   (2, 'plus', 'Plus', 8.99, 30)

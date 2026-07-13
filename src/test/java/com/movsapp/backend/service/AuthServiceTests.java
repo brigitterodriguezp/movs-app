@@ -21,25 +21,25 @@ class AuthServiceTests {
 
     @BeforeEach void setUp() {
         MockitoAnnotations.openMocks(this);
-        usuario = Usuario.builder().id(1L).correo("demo@movs.app").passwordHash("hash")
+        usuario = Usuario.builder().id(1L).correo("demo@gmail.com").passwordHash("hash")
             .rol(Rol.builder().id(2L).nombre("usuario").build()).build();
     }
 
     @Test void rechazaCredencialesInvalidasSinExponerElMotivo() {
-        when(usuarios.findByCorreoIgnoreCase("demo@movs.app")).thenReturn(Optional.of(usuario));
+        when(usuarios.findByCorreoIgnoreCase("demo@gmail.com")).thenReturn(Optional.of(usuario));
         when(encoder.matches("incorrecta", "hash")).thenReturn(false);
         NoAutorizadoException error = assertThrows(NoAutorizadoException.class,
-            () -> service.login(new LoginRequest("demo@movs.app", "incorrecta")));
+            () -> service.login(new LoginRequest("demo@gmail.com", "incorrecta")));
         assertEquals("Correo o contraseña incorrectos.", error.getMessage());
     }
 
     @Test void rechazaUnaSegundaSesionActiva() {
         Sesion activa = Sesion.builder().id(1L).usuario(usuario).activa(true).build();
-        when(usuarios.findByCorreoIgnoreCase("demo@movs.app")).thenReturn(Optional.of(usuario));
+        when(usuarios.findByCorreoIgnoreCase("demo@gmail.com")).thenReturn(Optional.of(usuario));
         when(encoder.matches("usuario123", "hash")).thenReturn(true);
         when(sesiones.findForUpdateByUsuarioId(1L)).thenReturn(Optional.of(activa));
         ConflictoException error = assertThrows(ConflictoException.class,
-            () -> service.login(new LoginRequest("demo@movs.app", "usuario123")));
+            () -> service.login(new LoginRequest("demo@gmail.com", "usuario123")));
         assertEquals(AuthService.SESION_DUPLICADA, error.getMessage());
         verify(sesiones, never()).save(any());
     }
