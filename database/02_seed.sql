@@ -1,0 +1,42 @@
+\connect movs_app_db
+
+INSERT INTO roles (id, nombre) VALUES (1, 'ADMIN'), (2, 'USER')
+ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre;
+
+INSERT INTO planes (id, codigo, nombre, precio, duracion_dias) VALUES
+  (1, 'basic', 'Basic', 4.99, 30),
+  (2, 'plus', 'Plus', 8.99, 30)
+ON CONFLICT (id) DO UPDATE SET codigo = EXCLUDED.codigo, nombre = EXCLUDED.nombre,
+  precio = EXCLUDED.precio, duracion_dias = EXCLUDED.duracion_dias;
+
+INSERT INTO plan_beneficios (plan_id, orden, beneficio) VALUES
+  (1,0,'1 pantalla'),(1,1,'Catálogo esencial'),(1,2,'Calidad HD'),
+  (2,0,'3 pantallas'),(2,1,'Estrenos destacados'),(2,2,'Full HD y favoritos')
+ON CONFLICT (plan_id, orden) DO UPDATE SET beneficio = EXCLUDED.beneficio;
+
+INSERT INTO peliculas (id,titulo,anio,genero,descripcion,imagen_url,variante) VALUES
+ (1,'Cover Story',2026,'Drama','Una historia íntima para volver cuando la noche pide calma.','001-cover.png','movie-card-featured'),
+ (2,'La Niñera',2025,'Suspenso','Una casa tranquila empieza a guardar demasiados secretos.','002-ninera.png','movie-card-tall'),
+ (3,'Scary Movie',2024,'Terror','Risas oscuras, sustos rápidos y una noche imposible de pausar.','003-scary-movie.png',NULL),
+ (4,'Little Women',2023,'Drama','Decisiones grandes en habitaciones pequeñas.','004-little-women.png',NULL),
+ (5,'Joker',2022,'Crimen','Una mirada intensa a una ciudad que ya no sabe escuchar.','005-joker.png','movie-card-wide'),
+ (6,'The Frightening',2021,'Misterio','Algo se mueve entre pasillos donde nadie debería estar.','006-the-frightening.png',NULL),
+ (7,'Marilyn Monroe',2020,'Biografía','Luz, cámara y una silueta que nunca dejó de aparecer.','007-marilyn-monroe.png',NULL),
+ (8,'Love Untangled',2025,'Romance','Primer amor, nervios y una confesión esperando su momento.','009-love-untangled.png','movie-card-wide')
+ON CONFLICT (id) DO UPDATE SET titulo=EXCLUDED.titulo, anio=EXCLUDED.anio, genero=EXCLUDED.genero,
+ descripcion=EXCLUDED.descripcion, imagen_url=EXCLUDED.imagen_url, variante=EXCLUDED.variante;
+
+INSERT INTO peliculas (id, titulo, anio, genero, descripcion, imagen_url, variante)
+SELECT n,
+       'Película de catálogo ' || lpad(n::text, 4, '0'),
+       1980 + (n % 46)::integer,
+       (ARRAY['Drama','Comedia','Acción','Ciencia ficción','Documental'])[1 + (n % 5)::integer],
+       'Película generada para validar el catálogo académico de Movs App.',
+       'catalogo-' || lpad(n::text, 4, '0') || '.png',
+       NULL
+FROM generate_series(9, 1000) AS n
+ON CONFLICT (id) DO NOTHING;
+
+SELECT setval(pg_get_serial_sequence('roles','id'), (SELECT MAX(id) FROM roles), true);
+SELECT setval(pg_get_serial_sequence('planes','id'), (SELECT MAX(id) FROM planes), true);
+SELECT setval(pg_get_serial_sequence('peliculas','id'), (SELECT MAX(id) FROM peliculas), true);
