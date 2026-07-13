@@ -3,7 +3,7 @@ import SignupSkeleton from '@/components/skeletons/SignupSkeleton/SignupSkeleton
 import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { BadgeCheck, CreditCard, KeyRound, Mail, ShieldCheck, User, UserPlus, Users } from '@lucide/vue'
-import { api, login, PLAN_IDS } from '@/services/api'
+import { getPlans, login, register, PLAN_IDS } from '@/services/api'
 import plansData from '@/data/plans.json'
 
 const router = useRouter()
@@ -16,7 +16,6 @@ const form = reactive({
   apellidos: '',
   correo: '',
   clave: '',
-  rol: 'usuario',
   plan: 'basic',
   cardName: '',
   cardNumber: '',
@@ -166,29 +165,23 @@ async function submitSignup() {
 
   submitting.value = true
   try {
-    const user = await api.post('/api/usuarios', {
-      nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
-      correo,
-      password: form.clave,
-      rol: form.rol,
-    })
     let planId
     try {
-      const apiPlans = await api.get('/api/planes')
+      const apiPlans = await getPlans()
       const apiPlan = apiPlans.find((p) => p.codigo === selectedPlanCode)
       planId = apiPlan ? apiPlan.id : PLAN_IDS[selectedPlanCode]
     } catch {
       planId = PLAN_IDS[selectedPlanCode]
     }
-    await login(correo, form.clave)
-    await api.post('/api/suscripciones', {
-      usuarioId: user.id,
+    await register({
+      nombre: `${capitalize(form.nombres)} ${capitalize(form.apellidos)}`,
+      correo,
+      password: form.clave,
       planId,
-      fechaInicio: new Date().toISOString().slice(0, 10),
-      estado: 'ACTIVA',
     })
+    await login(correo, form.clave)
     successMessage.value = 'Cuenta creada con éxito. Redirigiendo…'
-    setTimeout(() => router.push(form.rol === 'admin' ? '/admin' : '/app'), 1500)
+    setTimeout(() => router.push('/app'), 1500)
   } catch (err) {
     if (err.validaciones) {
       const map = { nombre: 'nombres', password: 'clave', correo: 'correo' }
@@ -255,17 +248,6 @@ async function submitSignup() {
             </label>
             <input id="clave" v-model="form.clave" class="form-control rounded-pill px-4 py-3" type="password" />
             <p v-if="errors.clave" class="auth-field-error">{{ errors.clave }}</p>
-          </div>
-
-          <div class="md:col-span-2">
-            <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="rol">
-              <ShieldCheck :size="15" />
-              <span>Tipo de cuenta</span>
-            </label>
-            <select id="rol" v-model="form.rol" class="form-control rounded-pill px-4 py-3">
-              <option value="usuario">Usuario</option>
-              <option value="admin">Administrador</option>
-            </select>
           </div>
 
           <div class="md:col-span-2">

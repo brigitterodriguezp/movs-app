@@ -21,12 +21,13 @@ function expiracionColor(dias) {
 
 onMounted(async () => {
   try {
-    const [profile, sub] = await Promise.all([
-      getMyProfile(),
-      getSubscriptionByUser(session.usuarioId),
-    ])
-    user.value = profile
-    subscription.value = sub
+    user.value = await getMyProfile()
+    try {
+      subscription.value = await getSubscriptionByUser(session.usuarioId)
+    } catch (err) {
+      if (err.status !== 404) throw err
+      subscription.value = null
+    }
   } catch {
     user.value = null
     subscription.value = null

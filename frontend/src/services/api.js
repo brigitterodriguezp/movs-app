@@ -1,17 +1,49 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080'
 const SESSION_KEY = 'movsSession'
+const REMEMBERED_EMAIL_KEY = 'movsRememberedEmail'
 
-export function getSession() {
-  const raw = sessionStorage.getItem(SESSION_KEY)
-  return raw ? JSON.parse(raw) : null
+function frontendRole(role) {
+  return String(role || '').toUpperCase() === 'ADMIN' ? 'admin' : 'usuario'
 }
 
-export function setSession(session) {
-  sessionStorage.setItem(SESSION_KEY, JSON.stringify(session))
+function apiRole(role) {
+  return frontendRole(role) === 'admin' ? 'ADMIN' : 'USER'
+}
+
+function normalizeSession(session) {
+  return session ? { ...session, rol: frontendRole(session.rol) } : null
+}
+
+function normalizeUser(user) {
+  return user ? { ...user, rol: frontendRole(user.rol) } : null
+}
+
+export function getSession() {
+  const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY)
+  if (!raw) return null
+
+  const session = normalizeSession(JSON.parse(raw))
+  if (session?.tokenExpira && Date.parse(session.tokenExpira) <= Date.now()) {
+    clearSession()
+    return null
+  }
+  return session
+}
+
+export function setSession(session, remember = false) {
+  sessionStorage.removeItem(SESSION_KEY)
+  localStorage.removeItem(SESSION_KEY)
+  const storage = remember ? localStorage : sessionStorage
+  storage.setItem(SESSION_KEY, JSON.stringify(normalizeSession(session)))
 }
 
 export function clearSession() {
   sessionStorage.removeItem(SESSION_KEY)
+  localStorage.removeItem(SESSION_KEY)
+}
+
+export function getRememberedEmail() {
+  return localStorage.getItem(REMEMBERED_EMAIL_KEY) || ''
 }
 
 export function isAuthenticated() {
@@ -73,10 +105,16 @@ export const api = {
 
 export const PLAN_IDS = { basic: 1, plus: 2 }
 
-export async function login(correo, password) {
-  const session = await api.post('/api/auth/login', { correo, password })
-  setSession(session)
+export async function login(correo, password, remember = false) {
+  const session = normalizeSession(await api.post('/api/auth/login', { correo, password }))
+  setSession(session, remember)
+  if (remember) localStorage.setItem(REMEMBERED_EMAIL_KEY, correo)
+  else localStorage.removeItem(REMEMBERED_EMAIL_KEY)
   return session
+}
+
+export async function register(data) {
+  return api.post('/api/registro', data)
 }
 
 export async function logout() {
@@ -88,23 +126,24 @@ export async function logout() {
 }
 
 export async function getUsers() {
-  return api.get('/api/usuarios')
+  const users = await api.get('/api/usuarios')
+  return users.map(normalizeUser)
 }
 
 export async function getUser(id) {
-  return api.get(`/api/usuarios/${id}`)
+  return normalizeUser(await api.get(`/api/usuarios/${id}`))
 }
 
 export async function getMyProfile() {
-  return api.get('/api/usuarios/me')
+  return normalizeUser(await api.get('/api/usuarios/me'))
 }
 
 export async function createUser(data) {
-  return api.post('/api/usuarios', data)
+  return normalizeUser(await api.post('/api/usuarios', { ...data, rol: apiRole(data.rol) }))
 }
 
 export async function updateUser(id, data) {
-  return api.put(`/api/usuarios/${id}`, data)
+  return normalizeUser(await api.put(`/api/usuarios/${id}`, { ...data, rol: apiRole(data.rol) }))
 }
 
 export async function deleteUser(id) {
@@ -153,6 +192,18 @@ export async function getMovies() {
 
 export async function getMovie(id) {
   return api.get(`/api/peliculas/${id}`)
+}
+
+export async function createMovie(data) {
+  return api.post('/api/peliculas', data)
+}
+
+export async function updateMovie(id, data) {
+  return api.put(`/api/peliculas/${id}`, data)
+}
+
+export async function deleteMovie(id) {
+  return api.delete(`/api/peliculas/${id}`)
 }
 
 export async function getSessionStatus(userId) {

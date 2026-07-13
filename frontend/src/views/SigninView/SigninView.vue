@@ -4,7 +4,7 @@ import { onMounted, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { Eye, EyeOff, KeyRound, LogIn, Mail } from '@lucide/vue'
 import signinCover from '@/assets/movies/main-cover.png'
-import { login } from '@/services/api'
+import { getRememberedEmail, login } from '@/services/api'
 
 const router = useRouter()
 const error = ref('')
@@ -19,6 +19,11 @@ const form = reactive({
 const showClave = ref(false)
 
 onMounted(() => {
+  const rememberedEmail = getRememberedEmail()
+  if (rememberedEmail) {
+    form.correo = rememberedEmail
+    form.recordar = true
+  }
   isLoading.value = false
 })
 
@@ -33,7 +38,7 @@ async function submitSignin() {
 
   submitting.value = true
   try {
-    const session = await login(correo, form.clave)
+    const session = await login(correo, form.clave, form.recordar)
     router.push(session.rol === 'admin' ? '/admin' : '/app')
   } catch (err) {
     error.value = err.message || 'Correo o clave incorrectos.'
@@ -70,7 +75,7 @@ async function submitSignin() {
               <Mail :size="15" />
               <span>Correo</span>
             </label>
-            <input id="correo" v-model="form.correo" class="form-control rounded-pill px-4 py-3" type="email" />
+            <input id="correo" v-model="form.correo" class="form-control rounded-pill px-4 py-3" type="email" autocomplete="username" />
           </div>
           <div>
             <label class="form-label auth-field-label text-sm" style="color: var(--color-text);" for="clave">
@@ -83,6 +88,7 @@ async function submitSignin() {
                 v-model="form.clave"
                 class="form-control rounded-pill px-4 py-3"
                 :type="showClave ? 'text' : 'password'"
+                autocomplete="current-password"
               />
               <button
                 class="btn btn-link position-absolute top-50 end-0 translate-middle-y p-2"
