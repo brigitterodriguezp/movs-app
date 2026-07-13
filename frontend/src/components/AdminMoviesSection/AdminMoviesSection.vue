@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
-  ChevronLeft, ChevronRight, Clapperboard, Edit3, Film, Plus, Search, Trash2, X
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, Plus, Search, Trash2, X
 } from '@lucide/vue'
 import { createMovie, deleteMovie, getMovies, updateMovie } from '@/services/api'
 
@@ -231,9 +231,11 @@ onMounted(loadMovies)
       <div class="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-xs sm:px-6" style="border-color: var(--color-border); color: var(--color-text-muted);">
         <span>Mostrando {{ visibleFrom }}–{{ visibleTo }} de {{ filteredMovies.length }}</span>
         <div class="flex flex-wrap items-center justify-center gap-2">
+          <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" aria-label="Ir a la primera página" title="Primera página" :disabled="currentPage === 1" @click="goToPage(1)"><ChevronsLeft :size="14" /></button>
           <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)"><ChevronLeft :size="14" /></button>
           <button v-for="page in visiblePages" :key="page" class="movie-page-button btn rounded-pill px-2.5 py-1" :class="{ active: page === currentPage }" type="button" @click="goToPage(page)">{{ page }}</button>
           <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" :disabled="currentPage === totalPages" @click="goToPage(currentPage + 1)"><ChevronRight :size="14" /></button>
+          <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" aria-label="Ir a la última página" title="Última página" :disabled="currentPage === totalPages" @click="goToPage(totalPages)"><ChevronsRight :size="14" /></button>
           <span>de {{ totalPages }}</span>
         </div>
       </div>

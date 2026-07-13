@@ -1,7 +1,7 @@
 <script setup>
 import { onMounted, ref, computed, watch } from 'vue'
 import {
-  BadgeCheck, ChevronLeft, ChevronRight, Clapperboard, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
+  BadgeCheck, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
 } from '@lucide/vue'
 import { currentUser, getUsers, getSubscriptions, createUser, updateUser, deleteUser as apiDeleteUser, createSubscription, updateSubscription, getPlans } from '@/services/api'
 import AdminMoviesSection from '@/components/AdminMoviesSection/AdminMoviesSection.vue'
@@ -473,6 +473,16 @@ onMounted(async () => {
             <button
               class="btn admin-pagination-button rounded-pill px-2 py-1 soft-button icon-link"
               type="button"
+              aria-label="Ir a la primera página"
+              title="Primera página"
+              :disabled="currentPage === 1"
+              @click="goToPage(1)"
+            >
+              <ChevronsLeft :size="14" />
+            </button>
+            <button
+              class="btn admin-pagination-button rounded-pill px-2 py-1 soft-button icon-link"
+              type="button"
               aria-label="Página anterior"
               :disabled="currentPage === 1"
               @click="goToPage(currentPage - 1)"
@@ -501,6 +511,16 @@ onMounted(async () => {
               @click="goToPage(currentPage + 1)"
             >
               <ChevronRight :size="14" />
+            </button>
+            <button
+              class="btn admin-pagination-button rounded-pill px-2 py-1 soft-button icon-link"
+              type="button"
+              aria-label="Ir a la última página"
+              title="Última página"
+              :disabled="currentPage === totalPages"
+              @click="goToPage(totalPages)"
+            >
+              <ChevronsRight :size="14" />
             </button>
             <span class="ms-1 whitespace-nowrap">de {{ totalPages }}</span>
           </div>
