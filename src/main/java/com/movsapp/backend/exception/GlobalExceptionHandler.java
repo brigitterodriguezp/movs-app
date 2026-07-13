@@ -51,6 +51,7 @@ public class GlobalExceptionHandler {
         return error(HttpStatus.INTERNAL_SERVER_ERROR, "Ocurrió un error interno.", req, Map.of());
     }
     private ResponseEntity<ApiError> error(HttpStatus status, String message, HttpServletRequest req, Map<String,String> fields) {
+        if (status.is4xxClientError()) log.warn("Error controlado status={} ruta={} mensaje={}", status.value(), req.getRequestURI(), message);
         ApiError body = new ApiError(OffsetDateTime.now(), status.value(), status.getReasonPhrase(), message,
                                      req.getRequestURI(), fields);
         return ResponseEntity.status(status).body(body);

@@ -13,7 +13,9 @@ public final class SecurityContext {
     }
 
     public static AuthenticatedUser current() {
-        AuthenticatedUser user = CURRENT.get();
+        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        AuthenticatedUser user = authentication != null && authentication.getPrincipal() instanceof AuthenticatedUser principal
+            ? principal : CURRENT.get();
         if (user == null) throw new NoAutorizadoException("Autenticación requerida.");
         return user;
     }

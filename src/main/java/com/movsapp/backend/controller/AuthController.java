@@ -9,7 +9,7 @@ public class AuthController {
  private static final Logger log = LoggerFactory.getLogger(AuthController.class);
  private final AuthService service;
  private final LoginRateLimitService rateLimit;
- @PostMapping("/login") @Operation(summary="Inicia una sesión",description="Devuelve 409 si el usuario ya tiene una sesión activa.") @ApiResponse(responseCode="401",description="Credenciales incorrectas") @ApiResponse(responseCode="409",description="Sesión activa")
+ @PostMapping("/login") @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Inicia una sesión",description="Devuelve 409 si el usuario ya tiene una sesión activa.") @ApiResponse(responseCode="401",description="Credenciales incorrectas") @ApiResponse(responseCode="409",description="Sesión activa")
  public SesionResponse login(@Valid @RequestBody LoginRequest r, HttpServletRequest request){
   String key=request.getRemoteAddr()+":"+r.correo().trim().toLowerCase();
   rateLimit.check(key);

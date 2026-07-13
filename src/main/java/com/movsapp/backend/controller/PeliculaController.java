@@ -7,10 +7,10 @@ import java.net.URI; import java.util.List;
 @RestController @RequestMapping("/api/peliculas") @RequiredArgsConstructor @Tag(name="Películas")
 public class PeliculaController {
  private final PeliculaService service;
- @GetMapping @Operation(summary="Lista películas") public List<PeliculaResponse> listar(){return service.listar();}
- @GetMapping("/{id}") @Operation(summary="Obtiene una película") public PeliculaResponse obtener(@PathVariable Long id){return service.obtener(id);}
- @GetMapping("/genero/{genero}") @Operation(summary="Filtra películas por género") public List<PeliculaResponse> porGenero(@PathVariable String genero){return service.porGenero(genero);}
- @GetMapping("/buscar") @Operation(summary="Busca películas por título") public List<PeliculaResponse> buscar(@RequestParam String titulo){return service.buscar(titulo);}
+ @GetMapping @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Lista películas") public List<PeliculaResponse> listar(){return service.listar();}
+ @GetMapping("/{id}") @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Obtiene una película") public PeliculaResponse obtener(@PathVariable Long id){return service.obtener(id);}
+ @GetMapping("/genero/{genero}") @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Filtra películas por género") public List<PeliculaResponse> porGenero(@PathVariable String genero){return service.porGenero(genero);}
+ @GetMapping("/buscar") @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Busca películas por título") public List<PeliculaResponse> buscar(@RequestParam String titulo){return service.buscar(titulo);}
  @RequireRole("admin")
  @PostMapping @Operation(summary="Crea una película") public ResponseEntity<PeliculaResponse> crear(@Valid @RequestBody PeliculaRequest r){PeliculaResponse x=service.crear(r);return ResponseEntity.created(URI.create("/api/peliculas/"+x.id())).body(x);}
  @RequireRole("admin")

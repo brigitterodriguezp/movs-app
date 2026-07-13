@@ -7,8 +7,8 @@ import java.net.URI; import java.util.List;
 @RestController @RequestMapping("/api/planes") @RequiredArgsConstructor @Tag(name="Planes")
 public class PlanController {
  private final PlanService service;
- @GetMapping @Operation(summary="Lista planes") public List<PlanResponse> listar(){return service.listar();}
- @GetMapping("/{id}") @Operation(summary="Obtiene un plan") public PlanResponse obtener(@PathVariable Long id){return service.obtener(id);}
+ @GetMapping @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Lista planes") public List<PlanResponse> listar(){return service.listar();}
+ @GetMapping("/{id}") @io.swagger.v3.oas.annotations.security.SecurityRequirements @Operation(summary="Obtiene un plan") public PlanResponse obtener(@PathVariable Long id){return service.obtener(id);}
  @RequireRole("admin")
  @PostMapping @Operation(summary="Crea un plan") public ResponseEntity<PlanResponse> crear(@Valid @RequestBody PlanRequest r){PlanResponse x=service.crear(r);return ResponseEntity.created(URI.create("/api/planes/"+x.id())).body(x);}
  @RequireRole("admin")
