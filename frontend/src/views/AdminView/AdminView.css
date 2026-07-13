@@ -9,6 +9,38 @@
   border-color: var(--color-accent-border);
 }
 
+.admin-section-toggle {
+  color: var(--color-text-secondary) !important;
+  border: 0 !important;
+}
+
+.admin-section-toggle.active {
+  color: #fff !important;
+  background: var(--color-accent) !important;
+}
+
+.admin-pagination-button {
+  color: var(--color-text) !important;
+  border-color: var(--color-border) !important;
+}
+
+.admin-pagination-button:hover:not(:disabled) {
+  color: var(--color-text) !important;
+  background: var(--color-surface-strong) !important;
+}
+
+.admin-pagination-button[aria-current='page'],
+.admin-pagination-button[aria-current='page']:hover {
+  color: #fff !important;
+  background: var(--color-accent) !important;
+  border-color: var(--color-accent) !important;
+}
+
+.admin-pagination-button:disabled {
+  color: var(--color-text-muted) !important;
+  opacity: 0.55;
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;

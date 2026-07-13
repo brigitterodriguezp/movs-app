@@ -1,9 +1,10 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue'
+import { onMounted, ref, computed, watch } from 'vue'
 import {
-  BadgeCheck, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
+  BadgeCheck, ChevronLeft, ChevronRight, Clapperboard, Edit3, Plus, Search, ShieldCheck, ShieldX, Trash2, UserPlus, Users, X
 } from '@lucide/vue'
 import { currentUser, getUsers, getSubscriptions, createUser, updateUser, deleteUser as apiDeleteUser, createSubscription, updateSubscription, getPlans } from '@/services/api'
+import AdminMoviesSection from '@/components/AdminMoviesSection/AdminMoviesSection.vue'
 
 const session = currentUser()
 const isAdmin = session?.rol === 'admin'
@@ -12,7 +13,10 @@ const allUsers = ref([])
 const subscriptions = ref([])
 const plans = ref([])
 const isLoading = ref(true)
+const activeSection = ref('users')
 const searchQuery = ref('')
+const currentPage = ref(1)
+const pageSize = 5
 const showModal = ref(false)
 const editingUser = ref(null)
 
@@ -69,6 +73,29 @@ const filteredUsers = computed(() => {
       (u.suscripcion?.plan?.toLowerCase() || '').includes(q) ||
       (u.suscripcion?.estado?.toLowerCase() || '').includes(q)
   )
+})
+
+const totalPages = computed(() => Math.max(1, Math.ceil(filteredUsers.value.length / pageSize)))
+const paginatedUsers = computed(() => {
+  const start = (currentPage.value - 1) * pageSize
+  return filteredUsers.value.slice(start, start + pageSize)
+})
+const visiblePages = computed(() => {
+  const windowSize = 5
+  const start = Math.max(1, Math.min(currentPage.value - 2, totalPages.value - windowSize + 1))
+  const end = Math.min(totalPages.value, start + windowSize - 1)
+  return Array.from({ length: end - start + 1 }, (_, index) => start + index)
+})
+const visibleFrom = computed(() => filteredUsers.value.length ? (currentPage.value - 1) * pageSize + 1 : 0)
+const visibleTo = computed(() => Math.min(currentPage.value * pageSize, filteredUsers.value.length))
+
+function goToPage(page) {
+  currentPage.value = Math.min(Math.max(Number(page), 1), totalPages.value)
+}
+
+watch(searchQuery, () => { currentPage.value = 1 })
+watch(totalPages, (pages) => {
+  if (currentPage.value > pages) currentPage.value = pages
 })
 
 function daysUntilExpiry(expiracion) {
@@ -224,7 +251,30 @@ onMounted(async () => {
 
 <template>
   <main v-if="isAdmin" class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
-    <section class="mx-auto max-w-7xl">
+    <div class="mx-auto mb-5 flex max-w-7xl justify-center">
+      <div class="inline-flex rounded-pill p-1" style="background: var(--color-surface-strong); border: 1px solid var(--color-border);">
+        <button
+          class="btn admin-section-toggle rounded-pill px-4 py-2 icon-link"
+          :class="{ active: activeSection === 'users' }"
+          type="button"
+          @click="activeSection = 'users'"
+        >
+          <Users :size="16" />
+          Usuarios
+        </button>
+        <button
+          class="btn admin-section-toggle rounded-pill px-4 py-2 icon-link"
+          :class="{ active: activeSection === 'movies' }"
+          type="button"
+          @click="activeSection = 'movies'"
+        >
+          <Clapperboard :size="16" />
+          Películas
+        </button>
+      </div>
+    </div>
+
+    <section v-if="activeSection === 'users'" class="mx-auto max-w-7xl">
       <div class="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p class="mb-2 inline-flex items-center gap-2 text-sm font-medium" style="color: var(--color-accent-text);">
@@ -232,7 +282,9 @@ onMounted(async () => {
             <span>Administración</span>
           </p>
           <h1 class="text-4xl font-semibold tracking-normal sm:text-5xl" style="color: var(--color-text);">Panel de administración</h1>
-          <p class="mt-2" style="color: var(--color-text-muted);">Gestión de usuarios registrados.</p>
+          <p class="mt-2" style="color: var(--color-text-muted);">
+            {{ allUsers.length }} {{ allUsers.length === 1 ? 'usuario registrado' : 'usuarios registrados' }}.
+          </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <button
@@ -278,7 +330,7 @@ onMounted(async () => {
           <table class="w-full text-left text-sm">
             <thead>
               <tr class="border-b" style="border-color: var(--color-border);">
-                <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">ID</th>
+                <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">No.</th>
                 <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Nombre</th>
                 <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Correo</th>
                 <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Rol</th>
@@ -290,12 +342,14 @@ onMounted(async () => {
             </thead>
             <tbody>
               <tr
-                v-for="(user, index) in filteredUsers"
+                v-for="(user, index) in paginatedUsers"
                 :key="user.id || index"
                 class="border-b last:border-0"
                 style="border-color: var(--color-border-subtle);"
               >
-                <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">{{ user.id || index + 1 }}</td>
+                <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">
+                  {{ (currentPage - 1) * pageSize + index + 1 }}
+                </td>
                 <td class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text);">{{ user.nombre }}</td>
                 <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">{{ user.correo }}</td>
                 <td class="px-4 py-3 sm:px-6">
@@ -408,10 +462,48 @@ onMounted(async () => {
           </table>
         </div>
         <div
-          class="flex items-center justify-between border-t px-4 py-3 text-xs sm:px-6"
+          class="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-xs sm:px-6"
           style="border-color: var(--color-border); color: var(--color-text-muted);"
         >
-          <span>{{ filteredUsers.length }} de {{ allUsers.length }} usuarios</span>
+          <span>
+            Mostrando {{ visibleFrom }}–{{ visibleTo }} de {{ filteredUsers.length }}
+            <template v-if="filteredUsers.length !== allUsers.length">({{ allUsers.length }} totales)</template>
+          </span>
+          <div class="flex items-center gap-2" aria-label="Paginación de usuarios">
+            <button
+              class="btn admin-pagination-button rounded-pill px-2 py-1 soft-button icon-link"
+              type="button"
+              aria-label="Página anterior"
+              :disabled="currentPage === 1"
+              @click="goToPage(currentPage - 1)"
+            >
+              <ChevronLeft :size="14" />
+            </button>
+            <button
+              v-for="page in visiblePages"
+              :key="page"
+              class="btn admin-pagination-button rounded-pill px-2.5 py-1 soft-button"
+              type="button"
+              :aria-label="`Ir a la página ${page}`"
+              :aria-current="page === currentPage ? 'page' : undefined"
+              :style="page === currentPage
+                ? { background: 'var(--color-accent)', color: '#fff', borderColor: 'var(--color-accent)' }
+                : {}"
+              @click="goToPage(page)"
+            >
+              {{ page }}
+            </button>
+            <button
+              class="btn admin-pagination-button rounded-pill px-2 py-1 soft-button icon-link"
+              type="button"
+              aria-label="Página siguiente"
+              :disabled="currentPage === totalPages"
+              @click="goToPage(currentPage + 1)"
+            >
+              <ChevronRight :size="14" />
+            </button>
+            <span class="ms-1 whitespace-nowrap">de {{ totalPages }}</span>
+          </div>
           <button
             class="btn rounded-pill px-3 py-1 soft-button"
             style="color: var(--color-error); border-color: transparent; background: transparent;"
@@ -423,6 +515,8 @@ onMounted(async () => {
         </div>
       </div>
     </section>
+
+    <AdminMoviesSection v-else />
 
     <!-- modal -->
     <Teleport to="body">
