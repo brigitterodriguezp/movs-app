@@ -1,120 +1,149 @@
 # Movs App
 
-Aplicación académica de catálogo de películas con frontend Vue y API REST Spring Boot. Incluye autenticación JWT, roles `ADMIN` y `USER`, suscripciones, registro público transaccional y administración de usuarios y películas.
+## Tabla de contenido
 
-## Tecnologías
+1. [Resumen](#1-resumen)
+2. [Tecnologías usadas](#2-tecnologías-usadas)
+3. [Instalación](#3-instalación)
+4. [Opciones por rol](#4-opciones-por-rol)
+5. [APIs disponibles](#5-apis-disponibles)
 
-| Capa | Tecnologías |
-|---|---|
-| Frontend | Vue 3, Vite 8, Tailwind CSS y Bootstrap |
-| Backend | Java 17, Spring Boot 3.5, Spring Security y Spring Data JPA |
-| Base de datos | PostgreSQL 17 y HikariCP |
-| API | REST, JWT Bearer y Springdoc OpenAPI/Swagger |
-| Empaquetado | Maven Wrapper y WAR ejecutable |
+## 1. Resumen
 
-## Funcionalidades
+Movs App es una aplicación académica para administrar usuarios, planes, suscripciones, sesiones y un catálogo de 1.000 películas. Incluye un frontend en Vue, una API REST en Spring Boot, persistencia en PostgreSQL, autenticación JWT y roles `ADMIN` y `USER`.
 
-- Registro público que crea únicamente usuarios `USER` y su suscripción en una transacción.
-- Inicio y cierre de sesión con contraseñas BCrypt y tokens JWT.
-- Autorización por roles con respuestas controladas `401` y `403`.
-- Catálogo con 1.000 películas precargadas.
-- Perfil y suscripción del usuario autenticado.
-- Panel `ADMIN` con subsecciones para usuarios y películas.
-- CRUD, búsqueda y paginación administrativa de cinco registros por página.
-- Navegación directa a primera, anterior, siguiente y última página.
-- Swagger UI con esquema `bearerAuth` y botón **Authorize**.
-- Interfaz adaptable con modo claro y oscuro.
+## 2. Tecnologías usadas
 
-## Requisitos
+| Tecnología | Versión exacta | Uso |
+|---|---:|---|
+| Java | 17.0.12 | Ejecución del backend |
+| Apache Maven | 3.9.9 | Compilación y empaquetado WAR |
+| Spring Boot | 3.5.15 | API REST y configuración principal |
+| Springdoc OpenAPI | 2.8.14 | Swagger UI y contrato OpenAPI |
+| PostgreSQL | 17.10 | Base de datos relacional |
+| Node.js | 24.13.0 | Ejecución del frontend |
+| Vue | 3.5.34 | Interfaz web |
+| Vue Router | 5.0.7 | Navegación del frontend |
+| Vite | 8.0.13 | Servidor y compilación del frontend |
+| Tailwind CSS | 4.3.0 | Estilos de la interfaz |
+| Bootstrap | 5.3.8 | Componentes y utilidades visuales |
+| Lucide Vue | 1.16.0 | Iconos |
 
-- Java 17.
-- PostgreSQL 17 o una versión compatible.
-- Node.js `20.19+` o `22.12+`.
-- `npm`.
+## 3. Instalación
 
-## Configuración de PostgreSQL
+1. Clonar el repositorio y entrar al proyecto:
 
-Los scripts son idempotentes y deben ejecutarse en orden. El primer script requiere un usuario administrador de PostgreSQL:
+   ```bash
+   git clone git@github.com:brigitterodriguezp/movs-app.git
+   cd movs-app
+   ```
 
-```bash
-sudo -u postgres psql -v ON_ERROR_STOP=1 \
-  -f database/00_create_database_and_user.sql
+2. Iniciar PostgreSQL:
 
-sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
-  -f database/01_schema.sql
+   ```bash
+   sudo systemctl start postgresql
+   ```
 
-sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
-  -f database/02_seed.sql
+3. Crear la base de datos y el usuario técnico:
 
-sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
-  -f database/03_verify.sql
-```
+   ```bash
+   sudo -u postgres psql -v ON_ERROR_STOP=1 \
+     -f database/00_create_database_and_user.sql
+   ```
 
-`03_verify.sql` muestra los conteos de películas, usuarios, suscripciones y sesiones.
+4. Crear el esquema, cargar los datos y verificar los conteos:
 
-## Variables de entorno
+   ```bash
+   sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
+     -f database/01_schema.sql
 
-Copia el archivo de ejemplo y reemplaza los valores `CHANGE_ME`:
+   sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
+     -f database/02_seed.sql
 
-```bash
-cp .env.example .env
-```
+   sudo -u postgres psql -v ON_ERROR_STOP=1 -d movs_app_db \
+     -f database/03_verify.sql
+   ```
 
-Antes de iniciar el backend, exporta las variables:
+5. Crear el archivo local de variables de entorno:
 
-```bash
-set -a
-source .env
-set +a
-```
+   ```bash
+   cp .env.example .env
+   ```
 
-El archivo `.env` contiene credenciales locales y está excluido de Git.
+   Reemplazar los valores `CHANGE_ME` dentro de `.env`.
 
-## Ejecutar el backend
+6. Exportar las variables e iniciar el backend:
 
-Durante el desarrollo:
+   ```bash
+   set -a
+   source .env
+   set +a
+   mvn spring-boot:run
+   ```
 
-```bash
-./mvnw spring-boot:run
-```
+7. En otra terminal, instalar e iniciar el frontend:
 
-También puede generarse y ejecutar el WAR:
+   ```bash
+   cd frontend
+   npm install
+   npm run dev
+   ```
 
-```bash
-./mvnw clean package
-java -jar target/movs-app-backend-0.0.1-SNAPSHOT.war
-```
+8. Abrir la aplicación y Swagger:
 
-La API queda disponible en `http://localhost:8080`.
+   ```text
+   Frontend: http://localhost:5173/movs-app/
+   Swagger:  http://localhost:8080/swagger-ui.html
+   ```
 
-## Ejecutar el frontend
+## 4. Opciones por rol
 
-En otra terminal:
+| Opción | Público | USER | ADMIN |
+|---|:---:|:---:|:---:|
+| Consultar planes y películas | Sí | Sí | Sí |
+| Registrar una cuenta con rol `USER` | Sí | — | — |
+| Iniciar sesión | Sí | — | — |
+| Cerrar sesión | No | Sí | Sí |
+| Consultar perfil propio | No | Sí | Sí |
+| Consultar suscripción propia | No | Sí | Sí |
+| Administrar usuarios | No | No | Sí |
+| Administrar suscripciones | No | No | Sí |
+| Crear, editar y eliminar planes | No | No | Sí |
+| Crear, editar y eliminar películas | No | No | Sí |
+| Acceder al Panel de administración | No | No | Sí |
 
-```bash
-cd frontend
-npm install
-npm run dev
-```
+## 5. APIs disponibles
 
-Abre `http://localhost:5173/movs-app/`.
-
-## Accesos útiles
-
-| Recurso | URL |
-|---|---|
-| Frontend | `http://localhost:5173/movs-app/` |
-| API | `http://localhost:8080/api` |
-| Swagger UI | `http://localhost:8080/swagger-ui.html` |
-| OpenAPI JSON | `http://localhost:8080/v3/api-docs` |
-
-Las cuentas exclusivamente locales y académicas están documentadas en [`users.md`](users.md).
-
-## Estructura principal
-
-```text
-database/   Scripts PostgreSQL ordenados
-frontend/   Aplicación Vue y panel administrativo
-src/        API Spring Boot
-users.md    Cuentas académicas locales
-```
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `POST` | `/api/auth/login` | Público | Iniciar sesión y obtener JWT |
+| `POST` | `/api/auth/logout` | USER / ADMIN | Cerrar la sesión activa |
+| `GET` | `/api/auth/sesion/{idUsuario}` | Propio / ADMIN | Consultar una sesión |
+| `POST` | `/api/registro` | Público | Registrar un usuario `USER` con suscripción |
+| `GET` | `/api/usuarios/me` | USER / ADMIN | Consultar el perfil autenticado |
+| `GET` | `/api/usuarios` | ADMIN | Listar usuarios |
+| `GET` | `/api/usuarios/{id}` | ADMIN | Consultar un usuario |
+| `GET` | `/api/usuarios/rol/{rol}` | ADMIN | Filtrar usuarios por rol |
+| `POST` | `/api/usuarios` | ADMIN | Crear un usuario |
+| `PUT` | `/api/usuarios/{id}` | ADMIN | Actualizar un usuario |
+| `DELETE` | `/api/usuarios/{id}` | ADMIN | Eliminar un usuario |
+| `GET` | `/api/planes` | Público | Listar planes |
+| `GET` | `/api/planes/{id}` | Público | Consultar un plan |
+| `POST` | `/api/planes` | ADMIN | Crear un plan |
+| `PUT` | `/api/planes/{id}` | ADMIN | Actualizar un plan |
+| `DELETE` | `/api/planes/{id}` | ADMIN | Eliminar un plan |
+| `GET` | `/api/suscripciones` | ADMIN | Listar suscripciones |
+| `GET` | `/api/suscripciones/{id}` | ADMIN | Consultar una suscripción |
+| `GET` | `/api/suscripciones/usuario/{idUsuario}` | Propio / ADMIN | Consultar una suscripción por usuario |
+| `POST` | `/api/suscripciones` | Propio / ADMIN | Crear una suscripción |
+| `PUT` | `/api/suscripciones/{id}` | ADMIN | Actualizar una suscripción |
+| `DELETE` | `/api/suscripciones/{id}` | ADMIN | Eliminar una suscripción |
+| `GET` | `/api/peliculas` | Público | Listar películas |
+| `GET` | `/api/peliculas/{id}` | Público | Consultar una película |
+| `GET` | `/api/peliculas/genero/{genero}` | Público | Filtrar películas por género |
+| `GET` | `/api/peliculas/buscar?titulo={titulo}` | Público | Buscar películas por título |
+| `POST` | `/api/peliculas` | ADMIN | Crear una película |
+| `PUT` | `/api/peliculas/{id}` | ADMIN | Actualizar una película |
+| `DELETE` | `/api/peliculas/{id}` | ADMIN | Eliminar una película |
+| `GET` | `/v3/api-docs` | Público | Consultar OpenAPI en JSON |
+| `GET` | `/swagger-ui.html` | Público | Abrir Swagger UI |
