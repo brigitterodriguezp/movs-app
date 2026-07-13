@@ -7,6 +7,7 @@
 3. [Instalación](#3-instalación)
 4. [Opciones por rol](#4-opciones-por-rol)
 5. [APIs disponibles](#5-apis-disponibles)
+6. [Arquitectura](#6-arquitectura)
 
 ## 1. Resumen
 
@@ -174,3 +175,115 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 |---|---|---|---|
 | `GET` | `/v3/api-docs` | Público | Consultar OpenAPI en JSON |
 | `GET` | `/swagger-ui.html` | Público | Abrir Swagger UI |
+
+## 6. Arquitectura
+
+### 6.1. Diagrama de paquetes
+
+```mermaid
+flowchart LR
+  subgraph Frontend["Frontend · frontend/src"]
+    Router[router]
+    Views[views]
+    Components[components]
+    ApiClient[services]
+    Data[data]
+
+    Router --> Views
+    Views --> Components
+    Views --> ApiClient
+    Views --> Data
+    Components --> ApiClient
+  end
+
+  subgraph Backend["Backend · com.movsapp.backend"]
+    Config[config]
+    Controllers[controller]
+    DTO[dto]
+    Security[security]
+    Services[service]
+    Repositories[repository]
+    Entities[entity]
+    Exceptions[exception]
+
+    Config --> Security
+    Security --> Controllers
+    Controllers --> DTO
+    Controllers --> Services
+    Controllers --> Exceptions
+    Services --> Repositories
+    Services --> Entities
+    Services --> Exceptions
+    Repositories --> Entities
+  end
+
+  Database[(PostgreSQL)]
+
+  ApiClient -- "HTTP · JSON · JWT" --> Controllers
+  Repositories -- "JPA · JDBC" --> Database
+```
+
+### 6.2. Diagrama entidad-relación
+
+```mermaid
+erDiagram
+  ROLES ||--o{ USUARIOS : asigna
+  USUARIOS ||--o| SUSCRIPCIONES : posee
+  PLANES ||--o{ SUSCRIPCIONES : define
+  PLANES ||--o{ PLAN_BENEFICIOS : contiene
+  USUARIOS ||--o| SESIONES : inicia
+
+  ROLES {
+    bigint id PK
+    varchar nombre UK
+  }
+
+  USUARIOS {
+    bigint id PK
+    varchar nombre
+    varchar correo UK
+    varchar password_hash
+    bigint rol_id FK
+  }
+
+  PLANES {
+    bigint id PK
+    varchar codigo UK
+    varchar nombre UK
+    numeric precio
+    integer duracion_dias
+  }
+
+  PLAN_BENEFICIOS {
+    bigint plan_id PK, FK
+    integer orden PK
+    varchar beneficio
+  }
+
+  SUSCRIPCIONES {
+    bigint id PK
+    bigint usuario_id FK, UK
+    bigint plan_id FK
+    date fecha_inicio
+    date fecha_expiracion
+    varchar estado
+  }
+
+  PELICULAS {
+    bigint id PK
+    varchar titulo
+    integer anio
+    varchar genero
+    varchar descripcion
+    varchar imagen_url
+    varchar variante
+  }
+
+  SESIONES {
+    bigint id PK
+    bigint usuario_id FK, UK
+    boolean activa
+    timestamp fecha_inicio
+    timestamp fecha_cierre
+  }
+```
