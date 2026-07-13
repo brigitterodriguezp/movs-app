@@ -1,2 +1,4 @@
-Backend: sudo /opt/lampp/lampp startmysql && mvn spring-boot:run
+Backend: set -a; source .env; set +a; mvn spring-boot:run
 Frontend: cd frontend && npm install && npm run dev
+Generar WAR: mvn clean package
+Ejecutar WAR: set -a; source .env; set +a; java -jar target/movs-app-backend-0.0.1-SNAPSHOT.war
