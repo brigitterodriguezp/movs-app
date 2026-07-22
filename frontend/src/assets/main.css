@@ -63,6 +63,7 @@
 }
 
 .dark .form-control {
+  color: var(--color-text);
   border-color: rgba(255, 255, 255, 0.2);
   background: rgba(30, 30, 36, 0.55);
 }
