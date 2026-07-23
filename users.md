@@ -1,8 +1,12 @@
-# Usuarios de prueba
+# Usuarios locales de prueba
 
-| Nombre    | Correo              | Contraseña     | Rol   |
-| --------- | ------------------- | -------------- | ----- |
-| Brigitte  | brigitte@gmail.com  | brigitte.2005  | ADMIN |
-| Alejandra | alejandra@gmail.com | alejandra.2005 | USER  |
+| Nombre    | Correo              | Contraseña      | Rol   |
+| --------- | ------------------- | --------------- | ----- |
+| Admin     | admin@movs.app      | Admin123!       | ADMIN |
+| Alejandra | alejandra@gmail.com | alejandra.2005  | USER  |
 
-*Nota: El usuario `admin@movs.app` / `Admin123!` se crea automáticamente al iniciar la app (configurado en `.env`).*
+El seed `db/02_seed.sql` crea ambas cuentas. Al iniciar el backend, la cuenta
+administradora también se valida mediante `APP_ADMIN_NAME`, `APP_ADMIN_EMAIL` y
+`APP_ADMIN_PASSWORD` configuradas en el archivo local `.env`.
+
+> `.env.example` contiene marcadores de configuración y no credenciales funcionales.
