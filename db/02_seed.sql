@@ -1089,3 +1089,18 @@ ON CONFLICT (id) DO UPDATE SET
   rol_id = EXCLUDED.rol_id;
 
 SELECT setval(pg_get_serial_sequence('usuarios','id'), (SELECT MAX(id) FROM usuarios), true);
+
+-- Administrador adicional; se identifica por correo para no reutilizar IDs existentes.
+INSERT INTO usuarios (nombre, correo, password_hash, rol_id)
+VALUES (
+  'Administrador Soporte',
+  'soporte.admin@movs.app',
+  '$2a$12$aJ1MNt8Z9YmECdVNWDKsFebZeb53Ft.gjmvOQulX7MNAuZYGua7Ke',
+  (SELECT id FROM roles WHERE nombre = 'ADMIN')
+)
+ON CONFLICT (correo) DO UPDATE SET
+  nombre = EXCLUDED.nombre,
+  password_hash = EXCLUDED.password_hash,
+  rol_id = EXCLUDED.rol_id;
+
+-- No se insertan favoritos ficticios: son datos personales creados por cada usuario.

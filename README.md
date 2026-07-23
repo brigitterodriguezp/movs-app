@@ -172,6 +172,16 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
    );
    CREATE INDEX IF NOT EXISTS idx_sesiones_activa ON sesiones (activa);
 
+   CREATE TABLE IF NOT EXISTS favoritos (
+     usuario_id BIGINT NOT NULL,
+     pelicula_id BIGINT NOT NULL,
+     fecha_agregada TIMESTAMP(6) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+     CONSTRAINT pk_favoritos PRIMARY KEY (usuario_id, pelicula_id),
+     CONSTRAINT fk_favoritos_usuarios FOREIGN KEY (usuario_id) REFERENCES usuarios(id) ON DELETE CASCADE,
+     CONSTRAINT fk_favoritos_peliculas FOREIGN KEY (pelicula_id) REFERENCES peliculas(id) ON DELETE CASCADE
+   );
+   CREATE INDEX IF NOT EXISTS idx_favoritos_pelicula ON favoritos (pelicula_id);
+
    GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA public TO brigitte;
    GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA public TO brigitte;
    ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO brigitte;
@@ -209,33 +219,17 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
      (9,'Acción'),(10,'Ciencia ficción'),(11,'Documental')
    ON CONFLICT (id) DO UPDATE SET nombre = EXCLUDED.nombre;
 
+   -- El archivo contiene 1.000 títulos reales del dataset público TMDb 5000.
+   -- Cada fila conserva título, año, género, sinopsis y enlace a su ficha de TMDb.
    INSERT INTO peliculas (id,titulo,anio,genero,descripcion,imagen_url,variante,categoria_id) VALUES
-    (1,'Cover Story',2026,'Drama','Una historia íntima para volver cuando la noche pide calma.','001-cover.png','movie-card-featured',1),
-    (2,'La Niñera',2025,'Suspenso','Una casa tranquila empieza a guardar demasiados secretos.','002-ninera.png','movie-card-tall',2),
-    (3,'Scary Movie',2024,'Terror','Risas oscuras, sustos rápidos y una noche imposible de pausar.','003-scary-movie.png',NULL,3),
-    (4,'Little Women',2023,'Drama','Decisiones grandes en habitaciones pequeñas.','004-little-women.png',NULL,1),
-    (5,'Joker',2022,'Crimen','Una mirada intensa a una ciudad que ya no sabe escuchar.','005-joker.png','movie-card-wide',4),
-    (6,'The Frightening',2021,'Misterio','Algo se mueve entre pasillos donde nadie debería estar.','006-the-frightening.png',NULL,5),
-    (7,'Marilyn Monroe',2020,'Biografía','Luz, cámara y una silueta que nunca dejó de aparecer.','007-marilyn-monroe.png',NULL,6),
-    (8,'Love Untangled',2025,'Romance','Primer amor, nervios y una confesión esperando su momento.','009-love-untangled.png','movie-card-wide',7)
-   ON CONFLICT (id) DO UPDATE SET titulo=EXCLUDED.titulo, anio=EXCLUDED.anio, genero=EXCLUDED.genero,
-    descripcion=EXCLUDED.descripcion, imagen_url=EXCLUDED.imagen_url, variante=EXCLUDED.variante, categoria_id=EXCLUDED.categoria_id;
+     (1,'Minions',2015,'Family','Minions Stuart, Kevin and Bob are recruited by Scarlet Overkill.','https://www.themoviedb.org/movie/211672',NULL,9),
+     (2,'Interstellar',2014,'Adventure','A group of explorers travel through a newly discovered wormhole.','https://www.themoviedb.org/movie/157336',NULL,9)
+     -- ...998 películas reales adicionales versionadas en db/02_seed.sql
+   ON CONFLICT (id) DO UPDATE SET titulo=EXCLUDED.titulo, anio=EXCLUDED.anio,
+     genero=EXCLUDED.genero, descripcion=EXCLUDED.descripcion,
+     imagen_url=EXCLUDED.imagen_url, variante=EXCLUDED.variante,
+     categoria_id=EXCLUDED.categoria_id;
 
-   INSERT INTO peliculas (id, titulo, anio, genero, descripcion, imagen_url, variante, categoria_id)
-   SELECT n,
-          'Película de catálogo ' || lpad(n::text, 4, '0'),
-          1980 + (n % 46)::integer,
-          (ARRAY['Drama','Comedia','Acción','Ciencia ficción','Documental'])[1 + (n % 5)::integer],
-          'Película generada para validar el catálogo académico de Movs App.',
-          'catalogo-' || lpad(n::text, 4, '0') || '.png',
-          NULL,
-          (ARRAY[1,8,9,10,11])[1 + (n % 5)::integer]
-   FROM generate_series(9, 1000) AS n
-   ON CONFLICT (id) DO NOTHING;
-
-   SELECT setval(pg_get_serial_sequence('roles','id'), (SELECT MAX(id) FROM roles), true);
-   SELECT setval(pg_get_serial_sequence('planes','id'), (SELECT MAX(id) FROM planes), true);
-   SELECT setval(pg_get_serial_sequence('categorias','id'), (SELECT MAX(id) FROM categorias), true);
    SELECT setval(pg_get_serial_sequence('peliculas','id'), (SELECT MAX(id) FROM peliculas), true);
    ```
 
@@ -254,10 +248,17 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
    SELECT COUNT(*) FROM usuarios;
    SELECT COUNT(*) FROM suscripciones;
    SELECT COUNT(*) FROM sesiones;
+   SELECT COUNT(*) FROM favoritos;
    ```
 
    ```bash
    psql -U postgres -v ON_ERROR_STOP=1 -d movs_app_db -f db/03_verify.sql
+   ```
+
+   Si la base ya existía, aplicar únicamente la migración incremental (sin repetir el seed):
+
+   ```bash
+   psql -U postgres -v ON_ERROR_STOP=1 -f db/04_add_favoritos.sql
    ```
 
 7. Crear el archivo local de variables de entorno:
@@ -302,6 +303,7 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 | Cerrar sesión | No | Sí | Sí |
 | Consultar perfil propio | No | Sí | Sí |
 | Consultar suscripción propia | No | Sí | Sí |
+| Administrar favoritos propios | No | Sí | Sí |
 | Administrar usuarios | No | No | Sí |
 | Administrar suscripciones | No | No | Sí |
 | Crear, editar y eliminar planes | No | No | Sí |
@@ -364,7 +366,15 @@ Movs App es una aplicación académica para administrar usuarios, planes, suscri
 | `PUT` | `/api/peliculas/{id}` | ADMIN | Actualizar una película |
 | `DELETE` | `/api/peliculas/{id}` | ADMIN | Eliminar una película |
 
-### 5.6. Documentación
+### 5.6. Favoritos
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `GET` | `/api/usuarios/me/favoritos` | USER / ADMIN | Listar favoritos propios |
+| `POST` | `/api/usuarios/me/favoritos/{peliculaId}` | USER / ADMIN | Agregar una película real |
+| `DELETE` | `/api/usuarios/me/favoritos/{peliculaId}` | USER / ADMIN | Quitar una película |
+
+### 5.7. Documentación
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
@@ -420,6 +430,11 @@ flowchart LR
 
 ### 6.2. Diagrama entidad-relación
 
+`FAVORITOS` materializa la relación muchos-a-muchos entre `USUARIOS` y
+`PELICULAS`. Su clave primaria compuesta (`usuario_id`, `pelicula_id`) evita que
+un usuario guarde dos veces la misma película; ambas claves foráneas usan
+eliminación en cascada en el esquema SQL.
+
 ```mermaid
 erDiagram
   CATEGORIAS ||--o{ PELICULAS : clasifica
@@ -428,6 +443,8 @@ erDiagram
   PLANES ||--o{ SUSCRIPCIONES : define
   PLANES ||--o{ PLAN_BENEFICIOS : contiene
   USUARIOS ||--o| SESIONES : inicia
+  USUARIOS ||--o{ FAVORITOS : guarda
+  PELICULAS ||--o{ FAVORITOS : aparece_en
 
   CATEGORIAS {
     bigint id PK
@@ -487,6 +504,12 @@ erDiagram
     boolean activa
     timestamp fecha_inicio
     timestamp fecha_cierre
+  }
+
+  FAVORITOS {
+    bigint usuario_id PK, FK
+    bigint pelicula_id PK, FK
+    timestamp fecha_agregada
   }
 ```
 

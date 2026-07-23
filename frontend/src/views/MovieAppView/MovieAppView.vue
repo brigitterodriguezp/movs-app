@@ -1,31 +1,25 @@
 <script setup>
 import MovieCard from '@/components/MovieCard/MovieCard.vue'
 import MovieGridSkeleton from '@/components/skeletons/MovieGridSkeleton/MovieGridSkeleton.vue'
-import moviesApi from '@/data/movies.json'
-import { Library, Search } from '@lucide/vue'
+import { addFavorite, getFavorites, getMovies, removeFavorite } from '@/services/api'
+import { Heart, Library, Search } from '@lucide/vue'
 import { computed, onMounted, ref } from 'vue'
-
-const movieImages = import.meta.glob('../../assets/movies/*.png', {
-  eager: true,
-  import: 'default',
-})
-
-const allMovies = moviesApi.map((movie) => ({
-  ...movie,
-  image: movieImages[`../../assets/movies/${movie.image}`],
-}))
 
 const isLoading = ref(true)
 const searchQuery = ref('')
-const skeletonMovies = moviesApi.map((movie) => ({
-  id: movie.id,
-  variant: movie.variant || '',
-}))
+const allMovies = ref([])
+const favoriteIds = ref(new Set())
+const onlyFavorites = ref(false)
+const errorMessage = ref('')
+const skeletonMovies = Array.from({ length: 8 }, (_, id) => ({ id }))
 
 const movies = computed(() => {
   const q = searchQuery.value.toLowerCase().trim()
-  if (!q) return allMovies
-  return allMovies.filter(
+  const source = onlyFavorites.value
+    ? allMovies.value.filter((movie) => favoriteIds.value.has(movie.id))
+    : allMovies.value
+  if (!q) return source
+  return source.filter(
     (m) =>
       m.title?.toLowerCase().includes(q) ||
       m.mood?.toLowerCase().includes(q) ||
@@ -34,8 +28,35 @@ const movies = computed(() => {
   )
 })
 
-onMounted(() => {
-  isLoading.value = false
+async function toggleFavorite(movieId) {
+  try {
+    if (favoriteIds.value.has(movieId)) await removeFavorite(movieId)
+    else await addFavorite(movieId)
+    const next = new Set(favoriteIds.value)
+    next.has(movieId) ? next.delete(movieId) : next.add(movieId)
+    favoriteIds.value = next
+  } catch (error) {
+    errorMessage.value = error.message
+  }
+}
+
+onMounted(async () => {
+  try {
+    const [moviesData, favoritesData] = await Promise.all([getMovies(), getFavorites()])
+    allMovies.value = moviesData.map((movie) => ({
+      id: movie.id,
+      title: movie.titulo,
+      year: String(movie.anio),
+      mood: movie.genero,
+      description: movie.descripcion,
+      sourceUrl: movie.imagenUrl,
+    }))
+    favoriteIds.value = new Set(favoritesData.map((movie) => movie.id))
+  } catch (error) {
+    errorMessage.value = error.message
+  } finally {
+    isLoading.value = false
+  }
 })
 </script>
 
@@ -61,12 +82,16 @@ onMounted(() => {
             />
           </div>
           <span class="ios-chip w-fit rounded-pill px-4 py-2 text-sm" style="color: var(--color-text-secondary);">
-            {{ movies.length }} de {{ allMovies.length }} títulos
+            {{ movies.length }} de {{ allMovies.length }} títulos reales
           </span>
+          <button class="ios-chip rounded-pill px-4 py-2 text-sm" type="button" @click="onlyFavorites = !onlyFavorites">
+            <Heart :size="16" class="inline" /> {{ onlyFavorites ? 'Ver catálogo' : 'Mis favoritos' }}
+          </button>
         </div>
       </div>
 
       <MovieGridSkeleton v-if="isLoading" :movies="skeletonMovies" />
+      <p v-else-if="errorMessage" class="ios-surface rounded-[1.35rem] p-6 text-center text-rose-700">{{ errorMessage }}</p>
       <div v-else-if="!movies.length" class="ios-surface rounded-[1.35rem] p-8 text-center">
         <Search :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
         <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">Sin resultados</h2>
@@ -77,9 +102,10 @@ onMounted(() => {
           v-for="(movie, index) in movies"
           :key="movie.id"
           :movie="movie"
-          :image="movie.image"
+          :favorite="favoriteIds.has(movie.id)"
           :variant="movie.variant"
           :delay="index * 70"
+          @toggle-favorite="toggleFavorite"
         />
       </div>
     </section>

@@ -4,3 +4,4 @@ SELECT COUNT(*) FROM peliculas;
 SELECT COUNT(*) FROM usuarios;
 SELECT COUNT(*) FROM suscripciones;
 SELECT COUNT(*) FROM sesiones;
+SELECT COUNT(*) FROM favoritos;

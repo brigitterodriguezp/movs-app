@@ -206,6 +206,18 @@ export async function deleteMovie(id) {
   return api.delete(`/api/peliculas/${id}`)
 }
 
+export async function getFavorites() {
+  return api.get('/api/usuarios/me/favoritos')
+}
+
+export async function addFavorite(movieId) {
+  return api.post(`/api/usuarios/me/favoritos/${movieId}`)
+}
+
+export async function removeFavorite(movieId) {
+  return api.delete(`/api/usuarios/me/favoritos/${movieId}`)
+}
+
 export async function getSessionStatus(userId) {
   return api.get(`/api/auth/sesion/${userId}`)
 }
