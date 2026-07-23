@@ -145,122 +145,162 @@ El usuario puede registrarse mediante `RegistroController`, que delega en `Regis
 
 ## Preguntas de revisión técnica
 
-1. **¿Qué arquitectura utiliza la aplicación?**
-   **Respuesta:** Utiliza una arquitectura por capas: vista frontend, cliente de API, seguridad, controlador, servicio, repositorio y base de datos.
+1. **¿Qué hace SpringApplication.run dentro de MovsAppBackendApplication.main?**
 
-2. **¿El frontend accede directamente a PostgreSQL?**
-   **Respuesta:** No. El frontend llama a la API REST; únicamente los repositorios del backend acceden a PostgreSQL.
+   **Respuesta:** Crea el contexto de Spring, detecta los componentes, construye las dependencias y levanta el servidor HTTP. Si se elimina esa llamada, el método main se ejecuta, pero la API no inicia.
 
-3. **¿Para qué sirve un controlador?**
-   **Respuesta:** Expone rutas HTTP, recibe y valida solicitudes, llama a la capa de servicio y devuelve una respuesta.
+2. **¿Por qué MovsAppBackendApplication excluye UserDetailsServiceAutoConfiguration?**
 
-4. **¿Por qué la lógica de negocio no debería estar en el controlador?**
-   **Respuesta:** Porque mezclar HTTP con reglas de negocio dificulta las pruebas, la reutilización y el mantenimiento.
+   **Respuesta:** Porque el proyecto no usa el formulario de login ni el usuario automático de Spring Security. La autenticación se implementa con AuthService, BearerTokenFilter y la tabla de sesiones; si se quita la exclusión, Spring podría crear una configuración de usuario adicional que no pertenece a este flujo.
 
-5. **¿Cuál es la función del servicio?**
-   **Respuesta:** Ejecutar reglas de negocio, controlar transacciones y coordinar uno o varios repositorios.
+3. **¿Para qué sirve el método configure de SpringBootServletInitializer?**
 
-6. **¿Cuál es la función del repositorio?**
-   **Respuesta:** Abstraer las operaciones de persistencia realizadas sobre las entidades de la base de datos.
+   **Respuesta:** Permite desplegar la aplicación como un archivo WAR dentro de un servidor de aplicaciones externo. Para ejecutarla como JAR con main no es indispensable, pero conservarlo admite ambas formas de despliegue.
 
-7. **¿Cuál es la diferencia entre autenticación y autorización?**
-   **Respuesta:** La autenticación identifica al usuario; la autorización determina si ese usuario puede ejecutar una operación.
+4. **¿Qué efecto tiene SessionCreationPolicy.STATELESS en SecurityConfig?**
 
-8. **¿Dónde se aplican realmente los permisos por rol?**
-   **Respuesta:** Principalmente en `SecurityConfig`, mediante reglas por método y ruta. La guarda de Vue mejora la navegación, pero no reemplaza la seguridad del backend.
+   **Respuesta:** Evita que Spring Security mantenga una sesión HTTP entre solicitudes. Cada petición debe presentar nuevamente el token; cambiarlo a un modo con sesión mezclaría dos mecanismos de autenticación y obligaría a revisar logout, CSRF y almacenamiento de credenciales.
 
-9. **¿La anotación `@RequireRole` protege por sí sola los métodos?**
-   **Respuesta:** No se observa un aspecto o interceptor que procese esa anotación. Actualmente funciona como declaración de intención; la protección efectiva depende de `SecurityConfig` y de `SecurityContext`.
+5. **¿Por qué csrf está desactivado en la cadena de seguridad?**
 
-10. **¿Qué hace `BearerTokenFilter` antes de llegar al controlador?**
-    **Respuesta:** Verifica el formato, firma y vencimiento del token, consulta que la sesión siga activa y crea el principal autenticado con su rol.
+   **Respuesta:** La API recibe el token en el encabezado Authorization y no autentica mediante una cookie de sesión enviada automáticamente. Si el proyecto cambia a cookies de autenticación, desactivar CSRF dejaría de ser una decisión segura y debería habilitarse su protección.
 
-11. **¿Por qué se consulta la sesión si ya existe un token?**
-    **Respuesta:** Porque permite invalidar el acceso al cerrar sesión. Un token firmado todavía puede no haber vencido, pero se rechaza si su sesión fue desactivada.
+6. **¿Qué controla app.cors.allowed-origins?**
 
-12. **¿Qué ocurre cuando vence el token?**
-    **Respuesta:** El frontend elimina la sesión local al detectar la expiración y el backend también rechaza el token si recibe una petición con él.
+   **Respuesta:** Define qué orígenes del navegador pueden llamar a las rutas /api. Si se configura con un origen incorrecto, el navegador bloqueará el frontend; si se amplía sin necesidad, se aceptarán solicitudes desde sitios no previstos.
 
-13. **¿Dónde se guarda el token en el navegador?**
-    **Respuesta:** En `sessionStorage` o `localStorage`, según la opción de recordar la sesión.
+7. **¿Por qué BearerTokenFilter se agrega antes de UsernamePasswordAuthenticationFilter?**
 
-14. **¿Qué riesgo tiene guardar el token en `localStorage`?**
-    **Respuesta:** Un ataque XSS podría leerlo. Se deben evitar scripts no confiables, aplicar una política CSP y evaluar cookies `HttpOnly` para un entorno de producción.
+   **Respuesta:** Para que el token sea validado y el usuario quede autenticado antes de que Spring evalúe los permisos de la ruta. Si se coloca después de la autorización, una petición válida podría ser rechazada por no tener todavía un principal autenticado.
 
-15. **¿La comunicación exige HTTPS actualmente?**
-    **Respuesta:** No por defecto, porque `APP_SECURITY_REQUIRE_HTTPS` parte en `false`. En producción debe habilitarse HTTPS para no exponer credenciales ni tokens.
+8. **¿Por qué bearerTokenFilterRegistration desactiva el registro automático del filtro?**
 
-16. **¿Es seguro usar el secreto JWT configurado por defecto?**
-    **Respuesta:** No. `dev-only-change-this-secret` es solo un valor de desarrollo; producción necesita un secreto fuerte, privado y proporcionado mediante variables de entorno.
+   **Respuesta:** Spring podría registrar el filtro como filtro servlet por ser un componente y, además, SecurityConfig lo agrega a la cadena de seguridad. Desactivar el registro automático evita que se ejecute dos veces en una misma solicitud.
 
-17. **¿Las contraseñas se almacenan en texto plano?**
-    **Respuesta:** No. Se procesan con BCrypt y un costo de 12 antes de guardarse.
+9. **¿Qué pasa en BearerTokenFilter cuando no existe el encabezado Authorization?**
 
-18. **¿Cómo se limita la fuerza bruta contra el login?**
-    **Respuesta:** `LoginRateLimitService` limita intentos por combinación de IP y correo. Sin embargo, el contador está en memoria y no se comparte entre varias instancias del backend.
+   **Respuesta:** El filtro deja continuar la solicitud sin crear una autenticación. Luego SecurityConfig permite la ruta si es pública o responde 401 si la ruta exige un usuario autenticado.
 
-19. **¿Puede un usuario abrir dos sesiones al mismo tiempo?**
-    **Respuesta:** El diseño lo impide: existe una sesión única por usuario y `AuthService` rechaza un nuevo login si la anterior continúa activa.
+10. **¿Qué ocurre si Authorization no comienza con Bearer o no contiene token?**
 
-20. **¿El registro de usuario y suscripción es atómico?**
-    **Respuesta:** Sí. `RegistroService.registrar` es transaccional; si falla la suscripción, también se revierte la creación del usuario.
+    **Respuesta:** El filtro lanza una excepción de autenticación, limpia el contexto y usa AuthenticationEntryPoint para devolver un 401 uniforme. La solicitud no alcanza el controlador.
 
-21. **¿La creación de usuario y suscripción desde el panel admin también es atómica?**
-    **Respuesta:** No completamente. El frontend ejecuta dos solicitudes distintas; si se crea el usuario y luego falla la suscripción, puede quedar un usuario sin plan.
+11. **¿Por qué el filtro consulta SesionRepository después de verificar la firma del token?**
 
-22. **¿El catálogo de películas está protegido en el backend?**
-    **Respuesta:** Los `GET /api/peliculas/**` son públicos en `SecurityConfig`, aunque la ruta `/movies` esté protegida en Vue. Por tanto, el catálogo puede consultarse directamente sin iniciar sesión.
+    **Respuesta:** La firma demuestra que el token no fue alterado, pero la consulta confirma que su sesión continúa activa y pertenece al mismo usuario. Esto permite invalidar el token mediante logout, aunque añade una consulta a PostgreSQL en cada petición autenticada.
 
-23. **¿Los favoritos sí requieren autenticación?**
-    **Respuesta:** Sí. Sus rutas no están declaradas como públicas y terminan en la regla que exige autenticación para `/api/**`.
+12. **¿Qué hace el prefijo ROLE_ al crear SimpleGrantedAuthority?**
 
-24. **¿Cómo evita el sistema que un usuario modifique favoritos ajenos?**
-    **Respuesta:** `FavoritoController` obtiene el identificador desde el usuario autenticado del token; no acepta un identificador de usuario enviado por el cliente.
+    **Respuesta:** Adapta ADMIN o USER al formato que Spring espera cuando se usa hasRole. Si se elimina el prefijo y se mantienen las reglas hasRole, los permisos no coincidirán y las solicitudes autorizadas recibirán 403.
 
-25. **¿Cómo se impiden favoritos duplicados?**
-    **Respuesta:** La clave primaria compuesta por usuario y película impide duplicados en la base de datos, y el servicio también los comprueba para devolver un error comprensible.
+13. **¿Cómo protege TokenService un token contra modificaciones?**
 
-26. **¿Qué pasa si se intenta agregar una película inexistente?**
-    **Respuesta:** `FavoritoService` busca la película y devuelve un error 404 si no existe.
+    **Respuesta:** Firma encabezado y contenido con HMAC-SHA256 y un secreto privado. Al recibirlo vuelve a calcular la firma y usa una comparación segura; cualquier cambio en los datos produce un token inválido.
 
-27. **¿Todos los planes pueden usar favoritos?**
-    **Respuesta:** Actualmente sí. No existe una validación en `FavoritoService` que restrinja esta función según el plan o el estado de la suscripción.
+14. **¿Qué pasa con los tokens existentes si cambia APP_SECURITY_JWT_SECRET?**
 
-28. **¿El formulario de tarjeta realiza un pago real?**
-    **Respuesta:** No. Los datos se validan visualmente en el frontend, pero no se envían al backend ni se integran con una pasarela de pago.
+    **Respuesta:** Todos dejan de validar porque fueron firmados con el secreto anterior. Es útil para una revocación general, pero también cerrará las sesiones de todos los usuarios.
 
-29. **¿Por qué se utilizan DTO en vez de devolver entidades JPA?**
-    **Respuesta:** Para controlar los datos expuestos, evitar filtrar campos sensibles y desacoplar el contrato de la API del modelo interno.
+15. **¿Qué cambia al modificar APP_SECURITY_JWT_TTL_MINUTES?**
 
-30. **¿Cómo se gestionan los errores del backend?**
-    **Respuesta:** `GlobalExceptionHandler` convierte excepciones conocidas en respuestas JSON uniformes con código, mensaje, ruta y validaciones.
+    **Respuesta:** Cambia la duración de los tokens emitidos después de reiniciar la aplicación. Un valor alto aumenta el tiempo útil de un token robado; uno demasiado bajo obliga al usuario a iniciar sesión con mucha frecuencia.
 
-31. **¿Qué diferencia existe entre los errores 401 y 403?**
-    **Respuesta:** El 401 significa que la autenticación falta o es inválida; el 403 significa que la identidad es válida, pero su rol no tiene permiso.
+16. **¿El token generado es un JWT completamente estándar?**
 
-32. **¿Para qué sirve CORS en este proyecto?**
-    **Respuesta:** Permite que el frontend de un origen autorizado, por defecto `http://localhost:5173`, realice solicitudes a la API de otro origen.
+    **Respuesta:** Tiene tres partes y una firma HS256, pero el contenido usa pares como uid, email y role en vez de un objeto JSON convencional. Funciona con TokenService, aunque puede no ser compatible con bibliotecas o servicios externos que esperen claims JWT estándar.
 
-33. **¿Por qué CSRF está desactivado?**
-    **Respuesta:** La API usa tokens Bearer y no una sesión HTTP basada en cookies. La decisión es coherente con ese modelo, aunque no elimina riesgos como XSS.
+17. **¿Qué sucede al activar APP_SECURITY_REQUIRE_HTTPS?**
 
-34. **¿Qué sucede si el backend tarda más de cinco segundos?**
-    **Respuesta:** `api.js` cancela la solicitud con `AbortController` y muestra un mensaje indicando que el servidor no respondió a tiempo.
+    **Respuesta:** BearerTokenFilter rechazará tokens recibidos en solicitudes que el servidor considere no seguras. Detrás de un proxy HTTPS debe configurarse correctamente el manejo de encabezados reenviados; de lo contrario, el backend podría interpretar la petición como HTTP y rechazarla.
 
-35. **¿Dónde se validan los datos de entrada?**
-    **Respuesta:** El frontend hace validaciones para mejorar la experiencia y el backend valida los DTO con Jakarta Validation; la validación confiable siempre debe permanecer en el backend.
+18. **¿Por qué BCryptPasswordEncoder se configura con costo 12?**
 
-36. **¿Hibernate crea o actualiza automáticamente las tablas?**
-    **Respuesta:** No. `spring.jpa.hibernate.ddl-auto=none` obliga a gestionar el esquema mediante los scripts SQL del proyecto.
+    **Respuesta:** El costo hace que calcular cada hash sea deliberadamente caro y dificulta ataques de fuerza bruta sobre contraseñas filtradas. Aumentarlo mejora la resistencia, pero también consume más CPU durante registro y login, por lo que debe medirse.
 
-37. **¿Existe alguna inconsistencia importante entre la entidad película y el esquema SQL?**
-    **Respuesta:** Sí. La tabla exige `categoria_id`, pero la entidad `Pelicula` y `PeliculaRequest` no lo modelan. La creación de una película desde el panel puede fallar por la restricción `NOT NULL`; ambas capas deben alinearse.
+19. **¿Qué limitación tiene ConcurrentHashMap en LoginRateLimitService?**
 
-38. **¿Qué ocurre si la base de datos deja de estar disponible?**
-    **Respuesta:** El repositorio falla, el manejador global devuelve un error del servidor y el frontend muestra el mensaje correspondiente; no existe un modo sin conexión.
+    **Respuesta:** Los intentos se almacenan únicamente en la memoria del proceso. Se pierden al reiniciar y no se comparten si existen varias instancias; para escalar sería necesario un almacenamiento común como Redis.
 
-39. **¿Qué pruebas deberían considerarse indispensables?**
-    **Respuesta:** Login válido e inválido, roles, token vencido, sesión cerrada, registro transaccional, CRUD, acceso a datos ajenos, favoritos duplicados y errores de integridad.
+20. **¿Por qué la clave del límite de login combina IP y correo?**
 
-40. **¿Cuáles son las mejoras prioritarias antes de producción?**
-    **Respuesta:** Corregir la relación de categorías, procesar realmente `@RequireRole` o retirarla, exigir HTTPS, reemplazar secretos de desarrollo, decidir si el catálogo será público, distribuir el rate limit y hacer atómico el alta administrativa con suscripción.
+    **Respuesta:** Permite contar intentos dirigidos a una cuenta desde una dirección concreta. Cambiarla solo por correo facilitaría bloquear a otra persona intencionalmente, mientras que usar solo IP podría afectar a muchos usuarios detrás de la misma red.
+
+21. **¿Para qué sirve findForUpdateByUsuarioId durante el login?**
+
+    **Respuesta:** Bloquea la fila de sesión dentro de la transacción mientras se decide si puede reactivarse. Sin ese bloqueo, dos solicitudes simultáneas podrían observar la sesión inactiva e intentar abrirla al mismo tiempo.
+
+22. **¿Qué pasa si un usuario intenta iniciar sesión mientras su sesión sigue activa?**
+
+    **Respuesta:** AuthService lanza ConflictoException y la API responde 409. El diseño admite una sola sesión activa por usuario, apoyado también por la restricción única de sesiones.usuario_id.
+
+23. **¿Cómo invalida el backend un token durante el logout?**
+
+    **Respuesta:** AuthService marca la sesión como inactiva y registra la fecha de cierre. El token conserva una firma válida, pero BearerTokenFilter lo rechaza en la siguiente petición porque la sesión ya no está activa.
+
+24. **¿Qué hace getSession en api.js cuando tokenExpira ya pasó?**
+
+    **Respuesta:** Elimina movsSession de sessionStorage y localStorage y devuelve null. La guarda del router redirige al login, aunque la validación definitiva sigue estando en el backend.
+
+25. **¿Qué diferencia produce marcar “recordar” en el login?**
+
+    **Respuesta:** La sesión se guarda en localStorage y permanece al cerrar el navegador; sin esa opción se usa sessionStorage y dura solo durante la pestaña o sesión del navegador. Persistirla más tiempo también amplía la exposición ante XSS.
+
+26. **¿Qué hace request de api.js antes de ejecutar fetch?**
+
+    **Respuesta:** Construye los encabezados, agrega Content-Type cuando existe cuerpo, adjunta el Bearer token y crea un AbortController. Centralizar esta lógica evita repetir el manejo de autenticación y errores en cada vista.
+
+27. **¿Qué ocurre si una petición tarda más de 5000 milisegundos?**
+
+    **Respuesta:** AbortController cancela fetch y api.js genera el mensaje de que el servidor no respondió a tiempo. Aumentar el límite toleraría operaciones lentas, pero también mantendría la interfaz esperando durante más tiempo.
+
+28. **¿Puede un usuario convertirse en administrador modificando localStorage?**
+
+    **Respuesta:** Puede engañar a Vue Router y mostrar la ruta /admin, porque esa guarda lee el rol local. No obtiene permisos reales: SecurityConfig vuelve a comprobar el rol firmado del token y responde 403 en las operaciones administrativas.
+
+29. **¿Por qué /api/usuarios/me debe declararse antes de /api/usuarios/** en SecurityConfig?**
+
+    **Respuesta:** Las reglas se evalúan en orden y la primera coincidencia se aplica. La ruta personal debe aceptar USER y ADMIN antes de la regla general que reserva el resto de usuarios para ADMIN.
+
+30. **¿Por qué los favoritos pueden fallar con 403 para un usuario USER en la configuración actual?**
+
+    **Respuesta:** /api/usuarios/me/favoritos no coincide con la regla exacta de /api/usuarios/me y después entra en /api/usuarios/**, que exige ADMIN. Debe agregarse una regla específica para /api/usuarios/me/favoritos/** antes del comodín administrativo.
+
+31. **¿La anotación RequireRole se ejecuta automáticamente?**
+
+    **Respuesta:** No. El proyecto define la anotación, pero no contiene un aspecto, interceptor o autorización por método que la procese. Quitarla no cambiaría hoy el resultado; la seguridad efectiva está en SecurityConfig y en algunas comprobaciones de SecurityContext.
+
+32. **¿Qué protege SecurityContext.requireSelfOrAdmin en SuscripcionController?**
+
+    **Respuesta:** Compara el usuario del token con el identificador solicitado y permite una excepción para ADMIN. Si se elimina, un USER autenticado podría intentar consultar o crear datos para otro usuario cuando la ruta general lo permita.
+
+33. **¿Por qué RegistroService.registrar tiene Transactional?**
+
+    **Respuesta:** Porque guarda usuario y suscripción como una sola unidad. Si falla el plan, el rol o la suscripción, la transacción revierte los cambios y evita una cuenta creada parcialmente.
+
+34. **¿Por qué el alta de usuario desde AdminView puede quedar incompleta?**
+
+    **Respuesta:** El frontend llama primero a createUser y después a createSubscription en dos peticiones independientes. Si la segunda falla, la primera ya fue confirmada; la solución sería un endpoint backend transaccional que realice ambas operaciones.
+
+35. **¿Qué problema existe entre Pelicula.java y db/01_schema.sql?**
+
+    **Respuesta:** La tabla peliculas exige categoria_id NOT NULL, pero la entidad y PeliculaRequest no incluyen la categoría. Un INSERT desde PeliculaService puede violar esa restricción; se debe mapear Categoria o cambiar de forma coherente el esquema.
+
+36. **¿Por qué FavoritoId contiene usuarioId y peliculaId?**
+
+    **Respuesta:** Es la clave primaria compuesta que identifica de forma única la relación entre un usuario y una película. Gracias a ella, una misma película no puede agregarse dos veces a los favoritos del mismo usuario.
+
+37. **¿Qué efecto tienen los ON DELETE CASCADE de la tabla favoritos?**
+
+    **Respuesta:** Al eliminar un usuario o una película, PostgreSQL elimina automáticamente sus relaciones de favoritos. Si se retira el cascade, la eliminación puede fallar por claves foráneas o exigir una limpieza manual previa.
+
+38. **¿Por qué Favorito usa FetchType.LAZY en sus relaciones?**
+
+    **Respuesta:** Evita cargar usuario y película automáticamente cuando no se necesitan. FavoritoService convierte la película a DTO dentro de una transacción; si se intentara acceder a la relación fuera de ella, podría aparecer un error de carga diferida.
+
+39. **¿Qué se evita al devolver PeliculaResponse en lugar de la entidad Pelicula?**
+
+    **Respuesta:** Se evita exponer detalles internos de persistencia y futuras relaciones JPA. Si la entidad cambia, el contrato de la API puede mantenerse estable modificando solamente el mapeo al DTO.
+
+40. **¿Qué pasa si se cambia una entidad Java pero no el script SQL?**
+
+   **Respuesta:** Hibernate no actualizará la base porque ddl-auto está configurado en none. La aplicación puede fallar por columnas o restricciones incompatibles; todo cambio del modelo debe acompañarse de una migración SQL y pruebas.
