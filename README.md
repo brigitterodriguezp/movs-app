@@ -8,6 +8,7 @@
 4. [Opciones por rol](#4-opciones-por-rol)
 5. [APIs disponibles](#5-apis-disponibles)
 6. [Arquitectura](#6-arquitectura)
+7. [Flujo de la aplicación](#7-flujo-de-la-aplicación)
 
 ## 1. Resumen
 
@@ -517,4 +518,68 @@ sequenceDiagram
   else No autorizado
     API-->>F: 401 / 403
   end
+```
+
+## 7. Flujo de la aplicación
+
+Los siguientes diagramas resumen el recorrido desde los puntos de entrada hasta la respuesta final de cada caso, sin mezclar todos los caminos en un único diagrama.
+
+### 7.1. Inicio del sistema
+
+```mermaid
+flowchart LR
+  A[main de Spring Boot] --> B[Crear contexto]
+  B --> C[Conectar PostgreSQL]
+  C --> D[Inicializar usuario ADMIN]
+  D --> E[API disponible]
+
+  F[main.js de Vue] --> G[Crear App]
+  G --> H[Instalar Router]
+  H --> I[Montar en #app]
+  I --> J[Vista inicial]
+```
+
+### 7.2. Navegación por rol
+
+```mermaid
+flowchart TD
+  A[Usuario abre una ruta] --> B{¿Ruta protegida?}
+  B -- No --> C[Mostrar vista pública]
+  B -- Sí --> D{¿Hay sesión?}
+  D -- No --> E[Redirigir a Sign in]
+  D -- Sí --> F{¿Ruta de admin?}
+  F -- No --> G[Mostrar cuenta o películas]
+  F -- Sí, es ADMIN --> H[Mostrar panel admin]
+  F -- Sí, no es ADMIN --> I[Mostrar no autorizado]
+```
+
+### 7.3. Registro e inicio de sesión
+
+```mermaid
+flowchart TD
+  A[Formulario] --> B{Caso}
+  B -- Registro --> C[POST /api/registro]
+  C --> D[Crear USER y suscripción]
+  D --> E[Cuenta registrada]
+  B -- Login --> F[POST /api/auth/login]
+  F --> G{Credenciales válidas?}
+  G -- No --> H[Error 401 o 409]
+  G -- Sí --> I[Crear sesión y JWT]
+  I --> J[Guardar sesión y navegar]
+```
+
+### 7.4. Solicitud a la API
+
+```mermaid
+flowchart LR
+  A[Vista Vue] --> B[services/api.js]
+  B --> C[BearerTokenFilter]
+  C --> D{Token y rol válidos?}
+  D -- No --> E[Respuesta 401 o 403]
+  D -- Sí --> F[Controller]
+  F --> G[Service]
+  G --> H[Repository]
+  H --> I[(PostgreSQL)]
+  I --> J[DTO JSON]
+  J --> A
 ```
