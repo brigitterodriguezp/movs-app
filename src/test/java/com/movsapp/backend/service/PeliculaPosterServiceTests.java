@@ -22,7 +22,7 @@ class PeliculaPosterServiceTests {
     void setUp() {
         RestClient.Builder builder = RestClient.builder();
         server = MockRestServiceServer.bindTo(builder).build();
-        service = new PeliculaPosterService(mock(PeliculaRepository.class), builder);
+        service = new PeliculaPosterService(mock(PeliculaRepository.class), builder, mock(OllamaService.class));
     }
 
     @Test

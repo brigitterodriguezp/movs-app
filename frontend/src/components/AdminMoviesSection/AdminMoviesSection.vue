@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
-  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, LoaderCircle, Plus, Search, Sparkles, Trash2, X
+  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, LoaderCircle, Plus, Search, Sparkles, Trash2, X, Lightbulb
 } from '@lucide/vue'
 import { completeMovieFromTitle, createMovie, deleteMovie, getMoviesPage, updateMovie } from '@/services/api'
 
@@ -36,6 +36,7 @@ const deleteTarget = ref(null)
 const saving = ref(false)
 const completing = ref(false)
 const assistantNotice = ref('')
+const suggestionTitle = ref('')
 const defaultPoster = `${import.meta.env.BASE_URL}default_movie.png`
 
 const emptyForm = () => ({
@@ -136,6 +137,7 @@ async function completeWithAle() {
   const title = form.titulo.trim()
   error.value = ''
   assistantNotice.value = ''
+  suggestionTitle.value = ''
   if (!title) {
     error.value = 'Escribe primero el título de la película.'
     return
@@ -152,10 +154,25 @@ async function completeWithAle() {
     form.imagenUrl = result.posterUrl || ''
     assistantNotice.value = 'Ale completó la información de la película.'
   } catch (err) {
-    error.value = err.message || 'Ale no pudo encontrar esa película.'
+    const msg = err.message || 'Ale no pudo encontrar esa película.'
+    const match = msg.match(/Quizas quisiste decir:\s*"([^"]+)"/i)
+      || msg.match(/Quizás quisiste decir:\s*"([^"]+)"/i)
+    if (match) {
+      suggestionTitle.value = match[1]
+      error.value = msg.replace(/Quiz[aá]s quisiste decir:\s*"[^"]+"/i, '').trim()
+    } else {
+      error.value = msg
+    }
   } finally {
     completing.value = false
   }
+}
+
+function useSuggestion() {
+  form.titulo = suggestionTitle.value
+  suggestionTitle.value = ''
+  error.value = ''
+  completeWithAle()
 }
 
 function useDefaultPoster(event) {
@@ -363,7 +380,10 @@ onMounted(loadMovies)
                 <label class="text-sm" style="color: var(--color-text);">Descripción<textarea v-model="form.descripcion" class="form-control mt-1 rounded-xl" maxlength="1000" rows="5" required /></label>
               </div>
             </div>
-            <p v-if="error" class="m-0 rounded-xl px-4 py-3 text-sm" style="background: color-mix(in srgb, var(--color-error) 12%, transparent); color: var(--color-error);">{{ error }}</p>
+            <div v-if="error || suggestionTitle" class="m-0 rounded-xl px-4 py-3 text-sm suggestion-box">
+              <p v-if="error" class="m-0 suggestion-error-text">{{ error }}</p>
+              <p v-if="suggestionTitle" class="m-0 suggestion-text">¿Quisiste decir <button type="button" class="suggestion-btn" @click="useSuggestion">{{ suggestionTitle }}</button>?</p>
+            </div>
             <div class="flex justify-end gap-3">
               <button class="btn rounded-pill px-4 py-2 soft-button" type="button" @click="closeModal">Cancelar</button>
               <button class="btn rounded-pill px-4 py-2 glass-accent-btn" type="submit" :disabled="saving">{{ saving ? 'Guardando…' : 'Guardar película' }}</button>
@@ -392,4 +412,9 @@ onMounted(loadMovies)
 .ale-complete-button:disabled { opacity: .5; }
 .assistant-success { background: #ecfdf5; color: #047857; }
 .movie-poster-preview { width: 7rem; aspect-ratio: 2 / 3; border-radius: .75rem; object-fit: cover; background: #f3f4f6; }
+.suggestion-box { background: #ede9fe; color: #4c1d95; }
+.suggestion-box .suggestion-error-text { color: #6b7280; font-size: 0.85rem; }
+.suggestion-text { color: #4c1d95; font-size: 0.85rem; margin-top: .25rem; }
+.suggestion-btn { background: none; border: none; color: #7c3aed; font-weight: 600; cursor: pointer; padding: 0; text-decoration: underline; text-underline-offset: 2px; }
+.suggestion-btn:hover { color: #6d28d9; }
 </style>

@@ -15,6 +15,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -62,6 +63,7 @@ public class PeliculaPosterService {
 
     private final PeliculaRepository peliculas;
     private final RestClient.Builder restClientBuilder;
+    private final OllamaService ollamaService;
     private final ConcurrentHashMap<Long, PeliculaMetadataResponse> cache = new ConcurrentHashMap<>();
 
     public Optional<URI> obtenerPoster(Long peliculaId) {
@@ -83,7 +85,10 @@ public class PeliculaPosterService {
             String html = obtenerHtml(busqueda);
             var match = MOVIE_LINK.matcher(html == null ? "" : html);
             if (!match.find()) {
-                throw new RecursoNoEncontradoException("No encontré una película con ese título.");
+                String sugerencia = sugerirTitulo(titulo.trim());
+                throw new RecursoNoEncontradoException(sugerencia != null
+                    ? "No encontré una película con ese título. " + sugerencia
+                    : "No encontré una película con ese título.");
             }
 
             String fichaUrl = "https://www.themoviedb.org/movie/" + match.group(2);
@@ -96,12 +101,40 @@ public class PeliculaPosterService {
                 .orElseThrow(() -> new RecursoNoEncontradoException("No pude obtener el género de esa película."));
             return new PeliculaLookupResponse(
                 metadata.titulo(), anio, genero, variantePara(genero),
-                metadata.descripcion(), metadata.posterUrl(), fichaUrl);
+                metadata.descripcion(), metadata.posterUrl(), fichaUrl, null);
         } catch (RecursoNoEncontradoException ex) {
             throw ex;
         } catch (RestClientException | IllegalArgumentException ex) {
             log.warn("No se pudo buscar la película '{}' en TMDb", titulo);
             throw new RecursoNoEncontradoException("No pude consultar la información de esa película ahora mismo.");
+        }
+    }
+
+    private String sugerirTitulo(String titulo) {
+        try {
+            List<String> candidatos = peliculas.findAll().stream()
+                .map(p -> p.getTitulo())
+                .limit(200)
+                .toList();
+            if (candidatos.isEmpty()) return null;
+            String lista = String.join(", ", candidatos);
+            String prompt = """
+                El usuario buscó una película pero escribió mal el título.
+                Título escrito: "%s"
+                Estas son películas del catálogo: %s
+                ¿Cuál de estas películas se parece más al título que escribió el usuario?
+                Responde SOLO el nombre correcto de la película, nada más, sin explicaciones, sin comillas.
+                Si ninguna se parece, responde: NINGUNA_SUGERENCIA
+                """.formatted(titulo, lista);
+            String respuesta = ollamaService.generar(prompt).response().trim();
+            if (respuesta == null || respuesta.isBlank() || "NINGUNA_SUGERENCIA".equals(respuesta)
+                    || respuesta.equalsIgnoreCase(titulo)) {
+                return null;
+            }
+            return "Quizás quisiste decir: \"" + respuesta + "\"";
+        } catch (Exception ex) {
+            log.warn("No se pudo obtener sugerencia de Ollama para '{}': {}", titulo, ex.getMessage());
+            return null;
         }
     }
 

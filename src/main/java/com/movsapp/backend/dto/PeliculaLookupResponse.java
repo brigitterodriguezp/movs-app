@@ -7,5 +7,6 @@ public record PeliculaLookupResponse(
     String variante,
     String descripcion,
     String posterUrl,
-    String fichaUrl
+    String fichaUrl,
+    String sugerencia
 ) {}
