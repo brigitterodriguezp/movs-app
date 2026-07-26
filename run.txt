@@ -1,6 +1,2 @@
 Backend: mvn spring-boot:run
-
 Frontend: cd frontend && npm install && npm run dev
-
-Contar registros totales de la tabla mayoritaria (1000)
-SELECT COUNT(*) FROM peliculas;
