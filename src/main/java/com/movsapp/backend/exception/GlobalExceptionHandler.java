@@ -35,6 +35,10 @@ public class GlobalExceptionHandler {
     ResponseEntity<ApiError> badRequest(SolicitudInvalidaException ex, HttpServletRequest req) {
         return error(HttpStatus.BAD_REQUEST, ex.getMessage(), req, Map.of());
     }
+    @ExceptionHandler(OllamaException.class)
+    ResponseEntity<ApiError> ollama(OllamaException ex, HttpServletRequest req) {
+        return error(HttpStatus.BAD_GATEWAY, ex.getMessage(), req, Map.of());
+    }
     @ExceptionHandler(MethodArgumentNotValidException.class)
     ResponseEntity<ApiError> validation(MethodArgumentNotValidException ex, HttpServletRequest req) {
         Map<String, String> fields = new LinkedHashMap<>();
