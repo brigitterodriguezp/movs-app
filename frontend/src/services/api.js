@@ -194,8 +194,10 @@ export async function getMovies() {
   return api.get('/api/peliculas')
 }
 
-export async function getMoviesPage(page = 0, search = '') {
-  const params = new URLSearchParams({ pagina: String(page), busqueda: search })
+export async function getMoviesPage(page = 0, search = '', sort = 'actualizacion', direction = 'desc') {
+  const params = new URLSearchParams({
+    pagina: String(page), busqueda: search, orden: sort, direccion: direction,
+  })
   return api.get(`/api/peliculas/pagina?${params}`)
 }
 

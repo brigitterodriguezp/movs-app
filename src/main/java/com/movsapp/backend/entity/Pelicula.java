@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
+import java.time.OffsetDateTime;
+
 @Entity
 @Table(name = "peliculas", indexes = {
     @Index(name = "idx_peliculas_titulo", columnList = "titulo"),
@@ -37,4 +39,22 @@ public class Pelicula {
     @Size(max = 60)
     @Column(length = 60)
     private String variante;
+
+    @NotNull
+    @Column(name = "categoria_id", nullable = false)
+    private Long categoriaId;
+
+    @NotNull
+    @Column(name = "actualizada_en", nullable = false)
+    private OffsetDateTime actualizadaEn;
+
+    @PrePersist
+    void antesDeCrear() {
+        actualizadaEn = OffsetDateTime.now();
+    }
+
+    @PreUpdate
+    void antesDeActualizar() {
+        actualizadaEn = OffsetDateTime.now();
+    }
 }

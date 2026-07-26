@@ -1,7 +1,7 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, LoaderCircle, Plus, Search, Sparkles, Trash2, X
+  ArrowDown, ArrowUp, ArrowUpDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, LoaderCircle, Plus, Search, Sparkles, Trash2, X
 } from '@lucide/vue'
 import { completeMovieFromTitle, createMovie, deleteMovie, getMoviesPage, updateMovie } from '@/services/api'
 
@@ -28,6 +28,8 @@ const currentPage = ref(1)
 const pageSize = 5
 const totalMovies = ref(0)
 const totalPages = ref(1)
+const sortField = ref('actualizacion')
+const sortDirection = ref('desc')
 const showModal = ref(false)
 const editingMovie = ref(null)
 const deleteTarget = ref(null)
@@ -65,6 +67,37 @@ watch(searchQuery, () => {
 function goToPage(page) {
   const target = Math.min(Math.max(Number(page), 1), totalPages.value)
   if (target !== currentPage.value) loadMovies(target)
+}
+
+function toggleSort(field) {
+  if (sortField.value === field) {
+    sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc'
+  } else {
+    sortField.value = field
+    sortDirection.value = field === 'anio' ? 'desc' : 'asc'
+  }
+  loadMovies(1)
+}
+
+function sortIcon(field) {
+  if (sortField.value !== field) return ArrowUpDown
+  return sortDirection.value === 'asc' ? ArrowUp : ArrowDown
+}
+
+function relativeUpdate(value) {
+  const timestamp = Date.parse(value)
+  if (!Number.isFinite(timestamp)) return 'Sin fecha'
+  const seconds = Math.max(0, Math.floor((Date.now() - timestamp) / 1000))
+  if (seconds < 60) return 'Ahora'
+  const minutes = Math.floor(seconds / 60)
+  if (minutes < 60) return `Hace ${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `Hace ${hours}h`
+  const days = Math.floor(hours / 24)
+  if (days < 30) return `Hace ${days}d`
+  const months = Math.floor(days / 30)
+  if (months < 12) return `Hace ${months}mes`
+  return `Hace ${Math.floor(months / 12)}a`
 }
 
 function fillForm(movie = null) {
@@ -133,7 +166,9 @@ async function loadMovies(page = currentPage.value) {
   isLoading.value = true
   error.value = ''
   try {
-    const data = await getMoviesPage(page - 1, searchQuery.value.trim())
+    const data = await getMoviesPage(
+      page - 1, searchQuery.value.trim(), sortField.value, sortDirection.value,
+    )
     if (!data.contenido.length && page > 1 && data.totalPaginas > 0) {
       await loadMovies(data.totalPaginas)
       return
@@ -248,9 +283,10 @@ onMounted(loadMovies)
           <thead>
             <tr class="border-b" style="border-color: var(--color-border);">
               <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">No.</th>
-              <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Título</th>
-              <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Año</th>
-              <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Género</th>
+              <th class="px-4 py-3 font-medium sm:px-6" :aria-sort="sortField === 'actualizacion' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'" style="color: var(--color-text-muted);"><button class="movie-sort-button" type="button" @click="toggleSort('actualizacion')"><span>Actualización</span><component :is="sortIcon('actualizacion')" :size="14" /></button></th>
+              <th class="px-4 py-3 font-medium sm:px-6" :aria-sort="sortField === 'titulo' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'" style="color: var(--color-text-muted);"><button class="movie-sort-button" type="button" @click="toggleSort('titulo')"><span>Nombre</span><component :is="sortIcon('titulo')" :size="14" /></button></th>
+              <th class="px-4 py-3 font-medium sm:px-6" :aria-sort="sortField === 'anio' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'" style="color: var(--color-text-muted);"><button class="movie-sort-button" type="button" @click="toggleSort('anio')"><span>Año</span><component :is="sortIcon('anio')" :size="14" /></button></th>
+              <th class="px-4 py-3 font-medium sm:px-6" :aria-sort="sortField === 'genero' ? (sortDirection === 'asc' ? 'ascending' : 'descending') : 'none'" style="color: var(--color-text-muted);"><button class="movie-sort-button" type="button" @click="toggleSort('genero')"><span>Categoría</span><component :is="sortIcon('genero')" :size="14" /></button></th>
               <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Imagen</th>
               <th class="px-4 py-3 font-medium sm:px-6" style="color: var(--color-text-muted);">Acciones</th>
             </tr>
@@ -258,6 +294,7 @@ onMounted(loadMovies)
           <tbody>
             <tr v-for="(movie, index) in paginatedMovies" :key="movie.id" class="border-b last:border-0" style="border-color: var(--color-border-subtle);">
               <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">{{ (currentPage - 1) * pageSize + index + 1 }}</td>
+              <td class="whitespace-nowrap px-4 py-3 sm:px-6" :title="movie.actualizadaEn" style="color: var(--color-text-secondary);">{{ relativeUpdate(movie.actualizadaEn) }}</td>
               <td class="max-w-64 px-4 py-3 font-medium sm:px-6" style="color: var(--color-text);">{{ movie.titulo }}</td>
               <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">{{ movie.anio }}</td>
               <td class="px-4 py-3 sm:px-6" style="color: var(--color-text-secondary);">{{ movie.genero }}</td>
@@ -340,6 +377,8 @@ onMounted(loadMovies)
 
 <style scoped>
 .admin-movie-surface { background: #fff; border: 1px solid #e5e7eb; }
+.movie-sort-button { display: inline-flex; align-items: center; gap: .35rem; color: inherit; background: transparent; border: 0; padding: 0; font: inherit; }
+.movie-sort-button:hover { color: var(--color-text); }
 .movie-page-button { color: var(--color-text) !important; border-color: var(--color-border) !important; }
 .movie-page-button.active { color: #fff !important; background: var(--color-accent) !important; border-color: var(--color-accent) !important; }
 .movie-page-button:disabled { color: var(--color-text-muted) !important; opacity: .55; }

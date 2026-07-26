@@ -76,6 +76,7 @@ CREATE TABLE IF NOT EXISTS peliculas (
   imagen_url VARCHAR(255) NOT NULL,
   variante VARCHAR(60),
   categoria_id BIGINT NOT NULL,
+  actualizada_en TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
   CONSTRAINT pk_peliculas PRIMARY KEY (id),
   CONSTRAINT chk_peliculas_anio CHECK (anio BETWEEN 1888 AND 2100),
   CONSTRAINT fk_peliculas_categorias FOREIGN KEY (categoria_id) REFERENCES categorias(id)
@@ -83,6 +84,7 @@ CREATE TABLE IF NOT EXISTS peliculas (
 CREATE INDEX IF NOT EXISTS idx_peliculas_titulo ON peliculas (titulo);
 CREATE INDEX IF NOT EXISTS idx_peliculas_genero ON peliculas (genero);
 CREATE INDEX IF NOT EXISTS idx_peliculas_categoria ON peliculas (categoria_id);
+CREATE INDEX IF NOT EXISTS idx_peliculas_actualizada ON peliculas (actualizada_en DESC);
 CREATE EXTENSION IF NOT EXISTS pg_trgm;
 CREATE INDEX IF NOT EXISTS idx_peliculas_titulo_trgm ON peliculas USING GIN (lower(titulo) gin_trgm_ops);
 CREATE INDEX IF NOT EXISTS idx_peliculas_genero_trgm ON peliculas USING GIN (lower(genero) gin_trgm_ops);

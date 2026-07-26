@@ -57,6 +57,6 @@ public class FavoritoService {
     }
 
     private PeliculaResponse response(Pelicula p) {
-        return new PeliculaResponse(p.getId(), p.getTitulo(), p.getAnio(), p.getGenero(), p.getDescripcion(), p.getImagenUrl(), p.getVariante());
+        return new PeliculaResponse(p.getId(), p.getTitulo(), p.getAnio(), p.getGenero(), p.getDescripcion(), p.getImagenUrl(), p.getVariante(), p.getActualizadaEn());
     }
 }
