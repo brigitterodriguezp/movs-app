@@ -1104,3 +1104,5 @@ ON CONFLICT (correo) DO UPDATE SET
   rol_id = EXCLUDED.rol_id;
 
 -- No se insertan favoritos ficticios: son datos personales creados por cada usuario.
+
+CALL optimizar_catalogo();
