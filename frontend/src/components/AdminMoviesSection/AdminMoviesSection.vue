@@ -5,6 +5,20 @@ import {
 } from '@lucide/vue'
 import { completeMovieFromTitle, createMovie, deleteMovie, getMoviesPage, updateMovie } from '@/services/api'
 
+const genreOptions = [
+  ['Action', 'Acción'], ['Adventure', 'Aventura'], ['Animation', 'Animación'],
+  ['Comedy', 'Comedia'], ['Crime', 'Crimen'], ['Documentary', 'Documental'],
+  ['Drama', 'Drama'], ['Family', 'Familiar'], ['Fantasy', 'Fantasía'],
+  ['History', 'Historia'], ['Horror', 'Terror'], ['Music', 'Musical'],
+  ['Mystery', 'Misterio'], ['Romance', 'Romance'], ['Science Fiction', 'Ciencia ficción'],
+  ['Thriller', 'Suspenso'], ['War', 'Bélica'], ['Western', 'Oeste'],
+]
+const variantOptions = [
+  ['movie-card-featured', 'Destacada'],
+  ['movie-card-wide', 'Ancha'],
+  ['movie-card-tall', 'Vertical'],
+]
+
 const movies = ref([])
 const searchQuery = ref('')
 const isLoading = ref(true)
@@ -98,9 +112,12 @@ async function completeWithAle() {
   try {
     const result = await completeMovieFromTitle(title)
     form.titulo = result.titulo || title
+    form.anio = result.anio || form.anio
+    form.genero = result.genero || ''
+    form.variante = result.variante || ''
     form.descripcion = result.descripcion || ''
     form.imagenUrl = result.posterUrl || ''
-    assistantNotice.value = 'Ale encontró y completó la sinopsis en español y el póster.'
+    assistantNotice.value = 'Ale completó la información de la película.'
   } catch (err) {
     error.value = err.message || 'Ale no pudo encontrar esa película.'
   } finally {
@@ -284,15 +301,15 @@ onMounted(loadMovies)
             <div class="grid gap-4 sm:grid-cols-2">
               <label class="text-sm" style="color: var(--color-text);">Título<input v-model="form.titulo" class="form-control mt-1 rounded-xl" maxlength="160" required /></label>
               <label class="text-sm" style="color: var(--color-text);">Año<input v-model.number="form.anio" class="form-control mt-1 rounded-xl" type="number" min="1888" max="2100" required /></label>
-              <label class="text-sm" style="color: var(--color-text);">Género<input v-model="form.genero" class="form-control mt-1 rounded-xl" maxlength="60" required /></label>
-              <label class="text-sm" style="color: var(--color-text);">Variante<input v-model="form.variante" class="form-control mt-1 rounded-xl" maxlength="60" placeholder="Opcional" /></label>
+              <label class="text-sm" style="color: var(--color-text);">Género<select v-model="form.genero" class="form-control mt-1 rounded-xl" required><option value="" disabled>Selecciona un género</option><option v-for="([value, label]) in genreOptions" :key="value" :value="value">{{ label }}</option></select></label>
+              <label class="text-sm" style="color: var(--color-text);">Presentación<select v-model="form.variante" class="form-control mt-1 rounded-xl"><option value="">Estándar</option><option v-for="([value, label]) in variantOptions" :key="value" :value="value">{{ label }}</option></select></label>
             </div>
             <div v-if="!editingMovie" class="ale-helper flex flex-wrap items-center justify-between gap-3 rounded-xl p-3">
               <div class="flex items-center gap-3">
                 <span class="ale-helper-icon"><Sparkles :size="17" /></span>
                 <div>
                   <p class="m-0 text-sm font-medium">Completar con Ale</p>
-                  <p class="m-0 text-xs">Busca por el título la sinopsis en español y el póster de TMDb.</p>
+                  <p class="m-0 text-xs">Busca por el título, año, género, presentación, sinopsis y póster.</p>
                 </div>
               </div>
               <button class="ale-complete-button btn rounded-pill px-4 py-2 text-sm" type="button" :disabled="completing || !form.titulo.trim()" @click="completeWithAle">

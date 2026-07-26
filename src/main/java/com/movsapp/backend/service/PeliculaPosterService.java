@@ -15,6 +15,7 @@ import org.springframework.web.util.HtmlUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -32,6 +33,32 @@ public class PeliculaPosterService {
     private static final Pattern MOVIE_LINK = Pattern.compile(
         "href=[\\\"'](/movie/(\\d+)(?:-[^?\\\"']*)?)(?:\\?[^\\\"']*)?[\\\"']",
         Pattern.CASE_INSENSITIVE);
+    private static final Pattern RELEASE_YEAR = Pattern.compile(
+        "<span[^>]+class=[\\\"']release[\\\"'][^>]*>\\s*[^<]*?((?:18|19|20|21)\\d{2})",
+        Pattern.CASE_INSENSITIVE);
+    private static final Pattern PRIMARY_GENRE = Pattern.compile(
+        "<span[^>]+class=[\\\"']genres[\\\"'][^>]*>[\\s\\S]*?<a[^>]+href=[\\\"']/genre/(\\d+)[^\\\"']*[\\\"']",
+        Pattern.CASE_INSENSITIVE);
+    private static final Map<String, String> GENRES = Map.ofEntries(
+        Map.entry("28", "Action"),
+        Map.entry("12", "Adventure"),
+        Map.entry("16", "Animation"),
+        Map.entry("35", "Comedy"),
+        Map.entry("80", "Crime"),
+        Map.entry("99", "Documentary"),
+        Map.entry("18", "Drama"),
+        Map.entry("10751", "Family"),
+        Map.entry("14", "Fantasy"),
+        Map.entry("36", "History"),
+        Map.entry("27", "Horror"),
+        Map.entry("10402", "Music"),
+        Map.entry("9648", "Mystery"),
+        Map.entry("10749", "Romance"),
+        Map.entry("878", "Science Fiction"),
+        Map.entry("53", "Thriller"),
+        Map.entry("10752", "War"),
+        Map.entry("37", "Western")
+    );
 
     private final PeliculaRepository peliculas;
     private final RestClient.Builder restClientBuilder;
@@ -60,10 +87,16 @@ public class PeliculaPosterService {
             }
 
             String fichaUrl = "https://www.themoviedb.org/movie/" + match.group(2);
-            PeliculaMetadataResponse metadata = extraerMetadata(obtenerHtml(URI.create(fichaUrl + "?language=es-ES")))
+            String fichaHtml = obtenerHtml(URI.create(fichaUrl + "?language=es-ES"));
+            PeliculaMetadataResponse metadata = extraerMetadata(fichaHtml)
                 .orElseThrow(() -> new RecursoNoEncontradoException("No pude obtener la sinopsis y el póster de esa película."));
+            int anio = extraerAnio(fichaHtml)
+                .orElseThrow(() -> new RecursoNoEncontradoException("No pude obtener el año de estreno de esa película."));
+            String genero = extraerGenero(fichaHtml)
+                .orElseThrow(() -> new RecursoNoEncontradoException("No pude obtener el género de esa película."));
             return new PeliculaLookupResponse(
-                metadata.titulo(), metadata.descripcion(), metadata.posterUrl(), fichaUrl);
+                metadata.titulo(), anio, genero, variantePara(genero),
+                metadata.descripcion(), metadata.posterUrl(), fichaUrl);
         } catch (RecursoNoEncontradoException ex) {
             throw ex;
         } catch (RestClientException | IllegalArgumentException ex) {
@@ -130,6 +163,28 @@ public class PeliculaPosterService {
         String poster = meta(html, "og:image").orElse("");
         if (titulo.isBlank() || descripcion.isBlank() || !esUrlTmdb(poster)) return Optional.empty();
         return Optional.of(new PeliculaMetadataResponse(titulo, descripcion, poster));
+    }
+
+    private Optional<Integer> extraerAnio(String html) {
+        if (html == null || html.isBlank()) return Optional.empty();
+        var match = RELEASE_YEAR.matcher(html);
+        if (!match.find()) return Optional.empty();
+        return Optional.of(Integer.parseInt(match.group(1)));
+    }
+
+    private Optional<String> extraerGenero(String html) {
+        if (html == null || html.isBlank()) return Optional.empty();
+        var match = PRIMARY_GENRE.matcher(html);
+        if (!match.find()) return Optional.empty();
+        return Optional.ofNullable(GENRES.get(match.group(1)));
+    }
+
+    private String variantePara(String genero) {
+        return switch (genero) {
+            case "Action", "Adventure", "Science Fiction" -> "movie-card-featured";
+            case "Animation", "Comedy", "Family", "Fantasy" -> "movie-card-wide";
+            default -> "movie-card-tall";
+        };
     }
 
     private Optional<String> meta(String html, String property) {
