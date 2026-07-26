@@ -86,6 +86,10 @@ async function request(path, options = {}, timeoutMs = 5000) {
   const data = contentType.includes('application/json') ? await response.json() : await response.text()
 
   if (!response.ok) {
+    if (response.status === 401 && path !== '/api/auth/login') {
+      clearSession()
+      window.location.assign(`${import.meta.env.BASE_URL}signin`)
+    }
     const message = data?.mensaje || data?.message || 'Error interno en el servidor.'
     const err = new Error(message)
     err.validaciones = data?.validaciones || null
@@ -190,12 +194,29 @@ export async function getMovies() {
   return api.get('/api/peliculas')
 }
 
+export async function getMoviesPage(page = 0, search = '') {
+  const params = new URLSearchParams({ pagina: String(page), busqueda: search })
+  return api.get(`/api/peliculas/pagina?${params}`)
+}
+
 export async function getMovie(id) {
   return api.get(`/api/peliculas/${id}`)
 }
 
+export function getMoviePosterUrl(id) {
+  return `${API_BASE_URL}/api/peliculas/${id}/poster`
+}
+
+export async function getMovieMetadata(id) {
+  return api.get(`/api/peliculas/${id}/metadata`)
+}
+
 export async function createMovie(data) {
   return api.post('/api/peliculas', data)
+}
+
+export async function completeMovieFromTitle(titulo) {
+  return api.post('/api/peliculas/asistente', { titulo })
 }
 
 export async function updateMovie(id, data) {
@@ -210,6 +231,11 @@ export async function getFavorites() {
   return api.get('/api/usuarios/me/favoritos')
 }
 
+export async function getFavoritesPage(page = 0, search = '') {
+  const params = new URLSearchParams({ pagina: String(page), busqueda: search })
+  return api.get(`/api/usuarios/me/favoritos/pagina?${params}`)
+}
+
 export async function addFavorite(movieId) {
   return api.post(`/api/usuarios/me/favoritos/${movieId}`)
 }
@@ -220,4 +246,12 @@ export async function removeFavorite(movieId) {
 
 export async function getSessionStatus(userId) {
   return api.get(`/api/auth/sesion/${userId}`)
+}
+
+export async function generateWithOllama(prompt) {
+  return request(
+    '/api/ollama/generate',
+    { method: 'POST', body: JSON.stringify({ prompt }) },
+    120000,
+  )
 }
