@@ -1,6 +1,7 @@
 package com.movsapp.backend.service;
 
 import com.movsapp.backend.dto.PeliculaResponse;
+import com.movsapp.backend.dto.PaginaResponse;
 import com.movsapp.backend.entity.Favorito;
 import com.movsapp.backend.entity.FavoritoId;
 import com.movsapp.backend.entity.Pelicula;
@@ -12,6 +13,7 @@ import com.movsapp.backend.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 
@@ -25,6 +27,14 @@ public class FavoritoService {
     public List<PeliculaResponse> listar(Long usuarioId) {
         return favoritos.findByUsuarioIdOrderByFechaAgregadaDesc(usuarioId).stream()
             .map(Favorito::getPelicula).map(this::response).toList();
+    }
+
+    @Transactional(readOnly = true)
+    public PaginaResponse<PeliculaResponse> paginar(Long usuarioId, int pagina, String busqueda) {
+        PageRequest pageable = PageRequest.of(Math.max(0, pagina), 5);
+        return PaginaResponse.desde(
+            favoritos.buscarPagina(usuarioId, busqueda == null ? "" : busqueda.trim(), pageable),
+            favorito -> response(favorito.getPelicula()));
     }
 
     @Transactional

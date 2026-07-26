@@ -1,6 +1,7 @@
 package com.movsapp.backend.controller;
 
 import com.movsapp.backend.dto.PeliculaResponse;
+import com.movsapp.backend.dto.PaginaResponse;
 import com.movsapp.backend.security.RequireRole;
 import com.movsapp.backend.security.SecurityContext;
 import com.movsapp.backend.service.FavoritoService;
@@ -24,6 +25,14 @@ public class FavoritoController {
     @Operation(summary = "Lista las películas favoritas del usuario autenticado")
     public List<PeliculaResponse> listar() {
         return service.listar(SecurityContext.current().id());
+    }
+
+    @GetMapping("/pagina")
+    @Operation(summary = "Lista favoritos paginados, máximo 5 por página")
+    public PaginaResponse<PeliculaResponse> pagina(
+            @RequestParam(defaultValue = "0") int pagina,
+            @RequestParam(defaultValue = "") String busqueda) {
+        return service.paginar(SecurityContext.current().id(), pagina, busqueda);
     }
 
     @PostMapping("/{peliculaId}")
