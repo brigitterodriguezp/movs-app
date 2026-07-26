@@ -1,9 +1,9 @@
 <script setup>
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import {
-  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, Plus, Search, Trash2, X
+  ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Clapperboard, Edit3, Film, LoaderCircle, Plus, Search, Sparkles, Trash2, X
 } from '@lucide/vue'
-import { createMovie, deleteMovie, getMovies, updateMovie } from '@/services/api'
+import { completeMovieFromTitle, createMovie, deleteMovie, getMoviesPage, updateMovie } from '@/services/api'
 
 const movies = ref([])
 const searchQuery = ref('')
@@ -12,10 +12,15 @@ const error = ref('')
 const notice = ref('')
 const currentPage = ref(1)
 const pageSize = 5
+const totalMovies = ref(0)
+const totalPages = ref(1)
 const showModal = ref(false)
 const editingMovie = ref(null)
 const deleteTarget = ref(null)
 const saving = ref(false)
+const completing = ref(false)
+const assistantNotice = ref('')
+const defaultPoster = `${import.meta.env.BASE_URL}default_movie.png`
 
 const emptyForm = () => ({
   titulo: '',
@@ -27,36 +32,25 @@ const emptyForm = () => ({
 })
 const form = reactive(emptyForm())
 
-const filteredMovies = computed(() => {
-  const query = searchQuery.value.trim().toLowerCase()
-  if (!query) return movies.value
-  return movies.value.filter((movie) =>
-    movie.titulo?.toLowerCase().includes(query) ||
-    movie.genero?.toLowerCase().includes(query) ||
-    String(movie.anio).includes(query)
-  )
-})
-const totalPages = computed(() => Math.max(1, Math.ceil(filteredMovies.value.length / pageSize)))
-const paginatedMovies = computed(() => {
-  const start = (currentPage.value - 1) * pageSize
-  return filteredMovies.value.slice(start, start + pageSize)
-})
+const paginatedMovies = computed(() => movies.value)
 const visiblePages = computed(() => {
   const size = 5
   const start = Math.max(1, Math.min(currentPage.value - 2, totalPages.value - size + 1))
   const end = Math.min(totalPages.value, start + size - 1)
   return Array.from({ length: end - start + 1 }, (_, index) => start + index)
 })
-const visibleFrom = computed(() => filteredMovies.value.length ? (currentPage.value - 1) * pageSize + 1 : 0)
-const visibleTo = computed(() => Math.min(currentPage.value * pageSize, filteredMovies.value.length))
+const visibleFrom = computed(() => totalMovies.value ? (currentPage.value - 1) * pageSize + 1 : 0)
+const visibleTo = computed(() => Math.min(currentPage.value * pageSize, totalMovies.value))
 
-watch(searchQuery, () => { currentPage.value = 1 })
-watch(totalPages, (pages) => {
-  if (currentPage.value > pages) currentPage.value = pages
+let searchTimer
+watch(searchQuery, () => {
+  clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => loadMovies(1), 350)
 })
 
 function goToPage(page) {
-  currentPage.value = Math.min(Math.max(Number(page), 1), totalPages.value)
+  const target = Math.min(Math.max(Number(page), 1), totalPages.value)
+  if (target !== currentPage.value) loadMovies(target)
 }
 
 function fillForm(movie = null) {
@@ -74,6 +68,7 @@ function openCreate() {
   editingMovie.value = null
   fillForm()
   error.value = ''
+  assistantNotice.value = ''
   showModal.value = true
 }
 
@@ -81,6 +76,7 @@ function openEdit(movie) {
   editingMovie.value = movie
   fillForm(movie)
   error.value = ''
+  assistantNotice.value = ''
   showModal.value = true
 }
 
@@ -89,11 +85,46 @@ function closeModal() {
   editingMovie.value = null
 }
 
-async function loadMovies() {
+async function completeWithAle() {
+  const title = form.titulo.trim()
+  error.value = ''
+  assistantNotice.value = ''
+  if (!title) {
+    error.value = 'Escribe primero el título de la película.'
+    return
+  }
+
+  completing.value = true
+  try {
+    const result = await completeMovieFromTitle(title)
+    form.titulo = result.titulo || title
+    form.descripcion = result.descripcion || ''
+    form.imagenUrl = result.posterUrl || ''
+    assistantNotice.value = 'Ale encontró y completó la sinopsis en español y el póster.'
+  } catch (err) {
+    error.value = err.message || 'Ale no pudo encontrar esa película.'
+  } finally {
+    completing.value = false
+  }
+}
+
+function useDefaultPoster(event) {
+  if (event.currentTarget.src !== defaultPoster) event.currentTarget.src = defaultPoster
+}
+
+async function loadMovies(page = currentPage.value) {
   isLoading.value = true
   error.value = ''
   try {
-    movies.value = await getMovies()
+    const data = await getMoviesPage(page - 1, searchQuery.value.trim())
+    if (!data.contenido.length && page > 1 && data.totalPaginas > 0) {
+      await loadMovies(data.totalPaginas)
+      return
+    }
+    movies.value = data.contenido
+    totalMovies.value = data.totalElementos
+    totalPages.value = Math.max(1, data.totalPaginas)
+    currentPage.value = data.pagina + 1
   } catch (err) {
     error.value = err.message || 'No se pudieron cargar las películas.'
   } finally {
@@ -127,7 +158,7 @@ async function saveMovie() {
     } else {
       const created = await createMovie(payload)
       movies.value.unshift(created)
-      currentPage.value = 1
+      await loadMovies(1)
       notice.value = 'Película creada correctamente.'
     }
     closeModal()
@@ -145,6 +176,7 @@ async function confirmDelete() {
   try {
     await deleteMovie(deleteTarget.value.id)
     movies.value = movies.value.filter((movie) => movie.id !== deleteTarget.value.id)
+    await loadMovies(Math.min(currentPage.value, totalPages.value))
     deleteTarget.value = null
     notice.value = 'Película eliminada correctamente.'
   } catch (err) {
@@ -164,7 +196,7 @@ onMounted(loadMovies)
           <span>Administración</span>
         </p>
         <h1 class="text-4xl font-semibold tracking-normal sm:text-5xl" style="color: var(--color-text);">Panel de administración</h1>
-        <p class="mt-2" style="color: var(--color-text-muted);">{{ movies.length }} películas registradas.</p>
+        <p class="mt-2" style="color: var(--color-text-muted);">{{ totalMovies }} películas registradas.</p>
       </div>
       <div class="flex flex-wrap items-center gap-3">
         <button class="btn rounded-pill px-4 py-2 soft-button icon-link glass-accent-btn" type="button" @click="openCreate">
@@ -181,19 +213,19 @@ onMounted(loadMovies)
     <p v-if="notice" class="mb-4 rounded-xl px-4 py-3 text-sm" style="background: var(--color-accent-bg); color: var(--color-accent-text);">{{ notice }}</p>
     <p v-if="error && !showModal" class="mb-4 rounded-xl px-4 py-3 text-sm" style="background: color-mix(in srgb, var(--color-error) 12%, transparent); color: var(--color-error);">{{ error }}</p>
 
-    <div v-if="isLoading" class="ios-surface rounded-[1.35rem] p-6">
+    <div v-if="isLoading" class="admin-movie-surface rounded-[1.35rem] p-6">
       <div class="page-skeleton-line page-skeleton-heading compact mb-4" />
       <div class="page-skeleton-line page-skeleton-text mb-2" />
       <div class="page-skeleton-line page-skeleton-text short" />
     </div>
 
-    <div v-else-if="!filteredMovies.length" class="ios-surface rounded-[1.35rem] p-8 text-center">
+    <div v-else-if="!paginatedMovies.length" class="admin-movie-surface rounded-[1.35rem] p-8 text-center">
       <Film :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
       <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">No se encontraron películas</h2>
       <p style="color: var(--color-text-muted);">Cambia la búsqueda o añade una película.</p>
     </div>
 
-    <div v-else class="overflow-hidden rounded-[1.35rem]" style="background: var(--color-surface-strong); border: 1px solid var(--color-border);">
+    <div v-else class="admin-movie-surface overflow-hidden rounded-[1.35rem]">
       <div class="overflow-x-auto">
         <table class="w-full text-left text-sm">
           <thead>
@@ -229,7 +261,7 @@ onMounted(loadMovies)
         </table>
       </div>
       <div class="flex flex-wrap items-center justify-between gap-3 border-t px-4 py-3 text-xs sm:px-6" style="border-color: var(--color-border); color: var(--color-text-muted);">
-        <span>Mostrando {{ visibleFrom }}–{{ visibleTo }} de {{ filteredMovies.length }}</span>
+        <span>Mostrando {{ visibleFrom }}–{{ visibleTo }} de {{ totalMovies }}</span>
         <div class="flex flex-wrap items-center justify-center gap-2">
           <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" aria-label="Ir a la primera página" title="Primera página" :disabled="currentPage === 1" @click="goToPage(1)"><ChevronsLeft :size="14" /></button>
           <button class="movie-page-button btn rounded-pill px-2 py-1" type="button" :disabled="currentPage === 1" @click="goToPage(currentPage - 1)"><ChevronLeft :size="14" /></button>
@@ -255,8 +287,28 @@ onMounted(loadMovies)
               <label class="text-sm" style="color: var(--color-text);">Género<input v-model="form.genero" class="form-control mt-1 rounded-xl" maxlength="60" required /></label>
               <label class="text-sm" style="color: var(--color-text);">Variante<input v-model="form.variante" class="form-control mt-1 rounded-xl" maxlength="60" placeholder="Opcional" /></label>
             </div>
-            <label class="text-sm" style="color: var(--color-text);">URL o ruta de imagen<input v-model="form.imagenUrl" class="form-control mt-1 rounded-xl" maxlength="255" required /></label>
-            <label class="text-sm" style="color: var(--color-text);">Descripción<textarea v-model="form.descripcion" class="form-control mt-1 rounded-xl" maxlength="1000" rows="4" required /></label>
+            <div v-if="!editingMovie" class="ale-helper flex flex-wrap items-center justify-between gap-3 rounded-xl p-3">
+              <div class="flex items-center gap-3">
+                <span class="ale-helper-icon"><Sparkles :size="17" /></span>
+                <div>
+                  <p class="m-0 text-sm font-medium">Completar con Ale</p>
+                  <p class="m-0 text-xs">Busca por el título la sinopsis en español y el póster de TMDb.</p>
+                </div>
+              </div>
+              <button class="ale-complete-button btn rounded-pill px-4 py-2 text-sm" type="button" :disabled="completing || !form.titulo.trim()" @click="completeWithAle">
+                <LoaderCircle v-if="completing" :size="16" class="animate-spin" />
+                <Sparkles v-else :size="16" />
+                {{ completing ? 'Buscando…' : 'Completar' }}
+              </button>
+            </div>
+            <p v-if="assistantNotice" class="m-0 rounded-xl px-4 py-3 text-sm assistant-success">{{ assistantNotice }}</p>
+            <div class="grid gap-4 sm:grid-cols-[7rem_1fr]">
+              <img v-if="form.imagenUrl" :src="form.imagenUrl" :alt="`Póster de ${form.titulo || 'la película'}`" class="movie-poster-preview" @error="useDefaultPoster" />
+              <div class="grid gap-4" :class="{ 'sm:col-span-2': !form.imagenUrl }">
+                <label class="text-sm" style="color: var(--color-text);">URL de la imagen<input v-model="form.imagenUrl" class="form-control mt-1 rounded-xl" maxlength="255" required /></label>
+                <label class="text-sm" style="color: var(--color-text);">Descripción<textarea v-model="form.descripcion" class="form-control mt-1 rounded-xl" maxlength="1000" rows="5" required /></label>
+              </div>
+            </div>
             <p v-if="error" class="m-0 rounded-xl px-4 py-3 text-sm" style="background: color-mix(in srgb, var(--color-error) 12%, transparent); color: var(--color-error);">{{ error }}</p>
             <div class="flex justify-end gap-3">
               <button class="btn rounded-pill px-4 py-2 soft-button" type="button" @click="closeModal">Cancelar</button>
@@ -270,9 +322,18 @@ onMounted(loadMovies)
 </template>
 
 <style scoped>
+.admin-movie-surface { background: #fff; border: 1px solid #e5e7eb; }
 .movie-page-button { color: var(--color-text) !important; border-color: var(--color-border) !important; }
 .movie-page-button.active { color: #fff !important; background: var(--color-accent) !important; border-color: var(--color-accent) !important; }
 .movie-page-button:disabled { color: var(--color-text-muted) !important; opacity: .55; }
-.movie-modal-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(0,0,0,.45); backdrop-filter: blur(8px); }
-.movie-modal-panel { width: min(100%, 42rem); max-height: 92vh; overflow-y: auto; border: 1px solid var(--color-border); border-radius: 1.35rem; background: var(--color-surface-strong); box-shadow: 0 24px 80px rgba(0,0,0,.25); }
+.movie-modal-overlay { position: fixed; inset: 0; z-index: 60; display: flex; align-items: center; justify-content: center; padding: 1rem; background: rgba(17,24,39,.32); }
+.movie-modal-panel { --color-text: #111827; --color-text-secondary: #374151; --color-text-muted: #6b7280; --color-border: #e5e7eb; --color-border-subtle: #f3f4f6; width: min(100%, 44rem); max-height: 92vh; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 1rem; background: #fff; box-shadow: 0 20px 55px rgba(15,23,42,.16); }
+.ale-helper { border: 1px solid #ede9fe; background: #faf8ff; color: #4c1d95; }
+.ale-helper-icon { display: grid; width: 2rem; height: 2rem; place-items: center; border-radius: 999px; background: #ede9fe; color: #7c3aed; }
+.ale-helper p:last-child { color: #6b7280; }
+.ale-complete-button { display: inline-flex; align-items: center; gap: .4rem; border: 0; background: #7c3aed; color: #fff; }
+.ale-complete-button:hover:not(:disabled) { background: #6d28d9; color: #fff; }
+.ale-complete-button:disabled { opacity: .5; }
+.assistant-success { background: #ecfdf5; color: #047857; }
+.movie-poster-preview { width: 7rem; aspect-ratio: 2 / 3; border-radius: .75rem; object-fit: cover; background: #f3f4f6; }
 </style>

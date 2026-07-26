@@ -250,7 +250,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <main v-if="isAdmin" class="page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
+  <main v-if="isAdmin" class="admin-page page-shell px-4 pb-4 pt-32 sm:px-6 lg:px-10">
     <div class="mx-auto mb-5 flex max-w-7xl justify-center">
       <div class="inline-flex rounded-pill p-1" style="background: var(--color-surface-strong); border: 1px solid var(--color-border);">
         <button
@@ -318,14 +318,14 @@ onMounted(async () => {
       </div>
 
       <!-- empty -->
-      <div v-else-if="!allUsers.length" class="overflow-hidden rounded-[1.35rem] p-8 text-center" style="background: var(--color-surface-strong); border: 1px solid var(--color-border); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);">
+      <div v-else-if="!allUsers.length" class="overflow-hidden rounded-[1.35rem] p-8 text-center" style="background: #fff; border: 1px solid var(--color-border);">
         <Users :size="40" class="mx-auto mb-4" style="color: var(--color-text-muted);" />
         <h2 class="mb-2 text-xl font-semibold" style="color: var(--color-text);">No hay usuarios registrados</h2>
         <p style="color: var(--color-text-muted);">Añade el primer usuario desde el botón superior.</p>
       </div>
 
       <!-- table -->
-      <div v-else class="overflow-hidden rounded-[1.35rem]" style="background: var(--color-surface-strong); border: 1px solid var(--color-border); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);">
+      <div v-else class="overflow-hidden rounded-[1.35rem]" style="background: #fff; border: 1px solid var(--color-border);">
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead>

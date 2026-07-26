@@ -48,25 +48,28 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(0, 0, 0, 0.4);
-  -webkit-backdrop-filter: blur(8px);
-  backdrop-filter: blur(8px);
+  padding: 1rem;
+  background: rgba(17, 24, 39, 0.32);
   animation: modalFade 200ms ease both;
 }
 
 .modal-panel {
+  --color-text: #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
   width: min(calc(100vw - 2rem), 32rem);
   max-height: 90vh;
   overflow-y: auto;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid var(--color-border);
-  border-radius: 1.35rem;
-  -webkit-backdrop-filter: var(--glass-blur);
-  backdrop-filter: var(--glass-blur);
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 1rem;
+  box-shadow: 0 20px 55px rgba(15, 23, 42, 0.16);
 }
 
 .dark .modal-panel {
-  background: var(--soft-card-strong);
+  background: #fff;
+  color: #111827;
 }
 
 .modal-header {
@@ -110,4 +113,13 @@
 .msg-fade-leave-to {
   opacity: 0;
   transform: translateY(-4px);
+}
+.admin-page {
+  --color-text: #111827;
+  --color-text-secondary: #374151;
+  --color-text-muted: #6b7280;
+  --color-border: #e5e7eb;
+  --color-border-subtle: #f3f4f6;
+  min-height: 100vh;
+  background: #f8fafc;
 }
